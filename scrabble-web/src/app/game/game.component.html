@@ -1,0 +1,173 @@
+<div class="row"
+     *ngIf="initialized">
+  <div class="col-md-3 col-sm-6 col-12 mt-3"
+       *ngFor="let player of players">
+    <div class="info-box"
+         [ngClass]="player.playerNumber == currentPlayerNumber ? 'border border-secondary' : 'border border-light'">
+      <span class="info-box-icon">
+        <img class="img-circle"
+             src="http://gateway.gamecity.io/image/avatar/thumbnail/{{player.userId}}"
+             alt="User profile picture">
+      </span>
+      <div class="info-box-content">
+        <span class="info-box-text">{{ player.username ? player.username : '?' }}</span>
+        <span class="info-box-number">{{ player.score }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row mt-2"
+     *ngIf="initialized">
+  <div class="col-md-7">
+    <div class="row"
+         *ngIf="virtualBoard != null">
+      <div class="col-md-12">
+        <table class="game-table table table-responsive"
+               *ngIf="virtualBoard.cells != null && virtualBoard.cells.length > 0">
+          <tbody>
+            <tr class="d-flex"
+                *ngFor="let r of [].constructor(board.rowSize); index as rowIndex">
+              <td class="border p-0"
+                  *ngFor="let c of [].constructor(board.columnSize); index as columnIndex"
+                  (click)="putTile(getCell(rowIndex, columnIndex))"
+                  [style.background-color]="getCell(rowIndex, columnIndex).letter == null ? getCell(rowIndex, columnIndex).color : ''">
+                <div class="cell-div text-center"
+                     *ngIf="getCell(rowIndex, columnIndex).letter != null"
+                     [ngClass]="getCell(rowIndex, columnIndex).lastPlayed ? 'sealed-cell' : 'cell'">
+                  <span class="cell-letter">{{ getCell(rowIndex, columnIndex).letter }}</span>
+                  <span class="cell-score">{{ getCell(rowIndex, columnIndex).value }}</span>
+                </div>
+                <div class="cell-div d-flex align-items-center"
+                     *ngIf="getCell(rowIndex, columnIndex).letter == null">
+                  <span class="container-fluid font-weight-bold"
+                        *ngIf="getCell(rowIndex, columnIndex).letter == null">
+                    {{ getCell(rowIndex, columnIndex).wordScoreMultiplier > 1 ? getCell(rowIndex, columnIndex).wordScoreMultiplier + 'xW' : '' }}
+                    {{ getCell(rowIndex, columnIndex).letterValueMultiplier > 1 ? getCell(rowIndex, columnIndex).letterValueMultiplier + 'xL' : '' }}
+                  </span> 
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mt-2 bg-light border rack"
+         *ngIf="virtualRack != null">
+      <div class="col-md-2 mt-2">
+        <a class="btn btn-app bg-secondary"
+           (click)="exchange()">
+          <i class="fas fa-exchange-alt"></i>{{ 'game.exchange' | translate }}
+        </a>
+      </div>
+      <div class="col-md-8 mt-2 pl-0">
+        <table class="table table-responsive mb-0">
+          <tbody class="d-flex justify-content-center">
+            <tr class="d-flex">
+              <td class="tile-td"
+                  *ngFor="let tile of virtualRack.tiles"
+                  (click)="selectTile(tile)">
+                <div class="tile-div text-center"
+                     *ngIf="tile != null"
+                     [ngClass]="tile.sealed ? 'sealed-tile' : tile.roundNumber == currentRoundNumber && tile.roundNumber > 1 ? 'new-tile' : 'tile'">
+                  <span class="tile-letter"
+                        *ngIf="!tile.selected">{{ tile.letter }}</span>
+                  <span class="tile-score"
+                        *ngIf="!tile.selected">{{ tile.value }}</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-2 mt-2">
+        <a class="btn btn-app bg-secondary"
+           (click)="play()">
+          <i class="fas fa-play"></i>{{ 'game.play' | translate }}
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-secondary">
+          <div class="card-header">
+            <h3 class="card-title">{{ 'game.words' | translate }}</h3>
+            <div class="card-tools">
+              <button type="button"
+                      class="btn btn-tool"
+                      data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body words overflow-auto">
+            <ol *ngIf="words != null">
+              <li *ngFor="let word of words">{{ 'game.words.word' | translate: { '0': word.word, '1': word.score, '2': getUsername(word.playerNumber) } }}</li>
+            </ol>
+            <div class="callout callout-info"
+                 *ngIf="words == null">
+              <h5><i class="fas fa-info"></i> {{'game.words.no.word' | translate}}</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-secondary card-outline direct-chat-secondary"
+             [ngClass]="chats != null ? 'direct-chat' : ''">
+          <div class="card-header">
+            <h3 class="card-title">{{ 'game.chat' | translate }}</h3>
+            <div class="card-tools">
+              <button type="button"
+                      class="btn btn-tool"
+                      data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="direct-chat-messages"
+                 *ngIf="chats != null"
+                 #scrollToBottom>
+              <div class="direct-chat-msg"
+                   [ngClass]="effectivePlayer.userId == chat.userId ? 'left' : 'right'"
+                   *ngFor="let chat of chats">
+                <div class="direct-chat-infos clearfix">
+                  <span class="direct-chat-name float-left">{{ chat.username }}</span>
+                  <span class="direct-chat-timestamp float-right">{{ chat.createdDate | date:'dd/MM/yyyy hh:mm:ss' }}</span>
+                </div>
+                <img class="direct-chat-img"
+                     src="http://gateway.gamecity.io/image/avatar/thumbnail/{{chat.userId}}"
+                     alt="Message User Image">
+                <div class="direct-chat-text">{{ chat.message }}</div>
+              </div>
+            </div>
+            <div class="callout callout-info"
+                 *ngIf="chats == null">
+              <h5><i class="fas fa-info"></i> {{ 'game.chat.no.message' | translate }}</h5>
+            </div>
+          </div>
+          <div class="card-footer">
+            <form action="#" method="post">
+              <div class="input-group">
+                <input class="form-control"
+                       type="text"
+                       name="message"
+                       placeholder="{{'game.chat.placeholder' | translate}}"
+                       [(ngModel)]="message">
+                <span class="input-group-append">
+                  <button type="submit"
+                          class="btn btn-secondary"
+                          (click)="sendMessage()">{{ 'game.send' | translate }}
+                  </button>
+                </span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

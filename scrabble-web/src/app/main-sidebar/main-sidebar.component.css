@@ -1,0 +1,3 @@
+.main-sidebar, .main-sidebar::before {
+  width: 200px;
+}

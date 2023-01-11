@@ -1,0 +1,75 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title">{{ 'game.new' | translate }}</h3>
+      </div>
+      <form [formGroup]="createGameForm" (ngSubmit)="onSubmit()">
+        <div class="card-body">
+          <div class="form-group">
+            <label for="name">{{ 'game.name' | translate }}</label>
+            <input id="name" type="text" class="form-control"
+              [ngClass]="name.invalid && name.touched ? 'is-invalid' : ''" placeholder="{{ 'game.name' | translate }}"
+              formControlName="name">
+            <div class="error invalid-feedback" *ngIf="name.errors && (name.dirty || name.touched)">
+              <p *ngIf="name.errors?.required">{{ 'game.name' | translate }} {{ 'validation.required' | translate }}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="playerCount">{{ 'game.playerCount' | translate }}</label>
+            <input id="playerCount" type="number" class="form-control"
+              [ngClass]="playerCount.invalid && playerCount.touched ? 'is-invalid' : ''"
+              placeholder="{{ 'game.playerCount' | translate }}" formControlName="playerCount">
+            <div class="error invalid-feedback"
+              *ngIf="playerCount.errors && (playerCount.dirty || playerCount.touched)">
+              <p *ngIf="playerCount.errors?.required">{{ 'game.playerCount' | translate }} {{ 'validation.required' |
+                translate }}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{ 'game.bag.name' | translate }}</label>
+            <select class="form-control" formControlName="bagId"
+              [ngClass]="bagId.invalid && bagId.touched ? 'is-invalid' : ''">
+              <option value="">{{ 'game.bag.select' | translate }}</option>
+              <option *ngFor="let bag of bags" [ngValue]="bag.id">
+                {{ bag.name }}
+              </option>
+            </select>
+            <div class="error invalid-feedback" *ngIf="bagId.errors && (bagId.dirty || bagId.touched)">
+              <p *ngIf="bagId.errors?.required">{{ 'game.bag.name'  | translate }} {{ 'validation.required' | translate
+                }}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{ 'game.board.size' | translate }}</label>
+            <select class="form-control" formControlName="boardId"
+              [ngClass]="boardId.invalid && boardId.touched ? 'is-invalid' : ''">
+              <option value="">{{ 'game.board.select' | translate }}</option>
+              <option *ngFor="let board of boards" [ngValue]="board.id">
+                {{ board.name }}
+              </option>
+            </select>
+            <div class="error invalid-feedback" *ngIf="boardId.errors && (boardId.dirty || boardId.touched)">
+              <p *ngIf="boardId.errors?.required">{{ 'game.board.size'  | translate }} {{ 'validation.required' | translate
+                }}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="duration">{{ 'game.duration' | translate }}</label>
+            <input id="duration" type="number" class="form-control"
+              [ngClass]="duration.invalid && duration.touched ? 'is-invalid' : ''"
+              placeholder="{{ 'game.duration' | translate }}" formControlName="duration">
+            <div class="error invalid-feedback" *ngIf="duration.errors && (duration.dirty || duration.touched)">
+              <p *ngIf="duration.errors?.required">{{ 'game.duration' | translate }} {{ 'validation.required' |
+                translate }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary" [disabled]="!createGameForm.valid">{{ 'game.create' | translate
+            }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

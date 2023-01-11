@@ -1,0 +1,9 @@
+{
+  "name": "My game",
+  "ownerId": 1,
+  "bagId": 1,
+  "boardId": 1,
+  "expectedPlayerCount": 2,
+  "duration": 2,
+  "status": "WAITING"
+}

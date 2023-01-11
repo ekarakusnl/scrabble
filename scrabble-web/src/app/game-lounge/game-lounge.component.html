@@ -1,0 +1,50 @@
+<div class="row" *ngIf="game != null">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">{{ 'game.name' | translate }}: {{ game.name }}</h5>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
+          </button>
+          <button type="button" class="btn btn-tool" data-card-widget="remove">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-3" *ngFor="let player of game.players">
+          <div class="card card-outline" [ngClass]="player.userId > 0 ? 'card-primary' : 'card-warning'">
+            <div class="card-body box-profile">
+              <div class="text-center">
+                <img class="profile-user-img img-fluid img-circle"
+                  src="http://gateway.gamecity.io/image/avatar/{{player.userId}}"
+                  alt="User profile picture">
+              </div>
+              <h3 class="profile-username text-center">{{ player.username ? player.username : '?' }}</h3>
+              <p class="text-muted text-center" *ngIf="player.userId == game.ownerId">{{ 'games.owner' | translate
+                }}</p>
+              <p class="text-muted text-center" *ngIf="player.userId != game.ownerId">
+                {{ 'games.player' | translate }}</p>
+              <ul class="list-group list-group-unbordered mb-3">
+                <li class="list-group-item">
+                  <b>{{ 'games.games.played' | translate }}</b> <a class="float-right">1,322</a>
+                </li>
+                <li class="list-group-item">
+                  <b>{{ 'games.games.won' | translate }}</b> <a class="float-right">543</a>
+                </li>
+                <li class="list-group-item">
+                  <b>{{ 'games.total.score' | translate }}</b> <a class="float-right">13,287</a>
+                </li>
+              </ul>
+              <a class="btn btn-primary btn-block"
+                *ngIf="game.status === 'WAITING' && player.userId != game.ownerId && player.userId == userId"
+                (click)="leaveGame(game.id)">{{'games.leave' | translate }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
