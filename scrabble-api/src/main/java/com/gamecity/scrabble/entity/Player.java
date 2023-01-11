@@ -53,7 +53,7 @@ public class Player extends AbstractEntity {
     private Integer score = 0;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "joined_date", nullable = false, columnDefinition = "datetime default now()")
+    @Column(name = "joined_date", nullable = false)
     private Date joinedDate;
 
     @Temporal(TemporalType.TIMESTAMP)

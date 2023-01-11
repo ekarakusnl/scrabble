@@ -10,6 +10,8 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import lombok.Data;
 
 /**
@@ -26,8 +28,9 @@ public abstract class AbstractEntity {
     @Column(name = "id")
     private Long id;
 
+    @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date", nullable = false, columnDefinition = "datetime default now()")
+    @Column(name = "created_date", nullable = false)
     private Date createdDate;
 
     @Temporal(TemporalType.TIMESTAMP)

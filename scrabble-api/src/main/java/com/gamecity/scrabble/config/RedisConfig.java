@@ -10,8 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration.JedisClientConfigurationBuilder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -35,11 +38,34 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Value("${redis.port}")
     private Integer redisPort;
 
+    @Value("${redis.username}")
+    private String redisUsername;
+
+    @Value("${redis.password}")
+    private String redisPassword;
+
+    @Value("${redis.ssl}")
+    private boolean useSsl;
+
     @Bean
     JedisConnectionFactory connectionFactory() {
         final RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
-        final JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisConfiguration);
-        return jedisConnectionFactory;
+        if (redisUsername != null && redisPassword != null) {
+            redisConfiguration.setUsername(redisUsername);
+            redisConfiguration.setPassword(RedisPassword.of(redisPassword));
+        }
+
+        final JedisClientConfigurationBuilder jedisConfigurationBuilder = JedisClientConfiguration.builder();
+        jedisConfigurationBuilder.connectTimeout(Duration.ofSeconds(60));
+        jedisConfigurationBuilder.readTimeout(Duration.ofSeconds(60));
+        if (useSsl) {
+            jedisConfigurationBuilder.useSsl();
+        }
+        jedisConfigurationBuilder.usePooling();
+
+        final JedisClientConfiguration jedisClientConfiguration = jedisConfigurationBuilder.build();
+
+        return new JedisConnectionFactory(redisConfiguration, jedisClientConfiguration);
     }
 
     @Bean

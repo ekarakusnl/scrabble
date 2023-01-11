@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 import com.gamecity.scrabble.Constants;
 
 import lombok.EqualsAndHashCode;
@@ -52,20 +54,24 @@ public class Cell extends AbstractEntity implements Serializable {
     @Column(name = "word_score_multiplier")
     private Integer wordScoreMultiplier;
 
-    // TODO remove definition
-    @Column(name = "has_right", nullable = false, columnDefinition = "tinyint default 0")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "has_right", nullable = false)
     private boolean hasRight;
 
-    @Column(name = "has_left", nullable = false, columnDefinition = "tinyint default 0")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "has_left", nullable = false)
     private boolean hasLeft;
 
-    @Column(name = "has_top", nullable = false, columnDefinition = "tinyint default 0")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "has_top", nullable = false)
     private boolean hasTop;
 
-    @Column(name = "has_bottom", nullable = false, columnDefinition = "tinyint default 0")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "has_bottom", nullable = false)
     private boolean hasBottom;
 
-    @Column(name = "center", nullable = false, columnDefinition = "tinyint default 0")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "center", nullable = false)
     private boolean center;
 
 }

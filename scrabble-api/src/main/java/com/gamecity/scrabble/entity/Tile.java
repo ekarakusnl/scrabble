@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 import com.gamecity.scrabble.Constants;
 
 import lombok.AllArgsConstructor;
@@ -46,7 +48,8 @@ public class Tile extends AbstractEntity implements Serializable {
     @Column(name = "value")
     private Integer value;
 
-    @Column(name = "vowel", nullable = false, columnDefinition = "tinyint default 0")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "vowel", nullable = false)
     private boolean vowel;
 
 }

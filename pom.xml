@@ -30,6 +30,7 @@
     <mariadb-java-client.version>3.1.0</mariadb-java-client.version>
     <mockito.version>4.8.1</mockito.version>
     <mysql.version>8.0.30</mysql.version>
+    <postgresql.version>42.5.1</postgresql.version>
 
     <!-- spring framework -->
     <spring.data.version>2.7.5</spring.data.version>
@@ -105,6 +106,11 @@
         <groupId>org.mariadb.jdbc</groupId>
         <artifactId>mariadb-java-client</artifactId>
         <version>${mariadb-java-client.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>

@@ -4,6 +4,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +31,8 @@ public class Board extends AbstractEntity {
     @Column(name = "column_size", nullable = false)
     private Integer columnSize;
 
-    @Column(name = "enabled", nullable = false, columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
 }

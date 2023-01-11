@@ -8,6 +8,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 import com.gamecity.scrabble.Constants;
 
 import lombok.EqualsAndHashCode;
@@ -37,7 +39,8 @@ public class UserRole extends AbstractEntity {
     @Column(name = "type", nullable = false)
     private RoleType type;
 
-    @Column(name = "enabled", nullable = false, columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
 }

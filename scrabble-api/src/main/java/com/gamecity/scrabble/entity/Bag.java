@@ -9,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +40,8 @@ public class Bag extends AbstractEntity implements Serializable {
     @Column(name = "tile_count")
     private Integer tileCount;
 
-    @Column(name = "enabled", nullable = false, columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
 }

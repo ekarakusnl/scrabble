@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.gamecity.scrabble.Constants;
@@ -48,16 +49,20 @@ public class User extends AbstractEntity implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "enabled", nullable = false, columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
-    @Column(name = "account_non_expired", nullable = false, columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "account_non_expired", nullable = false)
     private boolean accountNonExpired = true;
 
-    @Column(name = "account_non_locked", nullable = false, columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "account_non_locked", nullable = false)
     private boolean accountNonLocked = true;
 
-    @Column(name = "credentials_non_expired", nullable = false, columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "credentials_non_expired", nullable = false)
     private boolean credentialsNonExpired = true;
 
     @Transient
