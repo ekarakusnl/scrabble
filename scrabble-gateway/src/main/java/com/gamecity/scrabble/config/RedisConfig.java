@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RedisConfig extends CachingConfigurerSupport {
 
+    private static final Integer MAX_SUBSCRIPTION_REGISTRATION_MILLISECONDS = 300000;
     private static final Integer TTL_SECONDS = 3600;
     private static final String ACTION = "ACTION";
     private static final String CHATS = "CHATS";
@@ -112,6 +113,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     RedisMessageListenerContainer redisMessageListenerContainer(JedisConnectionFactory connectionFactory) {
         final RedisMessageListenerContainer messageListenerContainer = new RedisMessageListenerContainer();
         messageListenerContainer.setConnectionFactory(connectionFactory);
+        messageListenerContainer.setMaxSubscriptionRegistrationWaitingTime(MAX_SUBSCRIPTION_REGISTRATION_MILLISECONDS);
         messageListenerContainer.addMessageListener(actionController, new PatternTopic(ACTION));
         messageListenerContainer.addMessageListener(chatController, new PatternTopic(CHATS));
         return messageListenerContainer;
