@@ -32,7 +32,7 @@ RUN mkdir /tmp/scrabble
 RUN mkdir /tmp/scrabble/dictionary
 
 # copy dictionaries to dictionary path
-RUN cp -R /scrabble/scrabble-api/src/main/resources/dictionary /tmp/scrabble/dictionary
+RUN cp -R /scrabble/scrabble-api/src/main/resources/dictionary /tmp/scrabble
 
 # set connection properties
 ENV JAVA_OPTS="-Dpostgres.connection.url=$POSTGRES_CONNECTION_URL -Dpostgres.username=$POSTGRES_USERNAME \

@@ -30,7 +30,7 @@ RUN mkdir /tmp/scrabble
 RUN mkdir /tmp/scrabble/user
 
 # copy user avatars to user images path
-RUN cp -R /scrabble/scrabble-gateway/src/main/resources/user /tmp/scrabble/user
+RUN cp -R /scrabble/scrabble-gateway/src/main/resources/user /tmp/scrabble
 
 # set connection properties
 ENV JAVA_OPTS="-Dscrabble.api.endpoint=$SCRABBLE_API_ENDPOINT -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \
