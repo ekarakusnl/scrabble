@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * @author ekarakus
  */
-@CrossOrigin(allowCredentials = "true", origins = "http://web.gamecity.io")
 @RestController
 @RequestMapping("/rest/games/{gameId}/chats")
 @Slf4j

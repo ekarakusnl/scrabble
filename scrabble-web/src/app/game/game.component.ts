@@ -23,6 +23,7 @@ import { ToastService } from '../service/toast.service';
 import { VirtualRack } from '../model/virtual-rack';
 import { VirtualBoard } from '../model/virtual-board';
 import { TranslateService } from '@ngx-translate/core';
+import { Globals } from '../common/globals';
 
 @Component({
   selector: 'app-game',
@@ -33,6 +34,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollToBottom') private scrollContainer: ElementRef
 
   initialized: boolean = false;
+
+  imageResourceURL: string = Globals.GATEWAY_URL;
 
   id: number;
   playerId: number;

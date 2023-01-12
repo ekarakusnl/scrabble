@@ -25,7 +25,6 @@ public class ResourceExceptionMapper extends Exception implements ExceptionMappe
     @Override
     @Produces(MediaType.APPLICATION_JSON)
     public Response toResponse(Throwable e) {
-        e.printStackTrace();
         if (e instanceof GameException) {
             final GameException gameException = (GameException) e;
             return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value())

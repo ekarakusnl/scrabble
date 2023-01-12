@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +18,6 @@ import com.gamecity.scrabble.model.rest.PlayerDto;
  * 
  * @author ekarakus
  */
-@CrossOrigin(allowCredentials = "true", origins = "http://web.gamecity.io")
 @RestController
 @RequestMapping("/rest/games/{gameId}/players")
 public class PlayerController extends AbstractController {

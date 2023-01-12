@@ -6,7 +6,7 @@
          [ngClass]="player.playerNumber == currentPlayerNumber ? 'border border-secondary' : 'border border-light'">
       <span class="info-box-icon">
         <img class="img-circle"
-             src="http://gateway.gamecity.io/scrabble-gateway/image/avatar/thumbnail/{{player.userId}}"
+             src="{{imageResourceURL}}/image/avatar/thumbnail/{{player.userId}}"
              alt="User profile picture">
       </span>
       <div class="info-box-content">
@@ -139,7 +139,7 @@
                   <span class="direct-chat-timestamp float-right">{{ chat.createdDate | date:'dd/MM/yyyy hh:mm:ss' }}</span>
                 </div>
                 <img class="direct-chat-img"
-                     src="http://gateway.gamecity.io/scrabble-gateway/image/avatar/thumbnail/{{chat.userId}}"
+                     src="{{imageResourceURL}}/image/avatar/thumbnail/{{chat.userId}}"
                      alt="Message User Image">
                 <div class="direct-chat-text">{{ chat.message }}</div>
               </div>

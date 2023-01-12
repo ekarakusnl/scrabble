@@ -6,6 +6,7 @@ import { Game } from '../model/game';
 import { Player } from '../model/player';
 import { AuthenticationService } from '../service/authentication.service';
 import { Router } from '@angular/router';
+import { Globals } from '../common/globals';
 
 @Component({
   selector: 'app-game-list',
@@ -13,6 +14,8 @@ import { Router } from '@angular/router';
   styleUrls: ['./game-list.component.css']
 })
 export class GameListComponent implements OnInit {
+
+  imageResourceURL: string = Globals.GATEWAY_URL;
 
   initialized: boolean;
   userId: number;

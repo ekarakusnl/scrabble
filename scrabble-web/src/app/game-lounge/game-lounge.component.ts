@@ -10,6 +10,7 @@ import { GameService } from '../service/game.service';
 import { BoardService } from '../service/board.service';
 import { ActionService } from '../service/action.service';
 import { Action } from '../model/action';
+import { Globals } from '../common/globals';
 
 @Component({
   selector: 'app-game-lounge',
@@ -17,6 +18,8 @@ import { Action } from '../model/action';
   styleUrls: ['./game-lounge.component.css']
 })
 export class GameLoungeComponent implements OnInit {
+
+  imageResourceURL: string = Globals.GATEWAY_URL;
 
   id: number;
   userId: number;
