@@ -70,10 +70,7 @@
               "browserTarget": "scrabble-app:build:development"
             }
           },
-          "defaultConfiguration": "development",
-          "options": {
-            "disableHostCheck": true
-          }
+          "defaultConfiguration": "production"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
