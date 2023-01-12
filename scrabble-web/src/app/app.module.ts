@@ -5,9 +5,8 @@ import { HTTP_INTERCEPTORS, HttpClientModule, HttpClient } from '@angular/common
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // import ngx-translate and the http loader
-import { TranslateCompiler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { ToastrModule } from 'ngx-toastr';
 
 import { CustomHttpInterceptor } from './common/custom.http.interceptor';
@@ -57,7 +56,6 @@ import { ToastService } from './service/toast.service';
         deps: [HttpClient]
       }
     }),
-    SweetAlert2Module.forRoot(),
     ToastrModule.forRoot(),
   ],
   providers: [

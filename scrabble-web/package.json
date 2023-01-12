@@ -1,12 +1,12 @@
 {
-  "name": "scrabble-app",
-  "version": "0.0.0",
+  "name": "scrabble-web",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=14.2.0"
+  },
   "scripts": {
-    "ng": "./node_modules/@angular/cli/bin/ng.js",
     "start": "export NODE_OPTIONS=--max_old_space_size=512 && ./node_modules/@angular/cli/bin/ng.js serve",
-    "build": "./node_modules/@angular/cli/bin/ng.js build --configuration=production",
-    "watch": "./node_modules/@angular/cli/bin/ng.js build --watch --configuration development",
-    "test": "./node_modules/@angular/cli/bin/ng.js test"
+    "build": "./node_modules/@angular/cli/bin/ng.js build --configuration=production"
   },
   "private": true,
   "dependencies": {
@@ -20,26 +20,14 @@
     "@angular/router": "^14.2.0",
     "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^7.0.0",
-    "@sweetalert2/ngx-sweetalert2": "^12.0.2",
     "ngx-toastr": "^15.2.2",
     "rxjs": "~7.5.0",
-    "sweetalert2": "^11.6.8",
-    "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^14.2.7",
-    "@angular/cli": "~14.2.7",
+    "@angular-devkit/build-angular": "^14.2.0",
+    "@angular/cli": "^14.2.0",
     "@angular/compiler-cli": "^14.2.0",
-    "@angular/localize": "^14.2.8",
-    "@types/jasmine": "~4.0.0",
-    "i18n-extract": "^0.6.7",
-    "jasmine-core": "~4.3.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.1.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.0.0",
     "typescript": "~4.7.2"
   }
 }

@@ -1,15 +1,11 @@
 import { Injectable } from '@angular/core';
 
-import Swal from 'sweetalert2';
 import { ToastrService } from 'ngx-toastr';
-//import { Toast, ToastModel } from '@syncfusion/ej2-notifications';  // Import the toast component
 
 @Injectable()
 
 export class ToastService {
 
-  Toast;
-//  public toastInstance: Toast;
   constructor(
     private toastrService: ToastrService,
   ) { }

@@ -29,7 +29,7 @@
           },
           "configurations": {
             "production": {
-              "sourceMap": false,
+              "sourceMap": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -54,7 +54,7 @@
               "optimization": false,
               "vendorChunk": true,
               "extractLicenses": false,
-              "sourceMap": false,
+              "sourceMap": true,
               "namedChunks": true
             }
           },
