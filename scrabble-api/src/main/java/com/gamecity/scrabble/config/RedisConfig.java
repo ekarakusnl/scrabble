@@ -2,6 +2,7 @@ package com.gamecity.scrabble.config;
 
 import java.time.Duration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -20,6 +21,8 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Spring configuration for Redis including push messages and cache connection
  * 
@@ -28,6 +31,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @EnableCaching
 @PropertySource("classpath:redis.properties")
+@Slf4j
 public class RedisConfig extends CachingConfigurerSupport {
 
     private static final Integer TTL_SECONDS = 3600;
@@ -49,8 +53,9 @@ public class RedisConfig extends CachingConfigurerSupport {
 
     @Bean
     JedisConnectionFactory connectionFactory() {
+        log.debug("Connecting to '{}:{}'", redisHost, redisPort);
         final RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
-        if (redisUsername != null && redisPassword != null) {
+        if (StringUtils.isNotEmpty(redisUsername) && StringUtils.isNotEmpty(redisPassword)) {
             redisConfiguration.setUsername(redisUsername);
             redisConfiguration.setPassword(RedisPassword.of(redisPassword));
         }
@@ -59,6 +64,7 @@ public class RedisConfig extends CachingConfigurerSupport {
         jedisConfigurationBuilder.connectTimeout(Duration.ofSeconds(60));
         jedisConfigurationBuilder.readTimeout(Duration.ofSeconds(60));
         if (useSsl) {
+            log.debug("Redis server is ssl secured");
             jedisConfigurationBuilder.useSsl();
         }
         jedisConfigurationBuilder.usePooling();
