@@ -9,6 +9,7 @@ ARG REDIS_HOST
 ARG REDIS_PORT
 ARG REDIS_USERNAME
 ARG REDIS_PASSWORD
+ARG REDIS_USE_SSL
 
 # install maven
 RUN apt-get -y update && apt-get install -y maven
@@ -36,7 +37,7 @@ RUN cp -R /scrabble/scrabble-api/src/main/resources/dictionary /tmp/scrabble/dic
 # set connection properties
 ENV JAVA_OPTS="-Dpostgres.connection.url=$POSTGRES_CONNECTION_URL -Dpostgres.username=$POSTGRES_USERNAME \
                -Dpostgres.password=$POSTGRES_PASSWORD -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \
-               -Dredis.username=$REDIS_USERNAME -Dredis.password=$REDIS_PASSWORD"
+               -Dredis.username=$REDIS_USERNAME -Dredis.password=$REDIS_PASSWORD -Dredis.use.ssl=$REDIS_USE_SSL"
 
 # run tomcat
 EXPOSE 8080

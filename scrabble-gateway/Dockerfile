@@ -7,6 +7,7 @@ ARG REDIS_HOST
 ARG REDIS_PORT
 ARG REDIS_USERNAME
 ARG REDIS_PASSWORD
+ARG REDIS_USE_SSL
 
 # install maven
 RUN apt-get -y update && apt-get install -y maven
@@ -33,7 +34,7 @@ RUN cp -R /scrabble/scrabble-gateway/src/main/resources/user /tmp/scrabble/user
 
 # set connection properties
 ENV JAVA_OPTS="-Dscrabble.api.endpoint=$SCRABBLE_API_ENDPOINT -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \
-               -Dredis.username=$REDIS_USERNAME -Dredis.password=$REDIS_PASSWORD"
+               -Dredis.username=$REDIS_USERNAME -Dredis.password=$REDIS_PASSWORD -Dredis.use.ssl=$REDIS_USE_SSL"
 
 # run tomcat
 EXPOSE 8080
