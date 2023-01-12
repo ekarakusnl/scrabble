@@ -55,7 +55,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Value("${redis.password}")
     private String redisPassword;
 
-    @Value("${redis.ssl}")
+    @Value("${redis.use.ssl}")
     private boolean useSsl;
 
     @Autowired
