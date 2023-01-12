@@ -9,7 +9,7 @@ ARG REDIS_USERNAME
 ARG REDIS_PASSWORD
 
 # install maven
-#RUN apt-get -y update && apt-get install -y maven
+RUN apt-get -y update && apt-get install -y maven
 
 WORKDIR /scrabble
 
@@ -17,7 +17,7 @@ WORKDIR /scrabble
 ADD . /scrabble
 
 # maven build
-#RUN ["mvn", "clean", "install", "-e", "-DskipTests", "-DskipITs", "-Denvironment=prod"]
+RUN ["mvn", "clean", "install", "-e", "-DskipTests", "-DskipITs", "-Denvironment=prod"]
 
 # move deployable to webapps
 RUN cp /scrabble/scrabble-gateway/target/scrabble-gateway.war /usr/local/tomcat/webapps/scrabble-gateway.war
