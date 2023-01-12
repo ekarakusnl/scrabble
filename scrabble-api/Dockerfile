@@ -24,6 +24,15 @@ RUN ["mvn", "clean", "install", "-e", "-DskipTests", "-DskipITs", "-Denvironment
 # move deployable to webapps
 RUN cp /scrabble/scrabble-api/target/scrabble-api.war /usr/local/tomcat/webapps/scrabble-api.war
 
+# create scrabble directory
+RUN mkdir /tmp/scrabble
+
+# create dictionary directory
+RUN mkdir /tmp/scrabble/dictionary
+
+# copy dictionaries to dictionary path
+RUN cp -R /scrabble/scrabble-api/src/main/resources/dictionary /tmp/scrabble/dictionary
+
 # set connection properties
 ENV JAVA_OPTS="-Dpostgres.connection.url=$POSTGRES_CONNECTION_URL -Dpostgres.username=$POSTGRES_USERNAME \
                -Dpostgres.password=$POSTGRES_PASSWORD -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \

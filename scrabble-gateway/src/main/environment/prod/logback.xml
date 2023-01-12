@@ -15,6 +15,6 @@
   <logger name="com.gamecity" level="debug" />
 
   <root level="info">
-    <appender-ref ref="FILE" />
+    <appender-ref ref="CONSOLE" />
   </root>
 </configuration>
