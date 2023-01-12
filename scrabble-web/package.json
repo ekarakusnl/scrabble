@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "./node_modules/@angular/cli/bin/ng.js",
     "start": "export NODE_OPTIONS=--max_old_space_size=512 && ./node_modules/@angular/cli/bin/ng.js serve",
-    "build": "./node_modules/@angular/cli/bin/ng.js build",
+    "build": "./node_modules/@angular/cli/bin/ng.js build --configuration=production",
     "watch": "./node_modules/@angular/cli/bin/ng.js build --watch --configuration development",
     "test": "./node_modules/@angular/cli/bin/ng.js test"
   },
