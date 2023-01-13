@@ -1,7 +1,7 @@
 {
   "menu.create.game": "Créer un Jeu",
-  "menu.search.game": "Recherche de Jeux",
-  "menu.my.games": "Mes Jeux",
+  "menu.lobby": "Hall",
+  "menu.lounge": "Salon",
 
   "game.new": "Nouveau Jeu",
   "game.name": "Nom",
@@ -19,15 +19,15 @@
   "game.duration": "Durée",
   "game.create": "Créer",
 
-  "games.owner": "Propriétaire",
-  "games.player": "Joueur",
-  "games.available": "Disponible",
-  "games.games.played": "Jeux Joués",
-  "games.games.won": "Jeux Gagnés",
-  "games.total.score": "Score Total",
-  "games.join": "Rejoindre",
-  "games.leave": "Quitter",
-  "games.not.found": "Aucun jeu n'a été trouvé",
+  "game.owner": "Propriétaire",
+  "game.player": "Joueur",
+  "game.games.played": "Jeux Joués",
+  "game.games.won": "Jeux Gagnés",
+  "game.total.score": "Score Total",
+  "game.join": "Rejoindre",
+  "game.leave": "Quitter",
+  "game.not.found": "Aucun jeu n'a été trouvé",
+  "game.watch": "Regarder le jeu",
 
   "game.chat": "Discuter",
   "game.chat.placeholder": "Tapez votre message ici",
@@ -59,7 +59,5 @@
   "error.2013": "Le jeu attend les joueurs !",
   "error.2014": "Une lettre a déjà été échangée dans ce tour !",
 
-  "validation.required": "est requis",
-  
-  "en": "Anglais"
+  "validation.required": "est requis"
 }
