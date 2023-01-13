@@ -10,6 +10,7 @@ import { GameLoungeComponent } from "./game-lounge/game-lounge.component";
 import { GameComponent } from './game/game.component';
 
 const routes: Routes = [
+  { path: '', component: LoginComponent},
   { path: 'login', component: LoginComponent },
   {
     path: 'games', component: GamesComponent,
