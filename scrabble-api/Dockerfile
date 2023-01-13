@@ -1,4 +1,15 @@
 # syntax = docker/dockerfile:1.2
+FROM maven:3.8.3-jdk-11-slim as build
+
+# set work directory
+WORKDIR /scrabble
+
+# add project directory
+ADD . /scrabble
+
+# maven build
+RUN mvn clean install -e -DskipTests -DskipITs -Denvironment=prod
+
 FROM tomcat:9.0.70-jdk11
 
 # get connection properties
@@ -11,19 +22,8 @@ ARG REDIS_USERNAME
 ARG REDIS_PASSWORD
 ARG REDIS_USE_SSL
 
-# install maven
-RUN apt-get -y update && apt-get install -y maven
-
-WORKDIR /scrabble
-
-# add project directory
-ADD . /scrabble
-
-# maven build
-RUN ["mvn", "clean", "install", "-e", "-DskipTests", "-DskipITs", "-Denvironment=prod"]
-
 # move deployable to webapps
-RUN cp /scrabble/scrabble-api/target/scrabble-api.war /usr/local/tomcat/webapps/scrabble-api.war
+COPY --from=build /scrabble/scrabble-api/target/scrabble-api.war /usr/local/tomcat/webapps/scrabble-api.war
 
 # create scrabble directory
 RUN mkdir /tmp/scrabble
@@ -32,7 +32,7 @@ RUN mkdir /tmp/scrabble
 RUN mkdir /tmp/scrabble/dictionary
 
 # copy dictionaries to dictionary path
-RUN cp -R /scrabble/scrabble-api/src/main/resources/dictionary /tmp/scrabble
+COPY --from=build /scrabble/scrabble-api/src/main/resources/dictionary /tmp/scrabble/dictionary
 
 # set connection properties
 ENV JAVA_OPTS="-Dpostgres.connection.url=$POSTGRES_CONNECTION_URL -Dpostgres.username=$POSTGRES_USERNAME \

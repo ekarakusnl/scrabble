@@ -1,4 +1,15 @@
 # syntax = docker/dockerfile:1.2
+FROM maven:3.8.3-jdk-11-slim as build
+
+# set work directory
+WORKDIR /scrabble
+
+# add project directory
+ADD . /scrabble
+
+# maven build
+RUN mvn clean install -e -DskipTests -DskipITs -Denvironment=prod
+
 FROM tomcat:9.0.70-jdk11
 
 # get connection properties
@@ -9,19 +20,8 @@ ARG REDIS_USERNAME
 ARG REDIS_PASSWORD
 ARG REDIS_USE_SSL
 
-# install maven
-RUN apt-get -y update && apt-get install -y maven
-
-WORKDIR /scrabble
-
-# add project directory
-ADD . /scrabble
-
-# maven build
-RUN ["mvn", "clean", "install", "-e", "-DskipTests", "-DskipITs", "-Denvironment=prod"]
-
 # move deployable to webapps
-RUN cp /scrabble/scrabble-gateway/target/scrabble-gateway.war /usr/local/tomcat/webapps/scrabble-gateway.war
+COPY --from=build /scrabble/scrabble-gateway/target/scrabble-gateway.war /usr/local/tomcat/webapps/scrabble-gateway.war
 
 # create scrabble directory
 RUN mkdir /tmp/scrabble
@@ -30,7 +30,7 @@ RUN mkdir /tmp/scrabble
 RUN mkdir /tmp/scrabble/user
 
 # copy user avatars to user images path
-RUN cp -R /scrabble/scrabble-gateway/src/main/resources/user /tmp/scrabble
+COPY --from=build /scrabble/scrabble-gateway/src/main/resources/user /tmp/scrabble/user
 
 # set connection properties
 ENV JAVA_OPTS="-Dscrabble.api.endpoint=$SCRABBLE_API_ENDPOINT -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \
