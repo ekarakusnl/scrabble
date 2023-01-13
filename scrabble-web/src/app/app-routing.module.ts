@@ -4,23 +4,21 @@ import { AuthGuard } from './auth.guard';
 
 import { LoginComponent } from './login/login.component';
 import { CreateGameComponent } from './create-game/create-game.component';
-import { GamesComponent } from './games/games.component';
-import { MyGamesComponent } from './my-games/my-games.component';
-import { GameLoungeComponent } from "./game-lounge/game-lounge.component";
+import { LobbyComponent } from './lobby/lobby.component';
+import { LoungeComponent } from './lounge/lounge.component';
 import { GameComponent } from './game/game.component';
 
 const routes: Routes = [
-  { path: '', component: LoginComponent},
   { path: 'login', component: LoginComponent },
   {
-    path: 'games', component: GamesComponent,
+    path: 'lobby', component: LobbyComponent,
     canActivate: [AuthGuard],
     data: {
       role: 'ROLE_USER'
     },
   },
   {
-    path: 'my-games', component: MyGamesComponent,
+    path: 'lounge', component: LoungeComponent,
     canActivate: [AuthGuard],
     data: {
       role: 'ROLE_USER'
@@ -28,13 +26,6 @@ const routes: Routes = [
   },
   {
     path: 'create-game', component: CreateGameComponent,
-    canActivate: [AuthGuard],
-    data: {
-      role: 'ROLE_USER'
-    },
-  },
-  {
-    path: 'lounges/:id', component: GameLoungeComponent,
     canActivate: [AuthGuard],
     data: {
       role: 'ROLE_USER'

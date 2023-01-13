@@ -67,23 +67,23 @@ public class ActionController extends AbstractController implements MessageListe
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
+        final ActionDto actionDto = JsonUtils.toDto(message.toString(), ActionDto.class);
+
+        if ("READY_TO_START".equals(actionDto.getStatus())) {
+            post("/games/{gameId}/start", null, null, actionDto.getGameId());
+        }
+
+        if ("READY_TO_END".equals(actionDto.getStatus())) {
+            post("/games/{gameId}/end", null, null, actionDto.getGameId());
+        }
+
         try {
             for (Entry<DeferredResult<ActionDto>, Pair<Long, Integer>> entry : actions.entrySet()) {
                 log.info("onMessage is called with : {}", message.toString());
-                final ActionDto actionDto = JsonUtils.toDto(message.toString(), ActionDto.class);
 
                 if (entry.getValue().getRight().equals(actionDto.getCounter())
                         && entry.getValue().getLeft().equals(actionDto.getGameId())) {
                     entry.getKey().setResult(actionDto);
-
-                    if ("READY_TO_START".equals(actionDto.getStatus())) {
-                        post("/games/{gameId}/start", null, null, actionDto.getGameId());
-                    }
-
-                    if ("READY_TO_END".equals(actionDto.getStatus())) {
-                        post("/games/{gameId}/end", null, null, actionDto.getGameId());
-                    }
-
                 }
             }
         } catch (Exception e) {

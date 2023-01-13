@@ -13,8 +13,8 @@ import { ToastrModule } from 'ngx-toastr';
 import { CustomHttpInterceptor } from './common/custom.http.interceptor';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { GamesComponent } from './games/games.component';
-import { MyGamesComponent } from './my-games/my-games.component';
+import { LobbyComponent } from './lobby/lobby.component';
+import { LoungeComponent } from './lounge/lounge.component';
 import { MainHeaderComponent } from './main-header/main-header.component';
 import { MainSidebarComponent } from './main-sidebar/main-sidebar.component';
 import { ControlSidebarComponent } from './control-sidebar/control-sidebar.component';
@@ -23,14 +23,13 @@ import { MainFooterComponent } from './main-footer/main-footer.component';
 import { LoginComponent } from './login/login.component';
 import { CreateGameComponent } from './create-game/create-game.component';
 import { GameComponent } from './game/game.component';
-import { GameLoungeComponent } from './game-lounge/game-lounge.component';
 import { ToastService } from './service/toast.service';
 
 @NgModule({
   declarations: [
     AppComponent,
-    GamesComponent,
-    MyGamesComponent,
+    LobbyComponent,
+    LoungeComponent,
     MainHeaderComponent,
     MainSidebarComponent,
     ControlSidebarComponent,
@@ -39,7 +38,6 @@ import { ToastService } from './service/toast.service';
     LoginComponent,
     CreateGameComponent,
     GameComponent,
-    GameLoungeComponent,
   ],
   imports: [
     BrowserModule,

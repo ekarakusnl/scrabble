@@ -30,8 +30,8 @@ public class JwtProvider {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.token.validity.duration}")
-    private int tokenValidityDuration;
+    @Value("${jwt.token.validity.hours}")
+    private int tokenValidityHours;
 
     /**
      * Gets the username stored by JWT
@@ -57,7 +57,7 @@ public class JwtProvider {
         final Date now = new Date();
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
-        calendar.add(Calendar.SECOND, tokenValidityDuration);
+        calendar.add(Calendar.HOUR, tokenValidityHours);
 
         return Jwts.builder()
                 .setClaims(claims)

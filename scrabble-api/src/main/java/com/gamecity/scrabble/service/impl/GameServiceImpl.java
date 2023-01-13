@@ -386,6 +386,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         return baseDao.save(game);
     }
 
+    @Override
+    public List<Game> listByUser(Long userId) {
+        return baseDao.getByUser(userId);
+    }
+
     /**
      * Whether the player who is playing has the turn
      */

@@ -1,5 +1,8 @@
 package com.gamecity.scrabble.resource.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +132,15 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
                 game.getCurrentPlayerNumber(), game.getRoundNumber(), ActionType.END, GameStatus.ENDED);
         updaterService.run(action, game);
         return Response.ok(Mapper.toDto(game)).build();
+    }
+
+    @Override
+    public Response list(Long userId) {
+        if (userId == null) {
+            return super.list();
+        }
+        final List<Game> games = baseService.listByUser(userId);
+        return Response.ok(games.stream().map(Mapper::toDto).collect(Collectors.toList())).build();
     }
 
 }

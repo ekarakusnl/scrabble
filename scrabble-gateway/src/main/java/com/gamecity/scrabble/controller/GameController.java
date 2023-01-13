@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gamecity.scrabble.api.model.User;
 import com.gamecity.scrabble.model.rest.GameDto;
 import com.gamecity.scrabble.model.rest.VirtualRackDto;
 
@@ -100,6 +101,20 @@ public class GameController extends AbstractController {
     @ResponseBody
     public void play(@PathVariable Long id, @RequestBody VirtualRackDto rack) {
         post(API_RESOURCE_PATH + "/{id}/users/{userId}/rack", VirtualRackDto.class, rack, id, getUserId());
+    }
+
+    /**
+     * Gets the {@link List list} of {@link GameDto games} by authenticated {@link User user}
+     * 
+     * @return the game list
+     */
+    @GetMapping("/my")
+    public ResponseEntity<List<GameDto>> getMyGames() {
+        final List<GameDto> list = list(API_RESOURCE_PATH + "?userId={userId}", GameDto.class, getUserId());
+        if (list.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
 }

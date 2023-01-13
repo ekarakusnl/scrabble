@@ -9,11 +9,11 @@ import { Router } from '@angular/router';
 import { Globals } from '../common/globals';
 
 @Component({
-  selector: 'app-games',
-  templateUrl: './games.component.html',
-  styleUrls: ['./games.component.css']
+  selector: 'app-lounge',
+  templateUrl: './lounge.component.html',
+  styleUrls: ['./lounge.component.css']
 })
-export class GamesComponent implements OnInit {
+export class LoungeComponent implements OnInit {
 
   imageResourceURL: string = Globals.GATEWAY_URL;
 
@@ -36,7 +36,7 @@ export class GamesComponent implements OnInit {
   }
 
   loadGames(): void {
-    this.gameService.getGames().subscribe((games: Game[]) => {
+    this.gameService.getMyGames().subscribe((games: Game[]) => {
       this.initialized = true;
       this.games = games;
       if (games != null) {
@@ -64,9 +64,13 @@ export class GamesComponent implements OnInit {
     });
   }
 
-  joinGame(id: number): void {
-    this.gameService.joinGame(id).subscribe(() => {
-      this.router.navigate(['lounges', id]);
+  watchGame(id: number): void {
+    this.router.navigate(['games', id]);
+  }
+
+  leaveGame(id: number): void {
+    this.gameService.leaveGame(id).subscribe(() => {
+      this.router.navigate(['lobby']);
     });
   }
 

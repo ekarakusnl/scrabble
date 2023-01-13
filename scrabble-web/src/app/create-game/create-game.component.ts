@@ -72,7 +72,7 @@ export class CreateGameComponent implements OnInit {
       duration: this.createGameForm.value.duration
     };
     this.gameService.createGame(game).subscribe((game: Game) => {
-      this.router.navigate(['lounges', game.id]);
+      this.router.navigate(['lounge']);
     });
   }
 

@@ -125,7 +125,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
           this.loadChats();
         });
       } else {
-        this.router.navigate(['games']);
+        this.router.navigate(['lobby']);
       }
     });
   }

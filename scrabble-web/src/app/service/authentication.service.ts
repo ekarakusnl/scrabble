@@ -24,7 +24,7 @@ export class AuthenticationService {
         sessionStorage.setItem('token', 'HTTP_TOKEN ' + userToken.token);
         sessionStorage.setItem('roles', JSON.stringify(userToken.roles));
 
-        this.router.navigate(['games']).then(() => {
+        this.router.navigate(['lobby']).then(() => {
           window.location.reload();
         });
       } else {

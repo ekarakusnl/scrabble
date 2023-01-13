@@ -30,6 +30,10 @@ export class GameService {
     return this.http.get<Game[]>(Globals.GATEWAY_URL + '/rest/games');
   }
 
+  getMyGames(): Observable<Game[]> {
+    return this.http.get<Game[]>(Globals.GATEWAY_URL + '/rest/games/my');
+  }
+
   joinGame(id: number): Observable<void> {
     return this.http.post<void>(Globals.GATEWAY_URL + '/rest/games/' + id + '/join', null);
   }

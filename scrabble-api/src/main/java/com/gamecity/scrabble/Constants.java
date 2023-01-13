@@ -36,6 +36,7 @@ public interface Constants {
 
         // Game
         String getLastGames = "getLastGames";
+        String getByUser = "getByUser";
 
         // Player
         String getPlayersByUserId = "getPlayersByUserId";
