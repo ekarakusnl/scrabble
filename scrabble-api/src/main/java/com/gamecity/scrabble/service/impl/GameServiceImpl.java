@@ -219,7 +219,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         // expected player count has been reached
         if (game.getActivePlayerCount().equals(game.getExpectedPlayerCount())) {
-            log.debug("Expected player count has been reached, game {} is ready to start.", game.getId());
+            log.debug("Expected player count has been reached, game {} is ready to start", game.getId());
             game.setStatus(GameStatus.READY_TO_START);
         }
 
@@ -277,7 +277,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setRoundNumber(1);
         game.setActionCounter(game.getActionCounter() + 1);
 
-        log.debug("Game {} has been started.", game.getId());
+        log.debug("Game {} has been started", game.getId());
 
         return baseDao.save(game);
     }
@@ -295,7 +295,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             throw new GameException(GameError.WAITING);
         }
 
-        log.info("Playing on game {} as player {}.", game.getId(), game.getCurrentPlayerNumber());
+        log.info("Playing on game {} as player {}", game.getId(), game.getCurrentPlayerNumber());
 
         final Player player = playerService.getByUserId(game.getId(), userId);
         final Integer currentPlayerNumber = game.getCurrentPlayerNumber();
@@ -309,14 +309,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final Bag bag = bagService.get(game.getBagId());
         final Board board = boardService.get(game.getBoardId());
 
-        final VirtualCell[][] boardMatrix = new VirtualCell[board.getRowSize()][board.getColumnSize()];
         final VirtualBoard virtualBoard = virtualBoardService.getBoard(game.getId(), boardActionCounter);
-        virtualBoard.getCells().stream().forEach(cell -> {
-            boardMatrix[cell.getRowNumber() - 1][cell.getColumnNumber() - 1] = cell;
-            cell.setLastPlayed(false);
-        });
 
-        makeMove(game, bag, board, virtualRack, boardMatrix);
+        makeMove(game, bag, board, virtualRack, virtualBoard);
         assignNextPlayer(game);
 
         game.setActionCounter(game.getActionCounter() + 1);
@@ -332,13 +327,13 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         if (newRound) {
             if (GameStatus.LAST_ROUND == game.getStatus()) {
-                log.debug("The last round has been played, game {} is ready to end.", game.getId());
+                log.debug("The last round has been played, game {} is ready to end", game.getId());
                 game.setStatus(GameStatus.READY_TO_END);
             } else {
                 final List<Tile> tiles = virtualBagService.getTiles(game.getId(), game.getBagId());
                 // the bag is empty, set the last round
                 if (tiles.isEmpty()) {
-                    log.debug("No tiles left in the bag, the last round is going to be played on game {}.",
+                    log.debug("No tiles left in the bag, the last round is going to be played on game {}",
                             game.getId());
                     game.setStatus(GameStatus.LAST_ROUND);
                 }
@@ -381,7 +376,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setStatus(GameStatus.ENDED);
         game.setActionCounter(game.getActionCounter() + 1);
 
-        log.debug("Game {} has been ended.", game.getId());
+        log.debug("Game {} has been ended", game.getId());
 
         return baseDao.save(game);
     }
@@ -426,17 +421,23 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private void assignNextPlayer(Game game) {
         int nextPlayerNumber = (game.getActionCounter() % game.getExpectedPlayerCount()) + 1;
         game.setCurrentPlayerNumber(nextPlayerNumber);
-        log.debug("Current player is set as player {} on game {}.", nextPlayerNumber, game.getId());
+        log.debug("Current player is set as player {} on game {}", nextPlayerNumber, game.getId());
     }
 
     /**
      * Does the validations and makes the move
      */
-    private void makeMove(Game game, Bag bag, Board board, VirtualRack updatedRack, VirtualCell[][] boardMatrix) {
+    private void makeMove(Game game, Bag bag, Board board, VirtualRack updatedRack, VirtualBoard virtualBoard) {
         boolean hasNewMove = updatedRack.getTiles().stream().anyMatch(VirtualTile::isSealed);
         if (!hasNewMove) {
             return;
         }
+
+        final VirtualCell[][] boardMatrix = new VirtualCell[board.getRowSize()][board.getColumnSize()];
+        virtualBoard.getCells().stream().forEach(cell -> {
+            boardMatrix[cell.getRowNumber() - 1][cell.getColumnNumber() - 1] = cell;
+            cell.setLastPlayed(false);
+        });
 
         locateTilesOnBoard(updatedRack, boardMatrix);
         hasNonEmptyCenter(boardMatrix);
@@ -444,19 +445,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final List<BoardWord> newWords = findWordsOnBoard(game.getId(), game.getCurrentPlayerNumber(),
                 game.getRoundNumber(), board, boardMatrix);
 
-        final List<BoardWord> invalidWords = newWords.stream()
-                .filter(word -> !isValidWord(word.getWordDefinition().toString(), bag.getLanguage()))
-                .collect(Collectors.toList());
-
-        if (!CollectionUtils.isEmpty(invalidWords)) {
-            final String commaSeperatedInvalidWords = String.join(",",
-                    invalidWords.stream().map(BoardWord::getWordDefinition).collect(Collectors.toList()));
-            log.debug("Word(s) {} are not found in {} dictionary.", commaSeperatedInvalidWords, bag.getLanguage());
-            throw new GameException(GameError.WORDS_ARE_NOT_FOUND,
-                    Arrays.asList(commaSeperatedInvalidWords, bag.getLanguage().name()));
-        }
-
+        hasInvalidWords(newWords, bag.getLanguage());
         hasValidLink(newWords, boardMatrix);
+        hasSingleLetterWords(virtualBoard);
 
         final Integer newWordsScore = calculateNewWordsScore(newWords);
         updatePlayerScore(game.getId(), game.getCurrentPlayerNumber(), newWordsScore);
@@ -519,7 +510,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                         Direction.HORIZONTAL, boardWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
-                    log.debug("Horizontal word {} has been detected on game {} by player {}.",
+                    log.debug("Horizontal word {} has been detected on game {} by player {}",
                             detectedWord.getWordDefinition(), gameId, playerNumber);
                 }
             });
@@ -534,7 +525,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                         Direction.VERTICAL, boardWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
-                    log.debug("Vertical word {} has been detected on game {} by player {}.",
+                    log.debug("Vertical word {} has been detected on game {} by player {}",
                             detectedWord.getWordDefinition(), gameId, playerNumber);
                 }
             });
@@ -557,7 +548,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 cell.setRoundNumber(roundNumber);
             }
 
-            log.debug("A {} {} letter is spotted on [{},{}] on game {} by player {}.",
+            log.debug("A {} {} letter is spotted on [{},{}] on game {} by player {}",
                     boardWord.isLinked() ? "new linked" : "new", direction, cell.getRowNumber(), cell.getColumnNumber(),
                     gameId, playerNumber);
         }
@@ -613,6 +604,20 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         return dictionaryService.hasWord(word, language);
     }
 
+    private void hasInvalidWords(List<BoardWord> newWords, Language language) {
+        final List<BoardWord> invalidWords = newWords.stream()
+                .filter(word -> !isValidWord(word.getWordDefinition().toString(), language))
+                .collect(Collectors.toList());
+
+        if (!CollectionUtils.isEmpty(invalidWords)) {
+            final String commaSeperatedInvalidWords = String.join(",",
+                    invalidWords.stream().map(BoardWord::getWordDefinition).collect(Collectors.toList()));
+            log.debug("Word(s) {} are not found in {} dictionary", commaSeperatedInvalidWords, language);
+            throw new GameException(GameError.WORDS_ARE_NOT_FOUND,
+                    Arrays.asList(commaSeperatedInvalidWords, language.name()));
+        }
+    }
+
     /**
      * Whether the words are linked to existing words
      */
@@ -643,6 +648,22 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                         unlinkedWords.stream().map(BoardWord::getWordDefinition).collect(Collectors.toList()));
                 throw new GameException(GameError.WORDS_ARE_NOT_LINKED, Arrays.asList(commaSeperatedUnlinkedWords));
             }
+        }
+    }
+
+    private void hasSingleLetterWords(VirtualBoard virtualBoard) {
+        // detect single word letter
+        final List<String> singleLetterWords = virtualBoard.getCells()
+                .stream()
+                .filter(cell -> cell.getLetter() != null && !cell.isSealed())
+                .map(VirtualCell::getLetter)
+                .collect(Collectors.toList());
+
+        if (!CollectionUtils.isEmpty(singleLetterWords)) {
+            final String commaSeperatedSingleLetterWords = String.join(",", singleLetterWords);
+            log.debug("Single letter word(s) {} are detected", commaSeperatedSingleLetterWords);
+            throw new GameException(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED,
+                    Arrays.asList(commaSeperatedSingleLetterWords));
         }
     }
 

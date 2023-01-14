@@ -77,7 +77,12 @@ public enum GameError {
     /**
      * A letter has already been exchanged
      */
-    EXCHANGED(2014, "A letter has already been exchanged in this round!");
+    EXCHANGED(2014, "A letter has already been exchanged in this round!"),
+
+    /**
+     * Single letter words are not allowed
+     */
+    SINGLE_LETTER_WORDS_NOT_ALLOWED(2015, "Single letter words {0} are not allowed!");
 
     private int code;
     private String message;

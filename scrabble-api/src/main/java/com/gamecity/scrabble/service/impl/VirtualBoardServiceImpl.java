@@ -50,7 +50,7 @@ class VirtualBoardServiceImpl implements VirtualBoardService {
 
         final VirtualBoard virtualBoard = new VirtualBoard(Arrays.asList(cells));
         redisRepository.updateBoard(gameId, virtualBoard);
-        log.debug("Board has been created for game {} with the size {}.", gameId, board.getName());
+        log.debug("Board has been created for game {} with the size {}", gameId, board.getName());
     }
 
     /**
@@ -92,7 +92,7 @@ class VirtualBoardServiceImpl implements VirtualBoardService {
     @Override
     public void updateBoard(Long gameId, VirtualBoard virtualBoard) {
         redisRepository.updateBoard(gameId, virtualBoard);
-        log.debug("Board has been updated for game {}.", gameId);
+        log.debug("Board has been updated for game {}", gameId);
     }
 
     @Override

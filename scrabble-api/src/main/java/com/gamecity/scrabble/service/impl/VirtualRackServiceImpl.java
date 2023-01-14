@@ -53,7 +53,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
         final VirtualRack rack = new VirtualRack(false, Arrays.asList(tiles));
         redisRepository.refreshRack(gameId, playerNumber, rack);
-        log.debug("Rack has been created for player {} on game {}.", playerNumber, gameId);
+        log.debug("Rack has been created for player {} on game {}", playerNumber, gameId);
     }
 
     /**
@@ -130,7 +130,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
         final VirtualRack refreshedRack = new VirtualRack(false, updatedTiles);
         redisRepository.refreshRack(gameId, playerNumber, refreshedRack);
-        log.debug("Rack has been updated for player {} on game {}.", playerNumber, gameId);
+        log.debug("Rack has been updated for player {} on game {}", playerNumber, gameId);
 
         return refreshedRack;
     }
@@ -139,7 +139,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
     public void updateRack(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber,
             VirtualRack virtualRack) {
         redisRepository.updateRack(gameId, playerNumber, roundNumber, virtualRack);
-        log.debug("Rack has been updated for player {} on game {}.", playerNumber, gameId);
+        log.debug("Rack has been updated for player {} on game {}", playerNumber, gameId);
     }
 
     @Override

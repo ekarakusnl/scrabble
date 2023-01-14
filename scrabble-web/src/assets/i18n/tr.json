@@ -59,6 +59,7 @@
   "error.2012": "{{0}} kelimeleri {{1}} sözlükte bulunamadı!",
   "error.2013": "Oyuncular bekleniyor!",
   "error.2014": "Bu round bir harf değiştirdiniz!",
+  "error.2015": "Tek harfli {{0}} kelimeleri kullanılamaz!",
 
   "validation.required": "zorunlu"
 }

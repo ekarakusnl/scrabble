@@ -777,6 +777,40 @@ class TestGameService extends AbstractServiceTest {
         verify(wordService, times(1)).save(word);
     }
 
+    @Test
+    void test_play_single_letter_not_allowed() {
+        prepareGame();
+        prepareBoard();
+        prepareUsedRackByColumn(8, 8, "A");
+        prepareRepository();
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            fail("Single letter words are not detected");
+        } catch (GameException e) {
+            assertEquals(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode(), e.getCode());
+        }
+    }
+
+    @Test
+    void test_play_single_letter_with_valid_word_not_allowed() {
+        prepareGame();
+        prepareBoard();
+        prepareUsedRackByColumn(8, 8, "WEAK");
+        prepareUsedRackByColumn(1, 1, "A");
+        prepareRepository();
+
+        // the words are valid
+        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            fail("Single letter words are not detected");
+        } catch (GameException e) {
+            assertEquals(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode(), e.getCode());
+        }
+    }
+
     private void prepareGame() {
         game = createSampleGame(DEFAULT_USER_ID, 2);
         game.setId(DEFAULT_GAME_ID);

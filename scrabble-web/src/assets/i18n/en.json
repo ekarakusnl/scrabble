@@ -59,6 +59,7 @@
   "error.2012": "Words {{0}} are not defined in {{1}} language!",
   "error.2013": "Game is waiting players!",
   "error.2014": "A letter has already been exchanged in this round!",
+  "error.2015": "Single letter words {{0}} are not allowed!",
 
   "validation.required": "is required"
 }

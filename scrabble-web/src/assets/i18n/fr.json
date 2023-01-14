@@ -59,6 +59,7 @@
   "error.2012": "Les mots {{0}} ne sont pas définis dans la langue {{1}} !",
   "error.2013": "Le jeu attend les joueurs !",
   "error.2014": "Une lettre a déjà été échangée dans ce tour !",
+  "error.2015": "Les mots à une seule lettre {{0}} ne sont pas autorisés!",
 
   "validation.required": "est requis"
 }
