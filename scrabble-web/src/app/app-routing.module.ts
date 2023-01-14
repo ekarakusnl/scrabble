@@ -9,6 +9,7 @@ import { LoungeComponent } from './lounge/lounge.component';
 import { GameComponent } from './game/game.component';
 
 const routes: Routes = [
+  { path: '', component: LobbyComponent },
   { path: 'login', component: LoginComponent },
   {
     path: 'lobby', component: LobbyComponent,

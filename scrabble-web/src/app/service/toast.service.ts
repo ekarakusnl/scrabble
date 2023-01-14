@@ -10,7 +10,14 @@ export class ToastService {
     private toastrService: ToastrService,
   ) { }
 
-  ngOnInit(): void {;
+  ngOnInit(): void {
+  }
+
+  playSound() {
+    let audio = new Audio();
+    audio.src = "../../assets/sounds/alert.mp3";
+    audio.load();
+    audio.play();
   }
 
   error(message: string): void {

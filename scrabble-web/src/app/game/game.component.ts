@@ -210,6 +210,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
           this.chats = chats;
         } else {
           this.chats = this.chats.concat(chats);
+          this.toastService.playSound();
         }
       }
       this.loadChats();
