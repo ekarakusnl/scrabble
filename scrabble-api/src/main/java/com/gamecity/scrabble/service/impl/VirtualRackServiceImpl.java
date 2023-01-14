@@ -70,52 +70,48 @@ class VirtualRackServiceImpl implements VirtualRackService {
     private VirtualTile createTile(Long gameId, Long bagId, Integer playerNumber, int tileNumber, int roundNumber,
             Boolean vowel) {
         final List<Tile> tiles = virtualBagService.getTiles(gameId, bagId);
+        final List<Tile> availableTiles =
+                tiles.stream().filter(tile -> tile.getCount() > 0).collect(Collectors.toList());;
 
-        VirtualTile tile = null;
+        VirtualTile virtualTile = null;
         int index = 0;
         while (true) {
-            if (tiles.isEmpty()) {
-                break;
-            }
-
-            // a vowel letter is requested but there are no vowels left in the bag
-            if (Boolean.TRUE.equals(vowel) && tiles.stream().filter(Tile::isVowel).count() == 0) {
+            // there are no tiles left in the bag
+            if (availableTiles.isEmpty()) {
                 return null;
             }
 
-            index = new Random().nextInt(tiles.size()) + 1;
-            final Tile tileRule = tiles.get(index - 1);
+            // a vowel letter is requested but there are no vowels left in the bag
+            if (Boolean.TRUE.equals(vowel) && availableTiles.stream().filter(Tile::isVowel).count() == 0) {
+                return null;
+            }
+
+            index = new Random().nextInt(availableTiles.size()) + 1;
+            final Tile tile = availableTiles.get(index - 1);
 
             // filter by vowel
-            if (vowel != null && !vowel.equals(tileRule.isVowel())) {
+            if (vowel != null && !vowel.equals(tile.isVowel())) {
                 continue;
             }
 
-            if (tileRule.getCount() > 0) {
-                tile = VirtualTile.builder()
-                        .letter(tileRule.getLetter())
+            if (tile.getCount() > 0) {
+                virtualTile = VirtualTile.builder()
+                        .letter(tile.getLetter())
                         .number(tileNumber)
                         .playerNumber(playerNumber)
                         .roundNumber(roundNumber)
                         .sealed(false)
-                        .value(tileRule.getValue())
-                        .vowel(tileRule.isVowel())
+                        .value(tile.getValue())
+                        .vowel(tile.isVowel())
                         .build();
 
-                // remove the tile from the list when the count is zero
-                if (tileRule.getCount() == 0) {
-                    tiles.remove(tileRule);
-                } else {
-                    tileRule.setCount(tileRule.getCount() - 1);
-                }
-
+                tile.setCount(tile.getCount() - 1);
                 break;
             }
-            tiles.remove(tileRule);
         }
 
         virtualBagService.updateTiles(gameId, tiles);
-        return tile;
+        return virtualTile;
     }
 
     @Override
@@ -157,24 +153,29 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
         final VirtualTile exchangedVirtualTile = virtualRack.getTiles().get(tileNumber - 1);
         final VirtualTile newVirtualTile = createTile(gameId, bagId, playerNumber, tileNumber, roundNumber, true);
+
+        // return the default rack if the requested letter was not able to be created
+        if (newVirtualTile == null) {
+            return virtualRack;
+        }
+
         final List<VirtualTile> updatedTiles = new ArrayList<>(virtualRack.getTiles());
         updatedTiles.set(tileNumber - 1, newVirtualTile);
 
         final List<Tile> tiles = virtualBagService.getTiles(gameId, bagId);
-        final Tile updatedTile = tiles.stream()
+        final Tile exchangedTile = tiles.stream()
                 .filter(tile -> exchangedVirtualTile.getLetter().equals(tile.getLetter()))
                 .findFirst()
                 .orElse(null);
 
-        // no vowels have been found in the bag, do not exchange the letter and return the rack back
-        if (updatedTile == null) {
-            return virtualRack;
-        }
-        updatedTile.setCount(updatedTile.getCount() + 1);
+        exchangedTile.setCount(exchangedTile.getCount() + 1);
         virtualBagService.updateTiles(gameId, tiles);
 
         final VirtualRack updatedVirtualRack = new VirtualRack(true, updatedTiles);
         updateRack(gameId, bagId, playerNumber, roundNumber, updatedVirtualRack);
+
+        log.debug("Letter {} has been exchanged with {} for player {} on game {}", exchangedVirtualTile.getLetter(),
+                newVirtualTile.getLetter(), playerNumber, gameId);
 
         return updatedVirtualRack;
     }

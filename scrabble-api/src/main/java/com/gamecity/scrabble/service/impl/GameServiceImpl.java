@@ -330,7 +330,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 log.debug("The last round has been played, game {} is ready to end", game.getId());
                 game.setStatus(GameStatus.READY_TO_END);
             } else {
-                final List<Tile> tiles = virtualBagService.getTiles(game.getId(), game.getBagId());
+                final List<Tile> tiles = virtualBagService.getTiles(game.getId(), game.getBagId())
+                        .stream()
+                        .filter(tile -> tile.getCount() > 0)
+                        .collect(Collectors.toList());
                 // the bag is empty, set the last round
                 if (tiles.isEmpty()) {
                     log.debug("No tiles left in the bag, the last round is going to be played on game {}",

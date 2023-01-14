@@ -576,12 +576,17 @@ class GameResourceIT extends AbstractIntegrationTest {
         updateRack(game.getId(), game.getOwnerId(), startGame.getCurrentPlayerNumber(), startGame.getRoundNumber(),
                 letterValuePairs);
 
-        updateTiles(game.getId(), new ArrayList<>());
+        final List<Tile> updatedTiles = getTiles(game.getId());
+        updatedTiles.stream().forEach(tile -> {
+            tile.setCount(0);
+        });
+        updateTiles(game.getId(), updatedTiles);
 
         List<Tile> tiles = getTiles(game.getId());
         Tile exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);
 
-        assertNull(exchangedTile);
+        assertNotNull(exchangedTile);
+        assertEquals(0, exchangedTile.getCount());
 
         final Response exchangeTileResponse =
                 target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
@@ -600,7 +605,8 @@ class GameResourceIT extends AbstractIntegrationTest {
         tiles = getTiles(game.getId());
         exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);
 
-        assertNull(exchangedTile);
+        assertNotNull(exchangedTile);
+        assertEquals(0, exchangedTile.getCount());
 
         exchangeTileResponse.close();
     }
@@ -624,17 +630,19 @@ class GameResourceIT extends AbstractIntegrationTest {
         updateRack(game.getId(), game.getOwnerId(), startGame.getCurrentPlayerNumber(), startGame.getRoundNumber(),
                 letterValuePairs);
 
-        final List<Tile> updatedTiles = new ArrayList<>();
-        updatedTiles.add(Tile.builder().bagId(startGame.getBagId()).count(4).letter("C").value(1).vowel(false).build());
-        updatedTiles.add(Tile.builder().bagId(startGame.getBagId()).count(4).letter("C").value(1).vowel(false).build());
-        updatedTiles.add(Tile.builder().bagId(startGame.getBagId()).count(4).letter("F").value(1).vowel(false).build());
-
+        final List<Tile> updatedTiles = getTiles(game.getId());
+        updatedTiles.stream()
+                .filter(tile -> !tile.getLetter().equals("C") && !tile.getLetter().equals("F"))
+                .forEach(tile -> {
+                    tile.setCount(0);
+                });
         updateTiles(game.getId(), updatedTiles);
 
         List<Tile> tiles = getTiles(game.getId());
         Tile exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);
 
-        assertNull(exchangedTile);
+        assertNotNull(exchangedTile);
+        assertEquals(0, exchangedTile.getCount());
 
         final Response exchangeTileResponse =
                 target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
@@ -653,7 +661,8 @@ class GameResourceIT extends AbstractIntegrationTest {
         tiles = getTiles(game.getId());
         exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);
 
-        assertNull(exchangedTile);
+        assertNotNull(exchangedTile);
+        assertEquals(0, exchangedTile.getCount());
 
         exchangeTileResponse.close();
     }
@@ -664,7 +673,11 @@ class GameResourceIT extends AbstractIntegrationTest {
         joinGame(game.getId(), 2L);
         final GameDto startGame = startGame(game.getId());
 
-        updateTiles(game.getId(), new ArrayList<>());
+        final List<Tile> updatedTiles = getTiles(game.getId());
+        updatedTiles.stream().forEach(tile -> {
+            tile.setCount(0);
+        });
+        updateTiles(game.getId(), updatedTiles);
 
         // round 1 player 1
 
