@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.dao.RedisRepository;
-import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Player;
@@ -47,16 +46,11 @@ class UpdaterServiceImpl implements UpdaterService {
     }
 
     @Override
-    public void run(Action action, Game game) {
-        if (ActionType.END == action.getType()) {
-            redisRepository.publishAction(action.getGameId(), action);
-            return;
-        }
-
-        final List<Player> players = updatePlayers(action);
+    public void run(Game game, ActionType actionType) {
+        final List<Player> players = updatePlayers(game.getId());
 
         // the game is ready to start, prepare the board and the racks
-        if (GameStatus.IN_PROGRESS == action.getStatus() && ActionType.START == action.getType()) {
+        if (GameStatus.IN_PROGRESS == game.getStatus() && ActionType.START == actionType) {
             // create the board
             virtualBoardService.createBoard(game.getId(), game.getBoardId());
 
@@ -65,8 +59,6 @@ class UpdaterServiceImpl implements UpdaterService {
                 virtualRackService.createRack(game.getId(), game.getBagId(), player.getPlayerNumber());
             });
         }
-
-        redisRepository.publishAction(action.getGameId(), action);
     }
 
     @Override
@@ -77,9 +69,9 @@ class UpdaterServiceImpl implements UpdaterService {
         virtualBoardService.updateBoard(game.getId(), updatedBoard);
     }
 
-    private List<Player> updatePlayers(Action action) {
-        final List<Player> players = playerService.getPlayers(action.getGameId());
-        redisRepository.updatePlayers(action.getGameId(), players);
+    private List<Player> updatePlayers(Long gameId) {
+        final List<Player> players = playerService.getPlayers(gameId);
+        redisRepository.updatePlayers(gameId, players);
         return players;
     }
 

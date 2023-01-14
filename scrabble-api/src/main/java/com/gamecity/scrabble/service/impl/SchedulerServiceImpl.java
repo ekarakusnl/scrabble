@@ -30,7 +30,8 @@ class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public void schedulePlayDuration(Long gameId, Integer playerNumber, Integer duration, Integer actionCounter) {
+    public void schedulePlayDuration(Long gameId, Integer playerNumber, Integer duration, Integer actionCounter,
+            Date actionDate) {
         try {
             final JobDetail jobDetail = JobBuilder.newJob(PlayDurationJob.class)
                     .withIdentity("job" + actionCounter, "durationTrigger")
@@ -40,7 +41,7 @@ class SchedulerServiceImpl implements SchedulerService {
                     .build();
 
             final Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
+            cal.setTime(actionDate);
             cal.add(Calendar.MINUTE, duration);
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()

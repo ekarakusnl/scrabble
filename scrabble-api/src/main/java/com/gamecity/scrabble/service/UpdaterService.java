@@ -1,6 +1,6 @@
 package com.gamecity.scrabble.service;
 
-import com.gamecity.scrabble.entity.Action;
+import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualRack;
@@ -17,10 +17,10 @@ public interface UpdaterService {
     /**
      * Runs the update after the specified action in the {@link Game game}
      * 
-     * @param action the action
-     * @param game   the game that is currently played on
+     * @param game       the game that is currently played on
+     * @param actionType <code>type</code> of the action happened
      */
-    void run(Action action, Game game);
+    void run(Game game, ActionType actionType);
 
     /**
      * Runs the update after the specified action in the {@link Game game}

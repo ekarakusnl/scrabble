@@ -61,6 +61,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
 
   // play duration
   durationTimer: any;
+  remainingDurationInSeconds: number;
   remainingDuration: string;
 
   constructor(
@@ -178,14 +179,19 @@ export class GameComponent implements OnInit, AfterViewChecked {
     if (this.durationTimer) {
       this.durationTimer.unsubscribe();
     }
-    let remainingDurationInSeconds = this.game.duration * 60;
+    this.remainingDurationInSeconds = this.game.duration * 60;
     const passedDurationInSeconds = (new Date().getTime() - new Date(actionTimestamp).getTime()) / 1000;
-    const defaultDurationInSeconds = remainingDurationInSeconds - passedDurationInSeconds;
+    const defaultDurationInSeconds = this.remainingDurationInSeconds - passedDurationInSeconds;
     this.durationTimer = timer(0, 1000).subscribe(interval => {
-      remainingDurationInSeconds = Math.trunc(defaultDurationInSeconds - interval);
+      this.remainingDurationInSeconds = Math.trunc(defaultDurationInSeconds - interval);
+      if (this.remainingDurationInSeconds < 0) {
+          this.remainingDurationInSeconds = 0;
+          this.remainingDuration = '00:00';
+          return;
+      }
 
-      const remainingSeconds = remainingDurationInSeconds % 60;
-      const remainingMinutes = (remainingDurationInSeconds - remainingSeconds) / 60;
+      const remainingSeconds = this.remainingDurationInSeconds % 60;
+      const remainingMinutes = (this.remainingDurationInSeconds - remainingSeconds) / 60;
 
       const remainingSecondsString = (remainingSeconds < 10 ? '0' : '') + remainingSeconds.toString();
       const remainingMinutesString = (remainingMinutes < 10 ? '0' : '') + remainingMinutes.toString();
@@ -276,6 +282,9 @@ export class GameComponent implements OnInit, AfterViewChecked {
     if (this.effectivePlayer.playerNumber != this.currentPlayerNumber) {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
+    } else if (this.remainingDurationInSeconds <= 0) {
+      this.toastService.error(this.translateService.instant('error.2007'));
+      return;
     }
     if (tile.sealed) {
       this.selectedTile = null;
@@ -328,12 +337,22 @@ export class GameComponent implements OnInit, AfterViewChecked {
     if (this.effectivePlayer.playerNumber != this.currentPlayerNumber) {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
+    } else if (this.remainingDurationInSeconds <= 0) {
+      this.toastService.error(this.translateService.instant('error.2007'));
+      return;
     }
+    
     this.gameService.play(this.game.id, this.virtualRack).subscribe();
   };
 
   exchange(): void {
-    if (this.selectedTile == null) {
+    if (this.effectivePlayer.playerNumber != this.currentPlayerNumber) {
+      this.toastService.error(this.translateService.instant('error.2007'));
+      return;
+    } else if (this.remainingDurationInSeconds <= 0) {
+      this.toastService.error(this.translateService.instant('error.2007'));
+      return;
+    } else if (this.selectedTile == null) {
       this.toastService.warning(this.translateService.instant('game.select.tile'));
       return;
     } else if (this.virtualRack.exchanged) {
