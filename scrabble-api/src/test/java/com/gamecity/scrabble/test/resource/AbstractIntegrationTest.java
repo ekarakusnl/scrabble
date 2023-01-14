@@ -22,7 +22,9 @@ import redis.embedded.RedisServer;
 
 import com.gamecity.scrabble.config.PersistenceConfig;
 import com.gamecity.scrabble.config.PropertyConfig;
+import com.gamecity.scrabble.config.QuartzConfig;
 
+@SuppressWarnings("unchecked")
 abstract class AbstractIntegrationTest extends JerseyTest {
 
     private static RedisServer redisServer;
@@ -47,9 +49,9 @@ abstract class AbstractIntegrationTest extends JerseyTest {
     private static void initializeApplicationContext() {
         applicationContext = new AnnotationConfigApplicationContext();
         applicationContext.scan("com.gamecity.scrabble.dao", "com.gamecity.scrabble.service",
-                "com.gamecity.scrabble.resource");
+                "com.gamecity.scrabble.resource", "com.gamecity.scrabble.job");
         applicationContext.register(PersistenceConfig.class, RedisConfig.class, AspectConfig.class,
-                PropertyConfig.class);
+                PropertyConfig.class, QuartzConfig.class);
         applicationContext.refresh();
 
         redisTemplate = (RedisTemplate<String, Object>) applicationContext.getBean("redisTemplate");

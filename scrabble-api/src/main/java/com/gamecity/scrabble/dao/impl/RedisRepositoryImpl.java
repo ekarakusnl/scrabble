@@ -21,6 +21,7 @@ import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.rest.ActionDto;
 import com.gamecity.scrabble.model.rest.ChatDto;
 import com.gamecity.scrabble.model.rest.PlayerDto;
+import com.gamecity.scrabble.util.JsonUtils;
 
 @Repository(value = "redisRepository")
 class RedisRepositoryImpl implements RedisRepository {
@@ -34,17 +35,17 @@ class RedisRepositoryImpl implements RedisRepository {
 
     @Override
     public void publishAction(Long gameId, Action action) {
-        final ActionDto actionDto = Mapper.toDto(action);
-        redisTemplate.boundListOps(Constants.CacheKey.ACTION + ":" + gameId).rightPush(actionDto);
-        redisTemplate.convertAndSend(Constants.CacheKey.ACTION, actionDto);
+        final String payload = JsonUtils.toJson(Mapper.toDto(action));
+        redisTemplate.boundListOps(Constants.CacheKey.ACTION + ":" + gameId).rightPush(payload);
+        redisTemplate.convertAndSend(Constants.CacheKey.ACTION, payload);
     }
 
     @Override
     public Action getAction(Long gameId, Integer counter) {
         final BoundListOperations<String, Object> actions =
                 redisTemplate.boundListOps(Constants.CacheKey.ACTION + ":" + gameId);
-        final ActionDto actionDto = (ActionDto) actions.range(counter - 1, -1).stream().findFirst().orElse(null);
-        return actionDto == null ? null : Mapper.toEntity(actionDto);
+        final String actionPayload = (String) actions.range(counter - 1, -1).stream().findFirst().orElse(null);
+        return actionPayload == null ? null : Mapper.toEntity(JsonUtils.toDto(actionPayload, ActionDto.class));
     }
 
     @Override

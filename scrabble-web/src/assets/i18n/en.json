@@ -39,6 +39,7 @@
   "game.words.no.word": "No word has been played",
   "game.words.word": "'{{0}}' ({{1}}) has been played by {{2}}",
   "game.your.turn": "It's your turn",
+  "game.another.player.turn": "It's the turn of {{0}}",
   "game.select.tile": "No tile has been selected, please select a tile first",
   "game.last.round": "The bag is empty, this is the last round of the game",
   "game.you.won": "Congratulations! You have won the game!",

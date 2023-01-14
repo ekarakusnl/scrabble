@@ -4,8 +4,7 @@ export interface Action {
   counter: number;
   type: string;
   status: string;
-//  currentStatus: string;
-//  previousStatus: string;
   roundNumber: number;
   currentPlayerNumber: number;
+  lastUpdatedDate: Date;
 }

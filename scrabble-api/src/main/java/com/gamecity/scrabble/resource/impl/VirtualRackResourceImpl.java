@@ -44,7 +44,7 @@ class VirtualRackResourceImpl implements VirtualRackResource {
             return Response.ok().build();
         }
 
-        final Player player = playerService.loadByUserId(gameId, userId);
+        final Player player = playerService.getByUserId(gameId, userId);
         final VirtualRack virtualRack = virtualRackService.getRack(gameId, player.getPlayerNumber(), roundNumber);
         if (CollectionUtils.isEmpty(virtualRack.getTiles())) {
             return Response.ok().build();
@@ -58,7 +58,7 @@ class VirtualRackResourceImpl implements VirtualRackResource {
     public Response exchangeTile(Long gameId, Long userId, Integer tileNumber) {
 
         final Game game = gameService.get(gameId);
-        final Player player = playerService.loadByUserId(gameId, userId);
+        final Player player = playerService.getByUserId(gameId, userId);
         final VirtualRack virtualRack = virtualRackService.exchangeTile(gameId, game.getBagId(),
                 player.getPlayerNumber(), game.getRoundNumber(), tileNumber);
 

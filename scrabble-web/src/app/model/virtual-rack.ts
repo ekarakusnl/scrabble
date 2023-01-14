@@ -1,4 +1,4 @@
-import { Tile } from "./tile";
+import { Tile } from './tile';
 
 export interface VirtualRack {
   exchanged: boolean;

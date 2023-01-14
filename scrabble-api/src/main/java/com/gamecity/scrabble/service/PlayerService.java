@@ -43,7 +43,7 @@ public interface PlayerService extends BaseService<Player> {
      * @param userId <code>id</code> of the user
      * @return the player
      */
-    Player loadByUserId(Long gameId, Long userId);
+    Player getByUserId(Long gameId, Long userId);
 
     /**
      * Gets the {@link Player player} by <code>player number</code>
@@ -52,6 +52,6 @@ public interface PlayerService extends BaseService<Player> {
      * @param playerNumber <code>number</code> of the player
      * @return the player
      */
-    Player loadByPlayerNumber(Long gameId, Integer playerNumber);
+    Player getByPlayerNumber(Long gameId, Integer playerNumber);
 
 }

@@ -33,6 +33,7 @@ import com.gamecity.scrabble.service.exception.error.GameError;
 import com.gamecity.scrabble.util.JsonUtils;
 import com.google.common.io.Resources;
 
+@SuppressWarnings("unchecked")
 class GameResourceIT extends AbstractIntegrationTest {
 
     @Test
@@ -791,7 +792,7 @@ class GameResourceIT extends AbstractIntegrationTest {
 
     private GameDto createNewGame(Integer playerCount) throws IOException {
         final URL resource = GameResourceIT.class.getResource("/json/game.json");
-        final GameDto game = JsonUtils.toEntity(Resources.toString(resource, StandardCharsets.UTF_8), GameDto.class);
+        final GameDto game = JsonUtils.toDto(Resources.toString(resource, StandardCharsets.UTF_8), GameDto.class);
         game.setExpectedPlayerCount(playerCount);
 
         final Response gameResponse = target("/games").request().put(Entity.entity(game, MediaType.APPLICATION_JSON));

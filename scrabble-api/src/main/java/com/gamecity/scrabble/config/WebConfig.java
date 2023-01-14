@@ -15,15 +15,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
- * Spring configuration for Web MVC
+ * Spring configuration of Web MVC
  * 
  * @author ekarakus
  */
 @Configuration
 @EnableWebMvc
 @ComponentScan(
-        basePackages = { "com.gamecity.scrabble.dao", "com.gamecity.scrabble.service",
-                "com.gamecity.scrabble.resource" },
+        basePackages = { "com.gamecity.scrabble.dao", "com.gamecity.scrabble.service", "com.gamecity.scrabble.resource",
+                "com.gamecity.scrabble.job" },
         basePackageClasses = { PersistenceConfig.class, AspectConfig.class, PropertyConfig.class })
 public class WebConfig implements WebMvcConfigurer {
 

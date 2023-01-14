@@ -25,8 +25,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Spring configuration for Hibernate including transaction management, entity management, jpa
- * properties, datasource properties and data/schema populator
+ * Spring configuration of Hibernate including transaction management, entity management, jpa properties,
+ * datasource properties and data/schema populator
  * 
  * @author ekarakus
  */

@@ -1,8 +1,8 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { Globals } from "../common/globals";
-import { VirtualBoard } from "../model/virtual-board";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Globals } from '../common/globals';
+import { VirtualBoard } from '../model/virtual-board';
 
 @Injectable({
   providedIn: 'root'

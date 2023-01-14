@@ -1,10 +1,10 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { Globals } from "../common/globals";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Globals } from '../common/globals';
 
-import { Game } from "../model/game";
-import { VirtualRack } from "../model/virtual-rack";
+import { Game } from '../model/game';
+import { VirtualRack } from '../model/virtual-rack';
 
 @Injectable({
   providedIn: 'root'

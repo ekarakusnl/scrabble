@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { TranslateService } from "@ngx-translate/core";
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +13,7 @@ export class AppComponent {
   constructor(
     private translateService: TranslateService,
   ) {
-    let language = localStorage.getItem('locale') || 'en';
+    const language = localStorage.getItem('locale') || 'en';
     translateService.setDefaultLang('en');
     translateService.use(language);
   }

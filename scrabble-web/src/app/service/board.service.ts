@@ -1,9 +1,9 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { Globals } from "../common/globals";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Globals } from '../common/globals';
 
-import { Board } from "../model/board";
+import { Board } from '../model/board';
 
 @Injectable({
   providedIn: 'root'

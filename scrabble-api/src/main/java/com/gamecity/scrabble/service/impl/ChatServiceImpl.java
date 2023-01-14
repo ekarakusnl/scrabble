@@ -49,7 +49,7 @@ class ChatServiceImpl extends AbstractServiceImpl<Chat, ChatDao> implements Chat
     @Override
     public Chat save(Chat chat) {
         final Game game = gameService.get(chat.getGameId());
-        final Player player = playerService.loadByUserId(game.getId(), chat.getUserId());
+        final Player player = playerService.getByUserId(game.getId(), chat.getUserId());
 
         if (player == null) {
             throw new GameException(GameError.NOT_IN_THE_GAME);

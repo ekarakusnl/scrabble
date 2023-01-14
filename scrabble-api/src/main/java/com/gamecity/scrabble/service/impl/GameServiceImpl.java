@@ -207,7 +207,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             throw new GameException(GameError.IN_PROGRESS);
         }
 
-        final Player player = playerService.loadByUserId(game.getId(), userId);
+        final Player player = playerService.getByUserId(game.getId(), userId);
         if (player != null) {
             throw new GameException(GameError.IN_THE_GAME);
         }
@@ -239,7 +239,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             throw new GameException(GameError.IN_PROGRESS);
         }
 
-        final Player player = playerService.loadByUserId(game.getId(), userId);
+        final Player player = playerService.getByUserId(game.getId(), userId);
         if (player == null) {
             throw new GameException(GameError.NOT_IN_THE_GAME);
         }
@@ -297,7 +297,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         log.info("Playing on game {} as player {}.", game.getId(), game.getCurrentPlayerNumber());
 
-        final Player player = playerService.loadByUserId(game.getId(), userId);
+        final Player player = playerService.getByUserId(game.getId(), userId);
         final Integer currentPlayerNumber = game.getCurrentPlayerNumber();
         final Integer currentRoundNumber = game.getRoundNumber();
 
@@ -695,7 +695,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     private void updatePlayerScore(Long gameId, Integer playerNumber, Integer newWordsScore) {
-        final Player player = playerService.loadByPlayerNumber(gameId, playerNumber);
+        final Player player = playerService.getByPlayerNumber(gameId, playerNumber);
         player.setScore(player.getScore() + newWordsScore);
         playerService.save(player);
     }

@@ -25,7 +25,7 @@ export class MainHeaderComponent implements OnInit {
   }
 
   getLanguage() {
-    let language = this.translateService.currentLang;
+    const language = this.translateService.currentLang;
     return language == 'en' ? 'us' : language;
   }
 

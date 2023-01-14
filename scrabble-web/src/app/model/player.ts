@@ -3,5 +3,4 @@ export interface Player {
   username: string;
   playerNumber: number;
   score: number;
-//  lastAction?: string;
 }

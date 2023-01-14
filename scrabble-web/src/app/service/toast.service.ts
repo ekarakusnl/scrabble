@@ -14,8 +14,8 @@ export class ToastService {
   }
 
   playSound() {
-    let audio = new Audio();
-    audio.src = "../../assets/sounds/alert.mp3";
+    const audio = new Audio();
+    audio.src = '../../assets/sounds/alert.mp3';
     audio.load();
     audio.play();
   }

@@ -8,11 +8,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * JSON conversion utilities
  * 
  * @author ekarakus
  */
+@Slf4j
 public class JsonUtils {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -39,6 +42,7 @@ public class JsonUtils {
         try {
             return objectMapper.readValue(payload, new TypeReference<List<T>>() {});
         } catch (Exception e) {
+            log.error("An error occured while converting to {} by payload {}", clazz.getSimpleName(), payload);
             throw new RuntimeException(e);
         }
     }
@@ -59,6 +63,7 @@ public class JsonUtils {
         try {
             return objectMapper.readValue(payload, clazz);
         } catch (Exception e) {
+            log.error("An error occured while converting to {} by payload {}", clazz.getSimpleName(), payload);
             throw new RuntimeException(e);
         }
     }
@@ -91,6 +96,25 @@ public class JsonUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Formats the payload stored in Redis
+     * 
+     * @param payload payload stored in Redis
+     * @return the formatted payload
+     */
+    public static String formatRedisPayload(String payload) {
+        if (StringUtils.isEmpty(payload)) {
+            return null;
+        }
+
+        String formattedPayload = payload.replace("\\", "");
+        if (formattedPayload.substring(0, 1).equals("\"")
+                && formattedPayload.substring(formattedPayload.length() - 1).equals("\"")) {
+            formattedPayload = formattedPayload.substring(1, formattedPayload.length() - 1);
+        }
+        return formattedPayload;
     }
 
 }

@@ -39,6 +39,7 @@
   "game.words.no.word": "Aucun mot n'a été joué",
   "game.words.word": "'{{0}}' ({{1}}) a été joué par {{2}}",
   "game.your.turn": "C'est ton tour",
+  "game.another.player.turn": "C'est au tour {{0}}",
   "game.select.tile": "Aucune tuile n'a été sélectionnée, veuillez d'abord sélectionner une tuile",
   "game.last.round": "Le sac est vide, c'est le dernier tour du jeu",
   "game.you.won": "Toutes nos félicitations ! Tu as gagné le jeu !",

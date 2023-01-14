@@ -45,7 +45,7 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
 
     @Override
     public Response getPlayer(Long gameId, Long userId) {
-        final PlayerDto playerDto = Mapper.toDto(baseService.loadByUserId(gameId, userId));
+        final PlayerDto playerDto = Mapper.toDto(baseService.getByUserId(gameId, userId));
         return Response.ok(playerDto).tag(createETag(playerDto)).build();
     }
 

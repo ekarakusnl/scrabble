@@ -20,6 +20,7 @@ import com.gamecity.scrabble.model.rest.VirtualRackDto;
 import com.gamecity.scrabble.resource.GameResource;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
+import com.gamecity.scrabble.service.SchedulerService;
 import com.gamecity.scrabble.service.UpdaterService;
 
 @Component(value = "gameResource")
@@ -27,8 +28,9 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
 
     private GameService baseService;
     private ActionService actionService;
-    private RedisRepository redisRepository;
     private UpdaterService updaterService;
+    private SchedulerService schedulerService;
+    private RedisRepository redisRepository;
 
     GameService getBaseService() {
         return baseService;
@@ -50,6 +52,11 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     }
 
     @Autowired
+    void setSchedulerService(SchedulerService schedulerService) {
+        this.schedulerService = schedulerService;
+    }
+
+    @Autowired
     void setRedisRepository(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
@@ -65,6 +72,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(), null,
                 game.getRoundNumber(), ActionType.JOIN, GameStatus.WAITING);
         updaterService.run(action, game);
+
         final GameDto responseDto = Mapper.toDto(game);
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
     }
@@ -72,9 +80,11 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     @Override
     public Response join(Long id, Long userId) {
         final Game game = baseService.join(id, userId);
+
         final Action action = actionService.add(game.getId(), userId, game.getActionCounter(), null,
                 game.getRoundNumber(), ActionType.JOIN, game.getStatus());
         updaterService.run(action, game);
+
         return Response.ok(Mapper.toDto(game)).build();
     }
 
@@ -100,9 +110,11 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     @Override
     public Response leave(Long id, Long userId) {
         final Game game = baseService.leave(id, userId);
+
         final Action action = actionService.add(game.getId(), userId, game.getActionCounter(), null,
                 game.getRoundNumber(), ActionType.LEAVE, GameStatus.WAITING);
         updaterService.run(action, game);
+
         return Response.ok(Mapper.toDto(game)).build();
     }
 
@@ -110,27 +122,41 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     public Response play(Long id, Long userId, VirtualRackDto rackDto) {
         final VirtualRack rack = Mapper.toEntity(rackDto);
         final Game game = baseService.play(id, userId, rack);
+
         final Action action = actionService.add(game.getId(), userId, game.getActionCounter(),
                 game.getCurrentPlayerNumber(), game.getRoundNumber(), ActionType.PLAY, game.getStatus());
+
+        schedulerService.schedulePlayDuration(game.getId(), game.getCurrentPlayerNumber(), game.getDuration(),
+                game.getActionCounter());
+
         updaterService.run(action, game);
+
         return Response.ok(Mapper.toDto(game)).build();
     }
 
     @Override
     public Response start(Long id) {
         final Game game = baseService.start(id);
+
         final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(),
                 game.getCurrentPlayerNumber(), game.getRoundNumber(), ActionType.START, GameStatus.IN_PROGRESS);
+
+        schedulerService.schedulePlayDuration(game.getId(), game.getCurrentPlayerNumber(), game.getDuration(),
+                game.getActionCounter());
+
         updaterService.run(action, game);
+
         return Response.ok(Mapper.toDto(game)).build();
     }
 
     @Override
     public Response end(Long id) {
         final Game game = baseService.end(id);
+
         final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(),
                 game.getCurrentPlayerNumber(), game.getRoundNumber(), ActionType.END, GameStatus.ENDED);
         updaterService.run(action, game);
+
         return Response.ok(Mapper.toDto(game)).build();
     }
 
@@ -139,6 +165,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         if (userId == null) {
             return super.list();
         }
+
         final List<Game> games = baseService.listByUser(userId);
         return Response.ok(games.stream().map(Mapper::toDto).collect(Collectors.toList())).build();
     }

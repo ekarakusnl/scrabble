@@ -446,6 +446,7 @@ public class Mapper {
                 .counter(action.getCounter())
                 .currentPlayerNumber(action.getCurrentPlayerNumber())
                 .gameId(action.getGameId())
+                .lastUpdatedDate(action.getLastUpdatedDate())
                 .roundNumber(action.getRoundNumber())
                 .status(action.getStatus().name())
                 .type(action.getType().name())
@@ -466,6 +467,7 @@ public class Mapper {
         action.setCurrentPlayerNumber(actionDto.getCurrentPlayerNumber());
         // .currentStatus(actionDto.getCurrentStatus())
         action.setGameId(actionDto.getGameId());
+        action.setLastUpdatedDate(actionDto.getLastUpdatedDate());
         action.setRoundNumber(actionDto.getRoundNumber());
         action.setStatus(GameStatus.valueOf(actionDto.getStatus()));
         action.setType(ActionType.valueOf(actionDto.getType()));

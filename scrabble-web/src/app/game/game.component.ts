@@ -25,6 +25,8 @@ import { VirtualBoard } from '../model/virtual-board';
 import { TranslateService } from '@ngx-translate/core';
 import { Globals } from '../common/globals';
 
+import { timer } from 'rxjs';
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -56,6 +58,10 @@ export class GameComponent implements OnInit, AfterViewChecked {
   actionCounter: number = 0;
   currentRoundNumber: number;
   currentPlayerNumber: number;
+
+  // play duration
+  durationTimer: any;
+  remainingDuration: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -153,6 +159,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
         this.actionCounter = action.counter;
         this.currentRoundNumber = action.roundNumber;
         this.currentPlayerNumber = action.currentPlayerNumber;
+        this.resetDurationTimer(action.lastUpdatedDate);
         if (action.type == 'END') {
           this.loadGame();
           return;
@@ -162,11 +169,28 @@ export class GameComponent implements OnInit, AfterViewChecked {
         this.loadPlayers();
         this.loadCells();
         this.loadRack();
-        if (this.effectivePlayer != null && this.currentPlayerNumber == this.effectivePlayer.playerNumber) {
-          this.toastService.info(this.translateService.instant('game.your.turn'));
-        }
       }
       this.loadAction();
+    });
+  }
+
+  resetDurationTimer(actionTimestamp: Date): void {
+    if (this.durationTimer) {
+      this.durationTimer.unsubscribe();
+    }
+    let remainingDurationInSeconds = this.game.duration * 60;
+    const passedDurationInSeconds = (new Date().getTime() - new Date(actionTimestamp).getTime()) / 1000;
+    const defaultDurationInSeconds = remainingDurationInSeconds - passedDurationInSeconds;
+    this.durationTimer = timer(0, 1000).subscribe(interval => {
+      remainingDurationInSeconds = Math.trunc(defaultDurationInSeconds - interval);
+
+      const remainingSeconds = remainingDurationInSeconds % 60;
+      const remainingMinutes = (remainingDurationInSeconds - remainingSeconds) / 60;
+
+      const remainingSecondsString = (remainingSeconds < 10 ? '0' : '') + remainingSeconds.toString();
+      const remainingMinutesString = (remainingMinutes < 10 ? '0' : '') + remainingMinutes.toString();
+
+      this.remainingDuration = remainingMinutesString + ':' + remainingSecondsString;
     });
   }
 
@@ -184,19 +208,26 @@ export class GameComponent implements OnInit, AfterViewChecked {
         } else {
           this.toastService.info(this.translateService.instant('game.another.player.won', { 0 : winner.username }));
         }
+      } else {
+        if (this.effectivePlayer != null && this.currentPlayerNumber == this.effectivePlayer.playerNumber) {
+          this.toastService.info(this.translateService.instant('game.your.turn'));
+        } else {
+          const currentPlayer = this.players.find(player => player.playerNumber == this.currentPlayerNumber);
+          this.toastService.info(this.translateService.instant('game.another.player.turn', { 0 : currentPlayer.username }));
+        }
       }
     });
   }
 
   loadRack(): void {
-    let playerRoundNumber = this.currentPlayerNumber >= this.effectivePlayer.playerNumber ? this.currentRoundNumber : this.currentRoundNumber > 1 ? this.currentRoundNumber - 1 : 1;
+    const playerRoundNumber = this.currentPlayerNumber >= this.effectivePlayer.playerNumber ? this.currentRoundNumber : this.currentRoundNumber > 1 ? this.currentRoundNumber - 1 : 1;
     this.virtualRackService.getRack(this.game.id, playerRoundNumber).subscribe((virtualRack: VirtualRack) => {
       this.virtualRack = virtualRack;
     });
   }
 
   loadCells(): void {
-    let counter = this.actionCounter - this.game.expectedPlayerCount;
+    const counter = this.actionCounter - this.game.expectedPlayerCount;
     this.virtualBoardService.getBoard(this.game.id, counter).subscribe((virtualBoard: VirtualBoard) => {
       this.virtualBoard = virtualBoard;
       this.loadWords();
@@ -280,7 +311,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
       }
     } else if (cell.letter != null && cell.tileNumber != null) {
       // remove the tile from the board
-      let tile = this.virtualRack.tiles.find(tile => tile.number == cell.tileNumber);
+      const tile = this.virtualRack.tiles.find(tile => tile.number == cell.tileNumber);
       tile.sealed = false;
       tile.selected = false;
       tile.cellNumber = null;
@@ -317,7 +348,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   getUsername(playerNumber: number): string {
-    let player = this.players.find(player => player.playerNumber == playerNumber);
+    const player = this.players.find(player => player.playerNumber == playerNumber);
     return player.username;
   }
 

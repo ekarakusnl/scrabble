@@ -1,10 +1,10 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Router } from "@angular/router";
-import { Globals } from "../common/globals";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { Globals } from '../common/globals';
 
-import { User } from "../model/user";
-import { UserToken } from "../model/user-token";
+import { User } from '../model/user';
+import { UserToken } from '../model/user-token';
 
 @Injectable({
   providedIn: 'root'
@@ -17,19 +17,14 @@ export class AuthenticationService {
 
   login(user: User) {
     this.http.post<UserToken>(Globals.GATEWAY_URL + '/login', user).subscribe((userToken: UserToken) => {
-      if (userToken) {
+      sessionStorage.setItem('username', user.username);
+      sessionStorage.setItem('userId', String(userToken.id));
+      sessionStorage.setItem('token', 'HTTP_TOKEN ' + userToken.token);
+      sessionStorage.setItem('roles', JSON.stringify(userToken.roles));
 
-        sessionStorage.setItem('username', user.username);
-        sessionStorage.setItem('userId', String(userToken.id));
-        sessionStorage.setItem('token', 'HTTP_TOKEN ' + userToken.token);
-        sessionStorage.setItem('roles', JSON.stringify(userToken.roles));
-
-        this.router.navigate(['lobby']).then(() => {
-          window.location.reload();
-        });
-      } else {
-        console.log("Authentication failed.", userToken)
-      }
+      this.router.navigate(['lobby']).then(() => {
+        window.location.reload();
+      });
     });
   }
 
@@ -52,12 +47,12 @@ export class AuthenticationService {
   }
 
   getUserId(): number {
-    let userId = sessionStorage.getItem('userId');
+    const userId = sessionStorage.getItem('userId');
     return userId === null ? null : Number(sessionStorage.getItem('userId'));
   }
 
   getRoles(): string[] {
-    let roleString = sessionStorage.getItem('roles');
+    const roleString = sessionStorage.getItem('roles');
     return roleString ? JSON.parse(roleString) : [];
   }
 

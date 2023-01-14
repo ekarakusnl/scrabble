@@ -13,6 +13,12 @@
         <span class="info-box-text">{{ player.username ? player.username : '?' }}</span>
         <span class="info-box-number">{{ player.score }}</span>
       </div>
+      <div class="info-box-content"
+           *ngIf="player.playerNumber == currentPlayerNumber">
+        <span class="btn btn-app bg-danger">
+          <i class="far fa-hourglass"></i>{{ remainingDuration }}
+        </span>
+      </div>
     </div>
   </div>
 </div>

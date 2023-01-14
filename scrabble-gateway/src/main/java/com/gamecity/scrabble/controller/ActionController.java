@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.gamecity.scrabble.model.rest.ActionDto;
+import com.gamecity.scrabble.model.rest.GameDto;
 import com.gamecity.scrabble.util.JsonUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,14 +68,14 @@ public class ActionController extends AbstractController implements MessageListe
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        final ActionDto actionDto = JsonUtils.toDto(message.toString(), ActionDto.class);
+        final ActionDto actionDto = JsonUtils.toDto(JsonUtils.formatRedisPayload(message.toString()), ActionDto.class);
 
         if ("READY_TO_START".equals(actionDto.getStatus())) {
-            post("/games/{gameId}/start", null, null, actionDto.getGameId());
+            post("/games/{gameId}/start", GameDto.class, null, actionDto.getGameId());
         }
 
         if ("READY_TO_END".equals(actionDto.getStatus())) {
-            post("/games/{gameId}/end", null, null, actionDto.getGameId());
+            post("/games/{gameId}/end", GameDto.class, null, actionDto.getGameId());
         }
 
         try {

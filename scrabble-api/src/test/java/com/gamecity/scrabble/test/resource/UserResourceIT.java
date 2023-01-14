@@ -41,7 +41,7 @@ class UserResourceIT extends AbstractIntegrationTest {
     void test_create_user() throws IOException {
         final URL resource = UserResourceIT.class.getResource("/json/user.json");
         final UserDto sampleUserDto =
-                JsonUtils.toEntity(Resources.toString(resource, StandardCharsets.UTF_8), UserDto.class);
+                JsonUtils.toDto(Resources.toString(resource, StandardCharsets.UTF_8), UserDto.class);
 
         final Response response =
                 target("/users").request().put(Entity.entity(sampleUserDto, MediaType.APPLICATION_JSON));

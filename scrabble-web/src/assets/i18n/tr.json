@@ -39,6 +39,7 @@
   "game.words.no.word": "Kelime bulunamadı",
   "game.words.word": "'{{0}}' ({{1}}) {{2}} tarafından oynandı",
   "game.your.turn": "Sıra sizde",
+  "game.another.player.turn": "Sıradaki oyuncu {{0}}",
   "game.select.tile": "Harf seçimi yapılmadı, lütfen harf seçin",
   "game.last.round": "Torbadaki harfler sonra erdi, son raund oynanıyor",
   "game.you.won": "Tebrikler! Oyunu kazandınız!",

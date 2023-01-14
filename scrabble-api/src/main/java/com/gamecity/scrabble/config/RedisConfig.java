@@ -24,7 +24,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Spring configuration for Redis including push messages and cache connection
+ * Spring configuration of Redis including push messages and cache connection
  * 
  * @author ekarakus
  */

@@ -50,7 +50,7 @@ export class LobbyComponent implements OnInit {
 
   loadGamePlayers(game: Game): void {
     this.playerService.getPlayers(game.id, game.actionCounter).subscribe((players: Player[]) => {
-      let userExist = players.some(gamePlayer => gamePlayer.userId == this.userId);
+      const userExist = players.some(gamePlayer => gamePlayer.userId == this.userId);
       if (userExist) {
           return;
       }
@@ -63,7 +63,7 @@ export class LobbyComponent implements OnInit {
       
       // add missing players for remaining slots
       while (game.players.length < game.expectedPlayerCount) {
-        let player: Player = { userId: 0, username: '?', playerNumber: -1, score: 0 };
+        const player: Player = { userId: 0, username: '?', playerNumber: -1, score: 0 };
         game.players.push(player);
       }
     });

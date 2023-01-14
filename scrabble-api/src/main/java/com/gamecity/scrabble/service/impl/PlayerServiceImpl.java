@@ -49,12 +49,12 @@ class PlayerServiceImpl extends AbstractServiceImpl<Player, PlayerDao> implement
     }
 
     @Override
-    public Player loadByUserId(Long gameId, Long userId) {
+    public Player getByUserId(Long gameId, Long userId) {
         return baseDao.getByUserId(gameId, userId);
     }
 
     @Override
-    public Player loadByPlayerNumber(Long gameId, Integer playerNumber) {
+    public Player getByPlayerNumber(Long gameId, Integer playerNumber) {
         return baseDao.getByPlayerNumber(gameId, playerNumber);
     }
 

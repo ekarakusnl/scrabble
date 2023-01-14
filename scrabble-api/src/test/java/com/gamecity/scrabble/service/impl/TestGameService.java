@@ -244,7 +244,7 @@ class TestGameService extends AbstractServiceTest {
         sampleGame.setId(DEFAULT_GAME_ID);
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
-        when(playerService.loadByUserId(eq(DEFAULT_GAME_ID), eq(2L))).thenAnswer(invocation -> {
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(2L))).thenAnswer(invocation -> {
             return Mockito.mock(Player.class);
         });
 
@@ -284,7 +284,7 @@ class TestGameService extends AbstractServiceTest {
             return invocation.getArgument(0);
         });
 
-        when(playerService.loadByUserId(eq(DEFAULT_GAME_ID), eq(2L))).thenAnswer(invocation -> {
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(2L))).thenAnswer(invocation -> {
             return Mockito.mock(Player.class);
         });
 
@@ -334,7 +334,7 @@ class TestGameService extends AbstractServiceTest {
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
 
-        when(playerService.loadByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
             final Player player = new Player();
             player.setUserId(invocation.getArgument(0));
             return player;
@@ -789,7 +789,7 @@ class TestGameService extends AbstractServiceTest {
         when(boardService.get(eq(DEFAULT_BOARD_ID))).thenReturn(createSampleBoard());
         when(bagService.get(eq(DEFAULT_BAG_ID))).thenReturn(createSampleBag());
 
-        when(playerService.loadByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
             final Player player = new Player();
             player.setPlayerNumber(1);
             return player;
@@ -797,7 +797,7 @@ class TestGameService extends AbstractServiceTest {
     }
 
     private void preparePlayer(int score) {
-        when(playerService.loadByPlayerNumber(eq(DEFAULT_GAME_ID), eq(1))).thenAnswer(invocation -> {
+        when(playerService.getByPlayerNumber(eq(DEFAULT_GAME_ID), eq(1))).thenAnswer(invocation -> {
             final Player player = new Player();
             player.setPlayerNumber(1);
             player.setScore(score);

@@ -31,6 +31,7 @@
     <mockito.version>4.8.1</mockito.version>
     <mysql.version>8.0.30</mysql.version>
     <postgresql.version>42.5.1</postgresql.version>
+    <quartz.version>2.3.0</quartz.version>
 
     <!-- spring framework -->
     <spring.data.version>2.7.5</spring.data.version>
@@ -249,6 +250,12 @@
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
+      </dependency>
+      <!-- scheduler -->
+      <dependency>
+        <groupId>org.quartz-scheduler</groupId>
+        <artifactId>quartz</artifactId>
+        <version>${quartz.version}</version>
       </dependency>
       <!-- jersey -->
       <dependency>
