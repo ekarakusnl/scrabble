@@ -126,7 +126,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
         final VirtualRack refreshedRack = new VirtualRack(false, updatedTiles);
         redisRepository.refreshRack(gameId, playerNumber, refreshedRack);
-        log.debug("Rack has been updated for player {} on game {}", playerNumber, gameId);
+        log.debug("Rack has been refreshed for player {} on game {}", playerNumber, gameId);
 
         return refreshedRack;
     }

@@ -54,7 +54,7 @@ public class Action extends AbstractEntity implements Serializable {
     private ActionType type;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private GameStatus status;
+    @Column(name = "game_status")
+    private GameStatus gameStatus;
 
 }

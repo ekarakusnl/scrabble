@@ -18,7 +18,7 @@ CREATE TABLE actions (
   current_player_number integer,
   game_id bigint not null,
   round_number integer,
-  status varchar(255) not null,
+  game_status varchar(255) not null,
   type varchar(255) not null,
   user_id bigint not null,
   primary key (id)

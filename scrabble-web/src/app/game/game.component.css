@@ -1,7 +1,24 @@
-.game-body {
-  padding: 5px;
+/* overrides */
+.card-header.title-header {
+  padding-bottom: 6px;
+  padding-top: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
+.card-body.title-body {
+  padding: 10px;
+}
+
+.card-title.title {
+  font-size: 1.5rem;
+}
+
+.info-box.player {
+  margin: 0px;
+}
+
+/* custom styles */
 .game-table {
   overflow: hidden;
   border-collapse: collapse;

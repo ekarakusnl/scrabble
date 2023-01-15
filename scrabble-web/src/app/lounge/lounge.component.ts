@@ -7,6 +7,10 @@ import { Player } from '../model/player';
 import { AuthenticationService } from '../service/authentication.service';
 import { Router } from '@angular/router';
 import { Globals } from '../common/globals';
+import { BoardService } from '../service/board.service';
+import { BagService } from '../service/bag.service';
+import { Board } from '../model/board';
+import { Bag } from '../model/bag';
 
 @Component({
   selector: 'app-lounge',
@@ -17,7 +21,6 @@ export class LoungeComponent implements OnInit {
 
   imageResourceURL: string = Globals.USER_IMAGE_URL;
 
-  initialized: boolean;
   userId: number;
   username: string;
   games: Game[];
@@ -25,6 +28,8 @@ export class LoungeComponent implements OnInit {
   constructor(
     private gameService: GameService,
     private playerService: PlayerService,
+    private boardService: BoardService,
+    private bagService: BagService,
     private authenticationService: AuthenticationService,
     private router: Router,
   ) { }
@@ -37,18 +42,31 @@ export class LoungeComponent implements OnInit {
 
   loadGames(): void {
     this.gameService.getMyGames().subscribe((games: Game[]) => {
-      this.initialized = true;
       this.games = games;
       if (games != null) {
         for (var game of games) {
           game.players = [];
-          this.loadGamePlayers(game);
+          this.loadBoard(game);
+          this.loadBag(game);
+          this.loadPlayers(game);
         }
       }
     });
   }
 
-  loadGamePlayers(game: Game): void {
+  loadBoard(game: Game): void {
+    this.boardService.getBoard(game.boardId).subscribe((board: Board) => {
+      game.board = board;
+    });
+  }
+
+  loadBag(game: Game): void {
+    this.bagService.getBag(game.bagId).subscribe((bag: Bag) => {
+      game.bag = bag;
+    });
+  }
+
+  loadPlayers(game: Game): void {
     this.playerService.getPlayers(game.id, game.actionCounter).subscribe((players: Player[]) => {
       for (var player of players) {
         game.players.push(player);
@@ -64,7 +82,7 @@ export class LoungeComponent implements OnInit {
     });
   }
 
-  watchGame(id: number): void {
+  openGame(id: number): void {
     this.router.navigate(['games', id]);
   }
 

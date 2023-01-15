@@ -3,7 +3,7 @@ export interface Action {
   userId: number;
   counter: number;
   type: string;
-  status: string;
+  gameStatus: string;
   roundNumber: number;
   currentPlayerNumber: number;
   lastUpdatedDate: Date;

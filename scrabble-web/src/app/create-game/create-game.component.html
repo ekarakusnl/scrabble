@@ -27,12 +27,12 @@
             </div>
           </div>
           <div class="form-group">
-            <label>{{ 'game.bag.name' | translate }}</label>
+            <label>{{ 'game.bag.language' | translate }}</label>
             <select class="form-control" formControlName="bagId"
               [ngClass]="bagId.invalid && bagId.touched ? 'is-invalid' : ''">
               <option value="">{{ 'game.bag.select' | translate }}</option>
               <option *ngFor="let bag of bags" [ngValue]="bag.id">
-                {{ bag.name }}
+                {{ 'game.language.' + bag.language | translate }}
               </option>
             </select>
             <div class="error invalid-feedback" *ngIf="bagId.errors && (bagId.dirty || bagId.touched)">
@@ -55,7 +55,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="duration">{{ 'game.duration' | translate }}</label>
+            <label for="duration">{{ 'game.duration' | translate }} ({{ 'game.duration.minutes' | translate: { '0': 'x' } }})</label>
             <input id="duration" type="number" class="form-control"
               [ngClass]="duration.invalid && duration.touched ? 'is-invalid' : ''"
               placeholder="{{ 'game.duration' | translate }}" formControlName="duration">

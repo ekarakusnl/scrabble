@@ -41,7 +41,7 @@ class VirtualBoardResourceImpl implements VirtualBoardResource {
         }
 
         final VirtualBoard virtualBoard = virtualBoardService.getBoard(gameId, actionCounter);
-        if (CollectionUtils.isEmpty(virtualBoard.getCells())) {
+        if (virtualBoard == null || CollectionUtils.isEmpty(virtualBoard.getCells())) {
             return Response.ok().build();
         }
 

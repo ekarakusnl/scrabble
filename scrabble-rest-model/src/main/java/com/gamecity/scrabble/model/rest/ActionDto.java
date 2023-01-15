@@ -40,7 +40,7 @@ public class ActionDto extends AbstractDto implements Serializable {
     @JsonProperty("type")
     private String type;
 
-    @JsonProperty("status")
-    private String status;
+    @JsonProperty("gameStatus")
+    private String gameStatus;
 
 }

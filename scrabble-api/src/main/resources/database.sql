@@ -32,7 +32,7 @@ CREATE TABLE public.actions (
     current_player_number integer,
     game_id bigint,
     round_number integer,
-    status character varying(255),
+    game_status character varying(255),
     type character varying(255),
     user_id bigint
 );

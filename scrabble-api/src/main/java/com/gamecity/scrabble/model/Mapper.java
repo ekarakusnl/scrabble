@@ -427,6 +427,7 @@ public class Mapper {
      */
     public static Chat toEntity(ChatDto chatDto) {
         final Chat chat = new Chat();
+        chat.setCreatedDate(chatDto.getCreatedDate());
         chat.setGameId(chatDto.getGameId());
         chat.setMessage(chatDto.getMessage());
         chat.setUserId(chatDto.getUserId());
@@ -448,7 +449,7 @@ public class Mapper {
                 .gameId(action.getGameId())
                 .lastUpdatedDate(action.getLastUpdatedDate())
                 .roundNumber(action.getRoundNumber())
-                .status(action.getStatus().name())
+                .gameStatus(action.getGameStatus().name())
                 .type(action.getType().name())
                 .build();
 
@@ -469,7 +470,7 @@ public class Mapper {
         action.setGameId(actionDto.getGameId());
         action.setLastUpdatedDate(actionDto.getLastUpdatedDate());
         action.setRoundNumber(actionDto.getRoundNumber());
-        action.setStatus(GameStatus.valueOf(actionDto.getStatus()));
+        action.setGameStatus(GameStatus.valueOf(actionDto.getGameStatus()));
         action.setType(ActionType.valueOf(actionDto.getType()));
 
         return action;

@@ -26,6 +26,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { Globals } from '../common/globals';
 
 import { timer } from 'rxjs';
+import { BagService } from '../service/bag.service';
+import { Bag } from '../model/bag';
 
 @Component({
   selector: 'app-game',
@@ -35,14 +37,14 @@ import { timer } from 'rxjs';
 export class GameComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollToBottom') private scrollContainer: ElementRef
 
-  initialized: boolean = false;
-
   imageResourceURL: string = Globals.USER_IMAGE_URL;
 
   id: number;
-  playerId: number;
+  userId: number;
+  playerNumber: number;
   game: Game;
   board: Board;
+  bag: Bag;
 
   virtualBoard: VirtualBoard;
   virtualRack: VirtualRack;
@@ -51,13 +53,14 @@ export class GameComponent implements OnInit, AfterViewChecked {
   chats: Chat[];
   words: Word[];
 
-  effectivePlayer: Player;
   selectedTile: Tile;
   message: string;
 
   actionCounter: number = 0;
   currentRoundNumber: number;
   currentPlayerNumber: number;
+  currentStatus: string;
+  winnerPlayer: Player;
 
   // play duration
   durationTimer: any;
@@ -69,6 +72,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
     private router: Router,
     private gameService: GameService,
     private boardService: BoardService,
+    private bagService: BagService,
     private authenticationService: AuthenticationService,
     private virtualBoardService: VirtualBoardService,
     private playerService: PlayerService,
@@ -84,7 +88,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
     this.route.params.subscribe((params: Params) => {
       this.id = params.id;
     });
-    this.playerId = this.authenticationService.getUserId();
+    this.userId = this.authenticationService.getUserId();
     this.loadGame();
   }
 
@@ -106,79 +110,70 @@ export class GameComponent implements OnInit, AfterViewChecked {
   loadGame(): void {
     this.gameService.getGame(this.id).subscribe((game: Game) => {
       this.game = game;
-      if (game != null && game.status === 'IN_PROGRESS') {
-        this.actionCounter = game.actionCounter - 1;
-        this.playerService.getEffectivePlayer(this.game.id).subscribe((player: Player) => {
-          this.effectivePlayer = player;
-          this.loadBoard();
-          this.loadAction();
-          this.loadChats();
-        });
-      } else if (game.status === 'LAST_ROUND') {
-        this.actionCounter = game.actionCounter - 1;
-        this.playerService.getEffectivePlayer(this.game.id).subscribe((player: Player) => {
-          this.effectivePlayer = player;
-          this.loadBoard();
-          this.loadAction();
-          this.loadChats();
-        });
-      } else if (game.status === 'ENDED') {
-        this.actionCounter = game.actionCounter - 1;
-        this.playerService.getEffectivePlayer(this.game.id).subscribe((player: Player) => {
-          this.effectivePlayer = player;
-          this.loadBoard();
-          this.loadPlayers();
-          this.loadCells();
-          this.loadChats();
-        });
-      } else {
+      this.currentStatus = game.status;
+      if (!game || game.status === 'TERMINATED') {
         this.router.navigate(['lobby']);
+        return;
       }
+
+      this.actionCounter = game.actionCounter - 1;
+      this.loadBoard();
+      this.loadBag();
+      this.loadChats();
+      this.loadAction();
     });
   }
 
   loadBoard(): void {
     this.boardService.getBoard(this.game.boardId).subscribe((board: Board) => {
       this.board = board;
-      this.initialized = true;
     });
   }
 
-  loadEffectivePlayer(): void {
-    this.playerService.getEffectivePlayer(this.game.id).subscribe((player: Player) => {
-      this.effectivePlayer = player;
-      this.loadBoard();
-      this.loadAction();
-      this.loadChats();
+  loadBag(): void {
+    this.bagService.getBag(this.game.bagId).subscribe((bag: Bag) => {
+      this.bag = bag;
     });
   }
 
   loadAction(): void {
+    if (this.currentStatus === 'ENDED') {
+      this.loadCells();
+      this.loadPlayers();
+      this.loadWords();
+      return;
+    }
+
     var actionCounter = this.actionCounter + 1;
     this.actionService.getAction(this.game.id, actionCounter).subscribe((action: Action) => {
-      if (action != null && action.counter != null) {
+      if (action && action.counter) {
         this.actionCounter = action.counter;
         this.currentRoundNumber = action.roundNumber;
         this.currentPlayerNumber = action.currentPlayerNumber;
-        this.resetDurationTimer(action.lastUpdatedDate);
-        if (action.type == 'END') {
-          this.loadGame();
+        this.currentStatus = action.gameStatus;
+
+        if (this.currentStatus === 'ENDED') {
+          // game is ended, use the previous actionCounter to show the latest results
+          this.actionCounter = this.actionCounter - 1; 
+          this.stopTimer();
+          this.loadAction();
           return;
-        } else if (action.status == 'LAST_ROUND') {
+        } else if (this.currentStatus === 'LAST_ROUND') {
           this.toastService.info(this.translateService.instant('game.last.round'));
         }
-        this.loadPlayers();
+
+        this.resetTimer(action.lastUpdatedDate);
         this.loadCells();
-        this.loadRack();
+        this.loadPlayers();
+        this.loadWords();
       }
       this.loadAction();
     });
   }
 
-  resetDurationTimer(actionTimestamp: Date): void {
-    if (this.durationTimer) {
-      this.durationTimer.unsubscribe();
-    }
+  resetTimer(actionTimestamp: Date): void {
+    this.stopTimer();
+
     this.remainingDurationInSeconds = this.game.duration * 60;
     const passedDurationInSeconds = (new Date().getTime() - new Date(actionTimestamp).getTime()) / 1000;
     const defaultDurationInSeconds = this.remainingDurationInSeconds - passedDurationInSeconds;
@@ -200,50 +195,73 @@ export class GameComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  stopTimer(): void {
+    if (this.durationTimer) {
+      this.durationTimer.unsubscribe();
+    }
+  }
+
   loadPlayers(): void {
     this.playerService.getPlayers(this.game.id, this.actionCounter).subscribe((players: Player[]) => {
       this.players = players;
-      if (this.game.status === 'ENDED') {
-        const winner = players.reduce(
+      this.playerNumber = this.players.find(player => player.userId == this.userId).playerNumber;
+      if (this.currentStatus === 'WAITING') {
+          // add missing players for remaining slots
+          while (this.players.length < this.game.expectedPlayerCount) {
+            const player: Player = { userId: 0, username: '?', playerNumber: -1, score: 0 };
+            this.players.push(player);
+          }
+          return;
+      } else if (this.currentStatus === 'ENDED') {
+        this.winnerPlayer = players.reduce(
           (previous, current) => {
             return previous.score > current.score ? previous : current
           }
         );
-        if (winner.userId === this.playerId) {
+        if (this.winnerPlayer.userId === this.userId) {
           this.toastService.success(this.translateService.instant('game.you.won'));
         } else {
-          this.toastService.info(this.translateService.instant('game.another.player.won', { 0 : winner.username }));
+          this.toastService.info(this.translateService.instant('game.another.player.won', { 0 : this.winnerPlayer.username }));
         }
-      } else {
-        if (this.effectivePlayer != null && this.currentPlayerNumber == this.effectivePlayer.playerNumber) {
+      } else if (this.currentStatus === 'IN_PROGRESS' || this.currentStatus === 'LAST_ROUND') {
+        const currentPlayer = this.players.find(player => player.playerNumber === this.currentPlayerNumber);
+        if (currentPlayer.userId == this.userId) {
           this.toastService.info(this.translateService.instant('game.your.turn'));
         } else {
-          const currentPlayer = this.players.find(player => player.playerNumber == this.currentPlayerNumber);
           this.toastService.info(this.translateService.instant('game.another.player.turn', { 0 : currentPlayer.username }));
         }
       }
+      this.loadRack();
     });
   }
 
   loadRack(): void {
-    const playerRoundNumber = this.currentPlayerNumber >= this.effectivePlayer.playerNumber ? this.currentRoundNumber : this.currentRoundNumber > 1 ? this.currentRoundNumber - 1 : 1;
+    if (this.currentStatus !== 'IN_PROGRESS' && this.currentStatus !== 'LAST_ROUND') {
+        return;
+    }
+
+    let playerRoundNumber = this.currentPlayerNumber >= this.playerNumber ? this.currentRoundNumber :
+      this.currentRoundNumber > 1 ? this.currentRoundNumber - 1 : 1;
     this.virtualRackService.getRack(this.game.id, playerRoundNumber).subscribe((virtualRack: VirtualRack) => {
       this.virtualRack = virtualRack;
     });
   }
 
   loadCells(): void {
+    if (this.currentStatus === 'WAITING') {
+        return;
+    }
+
     const counter = this.actionCounter - this.game.expectedPlayerCount;
     this.virtualBoardService.getBoard(this.game.id, counter).subscribe((virtualBoard: VirtualBoard) => {
       this.virtualBoard = virtualBoard;
-      this.loadWords();
     });
   };
 
   loadChats(): void {
-    this.chatService.getChats(this.game.id, this.chats != null ? this.chats.length + 1 : 1).subscribe((chats: Chat[]) => {
-      if (chats != null && chats.length > 0) {
-        if (this.chats == null) {
+    this.chatService.getChats(this.game.id, this.chats ? this.chats.length + 1 : 1).subscribe((chats: Chat[]) => {
+      if (chats && chats.length > 0) {
+        if (!this.chats) {
           this.chats = chats;
         } else {
           this.chats = this.chats.concat(chats);
@@ -256,7 +274,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
 
   loadWords(): void {
     this.wordService.getWordLogs(this.game.id).subscribe((words: Word[]) => {
-      if (words != null && words.length > 0) {
+      if (words && words.length > 0) {
         this.words = words;
       }
     });
@@ -279,19 +297,20 @@ export class GameComponent implements OnInit, AfterViewChecked {
   };
 
   selectTile(tile: Tile): void {
-    if (this.effectivePlayer.playerNumber != this.currentPlayerNumber) {
+    if (this.playerNumber != this.currentPlayerNumber) {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
     } else if (this.remainingDurationInSeconds <= 0) {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
     }
+
     if (tile.sealed) {
       this.selectedTile = null;
-    } else if (this.selectedTile != null && this.selectedTile.number == tile.number) {
+    } else if (this.selectedTile && this.selectedTile.number === tile.number) {
       this.selectedTile.selected = false;
       this.selectedTile = null;
-    } else if (this.selectedTile != null && this.selectedTile.number != tile.number) {
+    } else if (this.selectedTile && this.selectedTile.number !== tile.number) {
       this.selectedTile.selected = false;
       tile.selected = true;
       this.selectedTile = tile;
@@ -302,9 +321,9 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   putTile(cell: Cell): void {
-    if (this.selectedTile != null) {
+    if (this.selectedTile) {
       // put the tile to the board
-      if (cell.letter == null) {
+      if (!cell.letter) {
         cell.letter = this.selectedTile.letter;
         cell.tileNumber = this.selectedTile.number;
         cell.value = this.selectedTile.value;
@@ -313,14 +332,14 @@ export class GameComponent implements OnInit, AfterViewChecked {
         this.selectedTile.columnNumber = cell.columnNumber;
         this.selectedTile.sealed = true;
         this.selectedTile = null;
-      } else if (cell.letter != null) {
-        this.toastService.error(this.translateService.instant('error.2010', {0 : cell.rowNumber, 1: cell.columnNumber}));
+      } else if (cell.letter) {
+        this.toastService.error(this.translateService.instant('error.2010', { 0: cell.rowNumber, 1: cell.columnNumber }));
         this.selectedTile.sealed = false;
         this.selectedTile = null;
       }
-    } else if (cell.letter != null && cell.tileNumber != null) {
+    } else if (cell.letter && cell.tileNumber) {
       // remove the tile from the board
-      const tile = this.virtualRack.tiles.find(tile => tile.number == cell.tileNumber);
+      const tile = this.virtualRack.tiles.find(tile => tile.number === cell.tileNumber);
       tile.sealed = false;
       tile.selected = false;
       tile.cellNumber = null;
@@ -334,7 +353,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   play(): void {
-    if (this.effectivePlayer.playerNumber != this.currentPlayerNumber) {
+    if (this.playerNumber !== this.currentPlayerNumber) {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
     } else if (this.remainingDurationInSeconds <= 0) {
@@ -346,13 +365,13 @@ export class GameComponent implements OnInit, AfterViewChecked {
   };
 
   exchange(): void {
-    if (this.effectivePlayer.playerNumber != this.currentPlayerNumber) {
+    if (this.playerNumber !== this.currentPlayerNumber) {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
     } else if (this.remainingDurationInSeconds <= 0) {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
-    } else if (this.selectedTile == null) {
+    } else if (!this.selectedTile) {
       this.toastService.warning(this.translateService.instant('game.select.tile'));
       return;
     } else if (this.virtualRack.exchanged) {
@@ -367,8 +386,14 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   getUsername(playerNumber: number): string {
-    const player = this.players.find(player => player.playerNumber == playerNumber);
+    const player = this.players.find(player => player.playerNumber === playerNumber);
     return player.username;
+  }
+
+  leaveGame(id: number): void {
+    this.gameService.leaveGame(id).subscribe(() => {
+      this.router.navigate(['lobby']);
+    });
   }
 
 }

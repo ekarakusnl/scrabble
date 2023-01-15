@@ -70,11 +70,11 @@ public class ActionController extends AbstractController implements MessageListe
     public void onMessage(Message message, byte[] pattern) {
         final ActionDto actionDto = JsonUtils.toDto(JsonUtils.formatRedisPayload(message.toString()), ActionDto.class);
 
-        if ("READY_TO_START".equals(actionDto.getStatus())) {
+        if ("READY_TO_START".equals(actionDto.getGameStatus())) {
             post("/games/{gameId}/start", GameDto.class, null, actionDto.getGameId());
         }
 
-        if ("READY_TO_END".equals(actionDto.getStatus())) {
+        if ("READY_TO_END".equals(actionDto.getGameStatus())) {
             post("/games/{gameId}/end", GameDto.class, null, actionDto.getGameId());
         }
 

@@ -22,18 +22,6 @@ import com.gamecity.scrabble.model.rest.PlayerDto;
 public interface PlayerResource {
 
     /**
-     * Gets the {@link PlayerDto player} by <code>userId</code>
-     * 
-     * @param gameId <code>id</code> of the game
-     * @param userId <code>id</code> of the user in the game
-     * @return the player
-     */
-    @GET
-    @Path("/{userId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    Response getPlayer(@PathParam("gameId") Long gameId, @PathParam("userId") Long userId);
-
-    /**
      * Gets the {@link List list} of {@link PlayerDto players} in a {@link GameDto game}
      * 
      * @param gameId        <code>id</code> of the game

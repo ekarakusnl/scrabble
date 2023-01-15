@@ -21,7 +21,7 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
         action.setGameId(gameId);
         action.setUserId(userId);
         action.setCounter(counter);
-        action.setStatus(status);
+        action.setGameStatus(status);
         action.setType(actionType);
         action.setCurrentPlayerNumber(currentPlayerNumber);
         action.setRoundNumber(roundNumber);

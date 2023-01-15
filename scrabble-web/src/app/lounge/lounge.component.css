@@ -1,0 +1,11 @@
+/* overrides */
+.card-title {
+  font-size: 1.5rem;
+  color: black;
+}
+
+.btn-tool {
+  font-size: 20px;
+}
+
+/* custom styles */

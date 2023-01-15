@@ -1,3 +1,5 @@
+import { Bag } from './bag';
+import { Board } from './board';
 import { Player } from './player';
 
 export interface Game {
@@ -13,5 +15,7 @@ export interface Game {
   currentPlayerNumber?: number;
   roundNumber?: number;
   actionCounter?: number;
+  board?: Board;
+  bag?: Bag;
   players?: Player[];
 }

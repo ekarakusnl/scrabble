@@ -46,7 +46,7 @@ class VirtualRackResourceImpl implements VirtualRackResource {
 
         final Player player = playerService.getByUserId(gameId, userId);
         final VirtualRack virtualRack = virtualRackService.getRack(gameId, player.getPlayerNumber(), roundNumber);
-        if (CollectionUtils.isEmpty(virtualRack.getTiles())) {
+        if (virtualRack == null || CollectionUtils.isEmpty(virtualRack.getTiles())) {
             return Response.ok().build();
         }
 

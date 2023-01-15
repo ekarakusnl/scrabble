@@ -34,7 +34,7 @@ import lombok.Setter;
         @NamedQuery(name = Constants.NamedQuery.getLastGames,
                 query = "Select g from Game g where g.status = 'WAITING' order by g.createdDate asc"),
         @NamedQuery(name = Constants.NamedQuery.getByUser,
-                query = "Select g from Game g, Player p where p.gameId = g.id and p.userId = :userId and p.leftDate is null and g.status in ('WAITING', 'IN_PROGRESS', 'LAST_ROUND', 'ENDED') order by g.createdDate asc") })
+                query = "Select g from Game g, Player p where p.gameId = g.id and p.userId = :userId and p.leftDate is null and g.status in ('WAITING', 'IN_PROGRESS', 'LAST_ROUND') order by g.createdDate asc") })
 public class Game extends AbstractEntity {
 
     // @JoinColumn(name = "owner_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =

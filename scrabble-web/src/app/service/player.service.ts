@@ -21,8 +21,4 @@ export class PlayerService {
     return this.http.get<Player[]>(Globals.GATEWAY_URL + '/rest/games/' + gameId + '/players?actionCounter=' + actionCounter);
   }
 
-  getEffectivePlayer(gameId: number): Observable<Player> {
-    return this.http.get<Player>(Globals.GATEWAY_URL + '/rest/games/' + gameId + '/players/effective');
-  }
-
 }

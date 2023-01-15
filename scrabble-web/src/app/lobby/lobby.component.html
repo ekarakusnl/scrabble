@@ -1,56 +1,95 @@
-<div class="row"*ngIf="initialized && (!games || games.length == 0)">
+<div class="row"
+     *ngIf="!games || games.length == 0">
   <div class="col-12">
     <div class="callout callout-info">
       <h5><i class="fas fa-info"></i> {{'game.not.found' | translate}}</h5>
     </div>
   </div>
 </div>
-<div class="row" *ngFor="let game of games">
-  <div class="col-md-12">
+<div class="row"
+     *ngFor="let game of games">
+  <div class="col-md-12"
+       *ngIf="game.board && game.bag">
     <div class="card">
       <div class="card-header">
-        <h5 class="card-title">{{ 'game.name' | translate }}: {{ game.name }}</h5>
+        <h2 class="card-title">
+          {{ 'game' | translate }}: {{ game.name }}
+        </h2>
         <div class="card-tools">
-          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+          <button type="button"
+                  class="btn btn-tool"
+                  data-card-widget="collapse">
             <i class="fas fa-minus"></i>
           </button>
-          <button type="button" class="btn btn-tool" data-card-widget="remove">
+          <button type="button"
+                  class="btn btn-tool"
+                  data-card-widget="remove">
             <i class="fas fa-times"></i>
           </button>
         </div>
       </div>
-      <div class="row mt-3">
-        <div class="col-md-1 ml-4">
-          <a class="btn btn-app bg-info"
-             (click)="joinGame(game.id)">
-            <i class="fas fa-thumbs-up"></i> {{ 'game.join' | translate }}
-          </a>
-        </div>
-        <div class="col-md-2 ml-3" *ngFor="let player of game.players">
-          <div class="card card-outline" [ngClass]="player.userId > 0 ? 'card-primary' : 'card-warning'">
-            <div class="card-body box-profile">
-              <div class="text-center">
-                <img class="profile-user-img img-fluid img-circle"
-                  src="{{imageResourceURL}}/{{player.userId}}.png"
-                  alt="User profile picture">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3 col-sm-6 col-12">
+            <div class="info-box">
+              <span class="info-box-icon bg-info"><i class="fas fa-flag"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text">{{ 'game.bag.language' | translate }}</span>
+                <span class="info-box-number">{{ 'game.language.' + game.bag.language | translate }}</span>
               </div>
-              <h3 class="profile-username text-center">{{ player.username ? player.username : '?' }}</h3>
-              <p class="text-muted text-center" *ngIf="player.userId == game.ownerId">{{ 'game.owner' | translate
-                }}</p>
-              <p class="text-muted text-center" *ngIf="player.userId != game.ownerId">{{ 'game.player' |
-                translate }}</p>
-              <ul class="list-group list-group-unbordered mb-3">
-                <li class="list-group-item">
-                  <b>{{ 'game.games.played' | translate }}</b> <a class="float-right">1,322</a>
-                </li>
-                <li class="list-group-item">
-                  <b>{{ 'game.games.won' | translate }}</b> <a class="float-right">543</a>
-                </li>
-                <li class="list-group-item">
-                  <b>{{ 'game.total.score' | translate }}</b> <a class="float-right">13,287</a>
-                </li>
-              </ul>
             </div>
+          </div>
+          <div class="col-md-3 col-sm-6 col-12">
+            <div class="info-box">
+              <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text">{{ 'game.playerCount' | translate }}</span>
+                <span class="info-box-number">{{ game.expectedPlayerCount }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6 col-12">
+            <div class="info-box">
+              <span class="info-box-icon bg-info"><i class="far fa-hourglass"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text">{{ 'game.duration' | translate }}</span>
+                <span class="info-box-number">{{ 'game.duration.minutes' | translate: { '0': game.duration } }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6 col-12">
+            <div class="info-box">
+              <span class="info-box-icon bg-info"><i class="fas fa-chess-board fa-fw"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text">{{ 'game.board.size' | translate }}</span>
+                <span class="info-box-number">{{ game.board.rowSize + 'X' + game.board.columnSize }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-md-3 ml-1"
+               *ngFor="let player of game.players">
+            <div class="card card-outline" [ngClass]="player.userId > 0 ? 'card-primary' : 'card-warning'">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  <img class="profile-user-img img-fluid img-circle"
+                    src="{{imageResourceURL}}/{{player.userId}}.png"
+                    alt="User profile picture">
+                </div>
+                <h3 class="profile-username text-center">{{ player.username ? player.username : '?' }}</h3>
+                <p class="text-muted text-center" *ngIf="player.userId == game.ownerId">{{ 'game.owner' | translate
+                  }}</p>
+                <p class="text-muted text-center" *ngIf="player.userId != game.ownerId">{{ 'game.player' |
+                  translate }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-1">
+            <a class="btn btn-app bg-success"
+               (click)="joinGame(game.id)">
+              <i class="fas fa-thumbs-up"></i> {{ 'game.join' | translate }}
+            </a>
           </div>
         </div>
       </div>

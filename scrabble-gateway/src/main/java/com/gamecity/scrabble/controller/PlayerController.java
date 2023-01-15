@@ -25,19 +25,6 @@ public class PlayerController extends AbstractController {
     private static final String API_RESOURCE_PATH = "/games/{gameId}/players";
 
     /**
-     * Gets a {@link PlayerDto player} by id
-     * 
-     * @param gameId <code>id</code> of the game
-     * @return the player
-     */
-    @GetMapping("/effective")
-    @ResponseBody
-    public ResponseEntity<PlayerDto> getPlayer(@PathVariable Long gameId) {
-        final PlayerDto playerDto = get(API_RESOURCE_PATH + "/{userId}", PlayerDto.class, gameId, getUserId());
-        return new ResponseEntity<>(playerDto, HttpStatus.OK);
-    }
-
-    /**
      * Gets the {@link List list} of {@link PlayerDto players}
      * 
      * @param gameId        <code>id</code> of the game
