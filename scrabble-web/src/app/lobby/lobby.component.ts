@@ -15,7 +15,7 @@ import { Globals } from '../common/globals';
 })
 export class LobbyComponent implements OnInit {
 
-  imageResourceURL: string = Globals.GATEWAY_URL;
+  imageResourceURL: string = Globals.USER_IMAGE_URL;
 
   initialized: boolean;
   userId: number;

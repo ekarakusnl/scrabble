@@ -37,7 +37,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
 
   initialized: boolean = false;
 
-  imageResourceURL: string = Globals.GATEWAY_URL;
+  imageResourceURL: string = Globals.USER_IMAGE_URL;
 
   id: number;
   playerId: number;

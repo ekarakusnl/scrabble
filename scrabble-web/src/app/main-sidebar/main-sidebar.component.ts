@@ -9,7 +9,7 @@ import { AuthenticationService } from '../service/authentication.service';
 })
 export class MainSidebarComponent implements OnInit {
 
-  imageResourceURL: string = Globals.GATEWAY_URL;
+  imageResourceURL: string = Globals.USER_IMAGE_URL;
 
   userId: number;
   username: string;
