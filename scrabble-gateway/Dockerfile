@@ -26,12 +26,6 @@ COPY --from=build /scrabble/scrabble-gateway/target/scrabble-gateway.war /usr/lo
 # create scrabble directory
 RUN mkdir /tmp/scrabble
 
-# create user directory for user avatars
-RUN mkdir /tmp/scrabble/user
-
-# copy user avatars to user images path
-COPY --from=build /scrabble/scrabble-gateway/src/main/resources/user /tmp/scrabble/user
-
 # set connection properties
 ENV JAVA_OPTS="-Dscrabble.api.endpoint=$SCRABBLE_API_ENDPOINT -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \
                -Dredis.username=$REDIS_USERNAME -Dredis.password=$REDIS_PASSWORD -Dredis.use.ssl=$REDIS_USE_SSL"
