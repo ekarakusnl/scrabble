@@ -120,14 +120,14 @@ class TestUserService extends AbstractServiceTest {
         final String username = "tester";
         when(userDao.getByUsername(eq(username))).thenReturn(mock(User.class));
 
-        assertNotNull(userService.findByUsername(username));
+        assertNotNull(userService.loadUserByUsername(username));
     }
 
     @Test
     void test_user_by_username_not_found() {
         String username = "tester";
         try {
-            userService.findByUsername(username);
+            userService.loadUserByUsername(username);
             fail("User by username is found");
         } catch (UserException e) {
             assertEquals(UserError.NOT_FOUND.getCode(), e.getCode());

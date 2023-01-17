@@ -33,7 +33,7 @@ import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
 import com.gamecity.scrabble.service.PlayerService;
 import com.gamecity.scrabble.service.GameService;
-import com.gamecity.scrabble.service.UpdaterService;
+import com.gamecity.scrabble.service.ContentService;
 import com.gamecity.scrabble.service.VirtualRackService;
 import com.gamecity.scrabble.service.UserService;
 import com.gamecity.scrabble.service.VirtualBoardService;
@@ -64,7 +64,7 @@ class TestGameService extends AbstractServiceTest {
     private PlayerService playerService;
 
     @Mock
-    private UpdaterService updaterService;
+    private ContentService contentService;
 
     @Mock
     private VirtualBoardService virtualBoardService;
@@ -503,7 +503,7 @@ class TestGameService extends AbstractServiceTest {
 
         final Word word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(11);
         word.setWord("WEAK");
@@ -584,7 +584,7 @@ class TestGameService extends AbstractServiceTest {
 
         Word word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(7);
         word.setWord("RAW");
@@ -594,7 +594,7 @@ class TestGameService extends AbstractServiceTest {
 
         word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(6);
         word.setWord("ROLE");
@@ -604,7 +604,7 @@ class TestGameService extends AbstractServiceTest {
 
         word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(7);
         word.setWord("WE");
@@ -681,7 +681,7 @@ class TestGameService extends AbstractServiceTest {
 
         Word word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(54);
         word.setWord("WEAKENING");
@@ -722,7 +722,7 @@ class TestGameService extends AbstractServiceTest {
         // the word WEAKENING is logged in the words
         Word word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(54);
         word.setWord("WEAKENING");
@@ -732,7 +732,7 @@ class TestGameService extends AbstractServiceTest {
         // the word WEAKENING is logged in the words
         word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(15);
         word.setWord("GOAL");
@@ -769,7 +769,7 @@ class TestGameService extends AbstractServiceTest {
         // the word WEAKENING is logged in the words
         Word word = new Word();
         word.setGameId(DEFAULT_GAME_ID);
-        word.setPlayerNumber(1);
+        word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
         word.setScore(12);
         word.setWord("WEAK");

@@ -29,8 +29,8 @@ public class Word extends AbstractEntity {
 
     // @JoinColumn(name = "user_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
     // "FK_WORD_LOG_USER"))
-    @Column(name = "player_number", nullable = false)
-    private Integer playerNumber;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "round_number", nullable = false)
     private Integer roundNumber;

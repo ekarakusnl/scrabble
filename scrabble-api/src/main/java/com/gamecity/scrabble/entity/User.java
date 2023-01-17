@@ -20,7 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * User represents a person authorized to use the application. A user is defined with the {@link RoleType
+ * User represents a person authorized to use the application. A user is defined with the {@link Role
  * roles} assigned to him to be able to use certain features
  * 
  * @author ekarakus

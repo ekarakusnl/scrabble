@@ -52,7 +52,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
         });
 
         final VirtualRack rack = new VirtualRack(false, Arrays.asList(tiles));
-        redisRepository.refreshRack(gameId, playerNumber, rack);
+        redisRepository.fillRack(gameId, playerNumber, rack);
         log.debug("Rack has been created for player {} on game {}", playerNumber, gameId);
     }
 
@@ -115,7 +115,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
     }
 
     @Override
-    public VirtualRack refreshRack(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber,
+    public VirtualRack fillRack(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber,
             VirtualRack virtualRack) {
         final List<VirtualTile> updatedTiles = virtualRack.getTiles().stream().map(tile -> {
             if (Boolean.TRUE.equals(tile.isSealed())) {
@@ -124,11 +124,11 @@ class VirtualRackServiceImpl implements VirtualRackService {
             return tile;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        final VirtualRack refreshedRack = new VirtualRack(false, updatedTiles);
-        redisRepository.refreshRack(gameId, playerNumber, refreshedRack);
-        log.debug("Rack has been refreshed for player {} on game {}", playerNumber, gameId);
+        final VirtualRack filledRack = new VirtualRack(false, updatedTiles);
+        redisRepository.fillRack(gameId, playerNumber, filledRack);
+        log.debug("Rack has been refilled for player {} on game {}", playerNumber, gameId);
 
-        return refreshedRack;
+        return filledRack;
     }
 
     @Override

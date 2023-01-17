@@ -184,7 +184,7 @@
           </div>
           <div class="card-body words overflow-auto">
             <ol *ngIf="words">
-              <li *ngFor="let word of words">{{ 'game.words.word' | translate: { '0': word.word, '1': word.score, '2': getUsername(word.playerNumber) } }}</li>
+              <li *ngFor="let word of words">{{ 'game.words.word' | translate: { '0': word.word, '1': word.score, '2': getUsername(word.userId) } }}</li>
             </ol>
             <div class="callout callout-info"
                  *ngIf="!words">
@@ -217,7 +217,7 @@
                    [ngClass]="userId === chat.userId ? 'left' : 'right'"
                    *ngFor="let chat of chats">
                 <div class="direct-chat-infos clearfix">
-                  <span class="direct-chat-name float-left">{{ chat.username }}</span>
+                  <span class="direct-chat-name float-left">{{ getUsername(chat.userId) }}</span>
                   <span class="direct-chat-timestamp float-right">{{ chat.createdDate | date:'dd/MM/yyyy HH:mm:ss' }}</span>
                 </div>
                 <img class="direct-chat-img"

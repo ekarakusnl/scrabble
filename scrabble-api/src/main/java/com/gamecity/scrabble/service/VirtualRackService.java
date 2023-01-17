@@ -24,7 +24,7 @@ public interface VirtualRackService {
     void createRack(Long gameId, Long bagId, Integer playerNumber);
 
     /**
-     * Refreshes the {@link VirtualRack rack} of the {@link Player player} after a new round starts
+     * Fills the empty tiles in te rack {@link VirtualRack rack} of the {@link Player player}
      * 
      * @param gameId       <code>id</code> of the game
      * @param bagId        <code>id</code> of the bag
@@ -33,8 +33,7 @@ public interface VirtualRackService {
      * @param virtualRack  the virtual rack to refresh
      * @return the rack
      */
-    VirtualRack refreshRack(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber,
-            VirtualRack virtualRack);
+    VirtualRack fillRack(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber, VirtualRack virtualRack);
 
     /**
      * Updates the {@link VirtualRack rack} of the {@link Player player} after a {@link Word word} is played

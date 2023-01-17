@@ -385,8 +385,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  getUsername(playerNumber: number): string {
-    const player = this.players.find(player => player.playerNumber === playerNumber);
+  getUsername(userId: number): string {
+    const player = this.players.find(player => player.userId === userId);
     return player.username;
   }
 

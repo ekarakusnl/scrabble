@@ -1,8 +1,7 @@
 package com.gamecity.scrabble.filter;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -12,17 +11,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.gamecity.scrabble.api.model.BaseAuthority;
-import com.gamecity.scrabble.api.model.User;
-import com.gamecity.scrabble.model.rest.UserDto;
-import com.gamecity.scrabble.service.RestService;
 import com.gamecity.scrabble.service.impl.JwtProvider;
 import com.google.common.net.HttpHeaders;
 
@@ -41,9 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
-    private RestService restService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -74,22 +65,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String username = jwtProvider.getUsername(token);
-
-        final UserDto userDto = restService.get("/users/by/{username}", UserDto.class, username);
-        // UserDetails userDetails = userAuthService.loadUserByUsername(userName);
-
-        final Collection<GrantedAuthority> authorities = userDto.getAuthorities()
-                .stream()
-                .map(authority -> new BaseAuthority(authority))
-                .collect(Collectors.toList());
-
-        final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword(), userDto.isEnabled(),
-                userDto.isAccountNonExpired(), userDto.isAccountNonLocked(), userDto.isCredentialsNonExpired(),
-                authorities);
-
-        final UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        final UsernamePasswordAuthenticationToken authentication;
+        try {
+            authentication = jwtProvider.getAuthenticationToken(token);
+        } catch (ExecutionException e) {
+            log.error("An error occured while getting the user", e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

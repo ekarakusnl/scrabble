@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.dao.UserRoleDao;
-import com.gamecity.scrabble.entity.RoleType;
+import com.gamecity.scrabble.entity.Role;
 import com.gamecity.scrabble.entity.UserRole;
 import com.gamecity.scrabble.service.UserRoleService;
 
@@ -13,16 +13,16 @@ import com.gamecity.scrabble.service.UserRoleService;
 class UserRoleServiceImpl extends AbstractServiceImpl<UserRole, UserRoleDao> implements UserRoleService {
 
     @Override
-    public void add(String username, RoleType type) {
+    public void add(Long userId, Role role) {
         final UserRole userRole = new UserRole();
-        userRole.setType(type);
-        userRole.setUsername(username);
+        userRole.setRole(role);
+        userRole.setUserId(userId);
         baseDao.save(userRole);
     }
 
     @Override
-    public List<RoleType> getRoleTypesByUsername(String username) {
-        return baseDao.getRoleTypesByUsername(username);
+    public List<Role> getRolesByUser(Long userId) {
+        return baseDao.getRolesByUser(userId);
     }
 
 }

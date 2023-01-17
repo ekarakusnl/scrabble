@@ -33,7 +33,7 @@ import com.gamecity.scrabble.service.BagService;
 import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
 import com.gamecity.scrabble.service.PlayerService;
-import com.gamecity.scrabble.service.UpdaterService;
+import com.gamecity.scrabble.service.ContentService;
 import com.gamecity.scrabble.service.GameService;
 import com.gamecity.scrabble.service.UserService;
 import com.gamecity.scrabble.service.VirtualBagService;
@@ -57,7 +57,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private VirtualBoardService virtualBoardService;
     private VirtualRackService virtualRackService;
     private VirtualBagService virtualBagService;
-    private UpdaterService updaterService;
+    private ContentService contentService;
     private DictionaryService dictionaryService;
     private WordService wordService;
 
@@ -132,8 +132,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     @Autowired
-    void setUpdaterService(UpdaterService updaterService) {
-        this.updaterService = updaterService;
+    void setContentService(ContentService contentService) {
+        this.contentService = contentService;
     }
 
     @Autowired
@@ -311,7 +311,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final VirtualBoard virtualBoard = virtualBoardService.getBoard(game.getId(), boardActionCounter);
 
-        makeMove(game, bag, board, virtualRack, virtualBoard);
+        findAndPlayWords(game, bag, board, virtualRack, virtualBoard, userId);
         assignNextPlayer(game);
 
         game.setActionCounter(game.getActionCounter() + 1);
@@ -323,7 +323,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             newRound = true;
         }
 
-        updaterService.run(game, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
+        contentService.update(game, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
 
         if (newRound) {
             if (GameStatus.LAST_ROUND == game.getStatus()) {
@@ -428,9 +428,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     /**
-     * Does the validations and makes the move
+     * Does the validations and play the words
      */
-    private void makeMove(Game game, Bag bag, Board board, VirtualRack updatedRack, VirtualBoard virtualBoard) {
+    private void findAndPlayWords(Game game, Bag bag, Board board, VirtualRack updatedRack, VirtualBoard virtualBoard,
+            Long userId) {
         boolean hasNewMove = updatedRack.getTiles().stream().anyMatch(VirtualTile::isSealed);
         if (!hasNewMove) {
             return;
@@ -458,14 +459,14 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         newWords.stream().forEach(word -> {
             word.getBoard().getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
         });
-        logWords(game.getId(), game.getCurrentPlayerNumber(), game.getRoundNumber(), newWords);
+        logWords(game.getId(), userId, game.getRoundNumber(), newWords);
     }
 
     /*
      * Log the words
      */
-    private void logWords(Long gameId, Integer playerNumber, Integer roundNumber, List<BoardWord> boardWords) {
-        boardWords.forEach(word -> saveWord(gameId, playerNumber, roundNumber, word));
+    private void logWords(Long gameId, Long userId, Integer roundNumber, List<BoardWord> boardWords) {
+        boardWords.forEach(word -> saveWord(gameId, userId, roundNumber, word));
     }
 
     /**
@@ -708,10 +709,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         }).sum();
     }
 
-    private void saveWord(Long gameId, Integer playerNumber, Integer roundNumber, BoardWord boardWord) {
+    private void saveWord(Long gameId, Long userId, Integer roundNumber, BoardWord boardWord) {
         final Word word = new Word();
         word.setGameId(gameId);
-        word.setPlayerNumber(playerNumber);
+        word.setUserId(userId);
         word.setRoundNumber(roundNumber);
         word.setScore(boardWord.getScore());
         word.setWord(boardWord.getWordDefinition().toString());

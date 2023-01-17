@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.dao.UserDao;
 import com.gamecity.scrabble.entity.BaseAuthority;
-import com.gamecity.scrabble.entity.RoleType;
+import com.gamecity.scrabble.entity.Role;
 import com.gamecity.scrabble.entity.User;
 import com.gamecity.scrabble.service.UserRoleService;
 import com.gamecity.scrabble.service.UserService;
@@ -37,9 +37,18 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         final User user = baseDao.getByUsername(username);
-        if (user == null || !user.isEnabled() || !user.isAccountNonExpired() || !user.isAccountNonLocked()) {
-            throw new UsernameNotFoundException(UserError.NOT_FOUND.getMessage());
+        if (user == null) {
+            throw new UserException(UserError.NOT_FOUND);
         }
+
+        final List<BaseAuthority> authorities = new ArrayList<>();
+        user.setAuthorities(authorities);
+
+        final List<Role> roles = userRoleService.getRolesByUser(user.getId());
+        if (!roles.isEmpty()) {
+            roles.forEach(roleType -> authorities.add(new BaseAuthority(ROLE_PREFIX + roleType.name())));
+        }
+
         return user;
     }
 
@@ -74,7 +83,7 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
 
         final User savedUser = baseDao.save(user);
 
-        userRoleService.add(savedUser.getUsername(), RoleType.USER);
+        userRoleService.add(savedUser.getId(), Role.USER);
 
         return user;
     }
@@ -82,28 +91,9 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
     // TOD this method can be replaced with patch operation since it only updates the password
     private User update(User user) {
         final User existingUser = baseDao.get(user.getId());
-
         existingUser.setPassword(user.getPassword());
 
         return baseDao.save(existingUser);
-    }
-
-    @Override
-    public User findByUsername(String username) {
-        final User user = baseDao.getByUsername(username);
-        if (user == null) {
-            throw new UserException(UserError.NOT_FOUND);
-        }
-
-        final List<BaseAuthority> authorities = new ArrayList<>();
-        user.setAuthorities(authorities);
-
-        final List<RoleType> roleTypes = userRoleService.getRoleTypesByUsername(username);
-        if (!roleTypes.isEmpty()) {
-            roleTypes.forEach(roleType -> authorities.add(new BaseAuthority(ROLE_PREFIX + roleType.name())));
-        }
-
-        return user;
     }
 
     @Override

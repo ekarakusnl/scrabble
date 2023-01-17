@@ -2,7 +2,7 @@ package com.gamecity.scrabble.dao;
 
 import java.util.List;
 
-import com.gamecity.scrabble.entity.RoleType;
+import com.gamecity.scrabble.entity.Role;
 import com.gamecity.scrabble.entity.User;
 import com.gamecity.scrabble.entity.UserRole;
 
@@ -14,12 +14,12 @@ import com.gamecity.scrabble.entity.UserRole;
 public interface UserRoleDao extends BaseDao<UserRole> {
 
     /**
-     * Gets the {@link List list} of assigned {@link RoleType role types} to a {@link User user} by
-     * <code>username</code>
+     * Gets the {@link List list} of assigned {@link Role roles} to the {@link User user} by
+     * <code>userId</code>
      * 
-     * @param username <code>username</code> of the user
+     * @param userId <code>id</code> of the user
      * @return the role types
      */
-    List<RoleType> getRoleTypesByUsername(String username);
+    List<Role> getRolesByUser(Long userId);
 
 }

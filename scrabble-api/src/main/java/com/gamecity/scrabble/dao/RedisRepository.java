@@ -10,14 +10,14 @@ import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualRack;
 
 /**
- * Provides methods to read/publish data from/to Redis cache
+ * Provides methods to read/publish data from/to Redis
  * 
  * @author ekarakus
  */
 public interface RedisRepository {
 
     /**
-     * Publish a new {@link Action action} in a {@link Game game} to Redis
+     * Publish the new {@link Action action} in the {@link Game game}
      * 
      * @param gameId <code>id</code> of the game
      * @param action
@@ -25,8 +25,7 @@ public interface RedisRepository {
     void publishAction(Long gameId, Action action);
 
     /**
-     * Gets the last {@link Action action} happened in a {@link Game game} by the specified
-     * <code>counter</code>
+     * Gets the last {@link Action action} in the {@link Game game} by the specified <code>counter</code>
      * 
      * @param gameId  <code>id</code> of the game
      * @param counter <code>counter</code> of the action
@@ -35,25 +34,7 @@ public interface RedisRepository {
     Action getAction(Long gameId, Integer counter);
 
     /**
-     * Updates the current {@link List list} of {@link Player players} in a {@link Game game} in Redis cache
-     * 
-     * @param gameId  <code>id</code> of the game
-     * @param players the list of players to update
-     */
-    void updatePlayers(Long gameId, List<Player> players);
-
-    /**
-     * Gets the {@link List list} of {@link Player players} in a {@link Game game} after the specified
-     * <code>actionCounter</code>
-     * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter <code>counter</code> of the action
-     * @return the list of players
-     */
-    List<Player> getPlayers(Long gameId, Integer actionCounter);
-
-    /**
-     * Publishes a new {@link Chat chat} sent in a {@link Game game}
+     * Publishes the new {@link Chat chat} in the {@link Game game}
      * 
      * @param gameId <code>id</code> of the game
      * @param chat   chat to publish
@@ -61,7 +42,7 @@ public interface RedisRepository {
     void publishChat(Long gameId, Chat chat);
 
     /**
-     * Gets the {@link List list} of {@link Chat chats} in a {@link Game game} sent by the specified
+     * Gets the {@link List list} of {@link Chat chats} in the {@link Game game} by the specified
      * <code>actionCounter</code>
      * 
      * @param gameId        <code>id</code> of the game
@@ -71,7 +52,7 @@ public interface RedisRepository {
     List<Chat> getChats(Long gameId, Integer actionCounter);
 
     /**
-     * Updates the current {@link VirtualBoard board} in a {@link Game game} in Redis cache
+     * Updates the {@link VirtualBoard board} in the {@link Game game}
      * 
      * @param gameId <code>id</code> of the game
      * @param board  the board to cache
@@ -79,7 +60,7 @@ public interface RedisRepository {
     void updateBoard(Long gameId, VirtualBoard board);
 
     /**
-     * Gets the {@link VirtualBoard board} in a {@link Game game} cached in Redis by the specified
+     * Gets the {@link VirtualBoard board} in the {@link Game game} by the specified
      * <code>actionCounter</code>
      * 
      * @param gameId        <code>id</code> of the game
@@ -89,18 +70,16 @@ public interface RedisRepository {
     VirtualBoard getBoard(Long gameId, Integer actionCounter);
 
     /**
-     * Refreshes the current {@link VirtualRack rack} of a {@link Player player} in a {@link Game game} in
-     * Redis cache
+     * Fills the {@link VirtualRack rack} of the {@link Player player} in the {@link Game game}
      * 
      * @param gameId       <code>id</code> of the game
      * @param playerNumber <code>number</code> of the player
      * @param rack         the rack to cache
      */
-    void refreshRack(Long gameId, Integer playerNumber, VirtualRack rack);
+    void fillRack(Long gameId, Integer playerNumber, VirtualRack rack);
 
     /**
-     * Updates the current {@link VirtualRack rack} of a {@link Player player} in a {@link Game game} in
-     * Redis cache
+     * Updates the {@link VirtualRack rack} of the {@link Player player} in the {@link Game game}
      * 
      * @param gameId        <code>id</code> of the game
      * @param playerNumber  <code>number</code> of the player
@@ -110,8 +89,7 @@ public interface RedisRepository {
     void updateRack(Long gameId, Integer playerNumber, Integer actionCounter, VirtualRack rack);
 
     /**
-     * Gets the {@link VirtualRack rack} in a {@link Game game} cached in Redis by the specified
-     * <code>actionCounter</code>
+     * Gets the {@link VirtualRack rack} in the {@link Game game} by the specified <code>actionCounter</code>
      * 
      * @param gameId       <code>id</code> of the game
      * @param playerNumber <code>number</code> of the player

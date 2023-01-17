@@ -21,14 +21,14 @@ import com.gamecity.scrabble.resource.GameResource;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
 import com.gamecity.scrabble.service.SchedulerService;
-import com.gamecity.scrabble.service.UpdaterService;
+import com.gamecity.scrabble.service.ContentService;
 
 @Component(value = "gameResource")
 class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> implements GameResource {
 
     private GameService baseService;
     private ActionService actionService;
-    private UpdaterService updaterService;
+    private ContentService contentService;
     private SchedulerService schedulerService;
     private RedisRepository redisRepository;
 
@@ -47,8 +47,8 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     }
 
     @Autowired
-    void setUpdaterService(UpdaterService updaterService) {
-        this.updaterService = updaterService;
+    void setContentService(ContentService contentService) {
+        this.contentService = contentService;
     }
 
     @Autowired
@@ -71,8 +71,6 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Game game = baseService.save(Mapper.toEntity(gameDto));
 
         final ActionType actionType = ActionType.JOIN;
-        updaterService.run(game, actionType);
-
         final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(), null,
                 game.getRoundNumber(), actionType, GameStatus.WAITING);
         redisRepository.publishAction(action.getGameId(), action);
@@ -86,8 +84,6 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Game game = baseService.join(id, userId);
 
         final ActionType actionType = ActionType.JOIN;
-        updaterService.run(game, actionType);
-
         final Action action = actionService.add(game.getId(), userId, game.getActionCounter(), null,
                 game.getRoundNumber(), actionType, game.getStatus());
         redisRepository.publishAction(action.getGameId(), action);
@@ -119,8 +115,6 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Game game = baseService.leave(id, userId);
 
         final ActionType actionType = ActionType.LEAVE;
-        updaterService.run(game, actionType);
-
         final Action action = actionService.add(game.getId(), userId, game.getActionCounter(), null,
                 game.getRoundNumber(), actionType, GameStatus.WAITING);
         redisRepository.publishAction(action.getGameId(), action);
@@ -134,8 +128,6 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Game game = baseService.play(id, userId, rack);
 
         final ActionType actionType = ActionType.PLAY;
-        updaterService.run(game, actionType);
-
         final Action action = actionService.add(game.getId(), userId, game.getActionCounter(),
                 game.getCurrentPlayerNumber(), game.getRoundNumber(), actionType, game.getStatus());
         redisRepository.publishAction(action.getGameId(), action);
@@ -151,7 +143,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Game game = baseService.start(id);
 
         final ActionType actionType = ActionType.START;
-        updaterService.run(game, actionType);
+        contentService.create(game, actionType);
 
         final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(),
                 game.getCurrentPlayerNumber(), game.getRoundNumber(), actionType, GameStatus.IN_PROGRESS);

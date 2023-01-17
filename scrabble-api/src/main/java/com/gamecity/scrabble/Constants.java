@@ -43,9 +43,6 @@ public interface Constants {
         String getPlayerByPlayerNumber = "getPlayerByPlayerNumber";
         String getCurrentPlayers = "getCurrentPlayers";
 
-        // Role
-        String getRoleByRoleType = "getRoleByRoleType";
-
         // Tile
         String getTiles = "getTiles";
 
@@ -54,7 +51,7 @@ public interface Constants {
         String getUserByEmail = "getUserByEmail";
 
         // UserRole
-        String getRoleTypesByUsername = "getRoleTypesByUsername";
+        String getRolesByUserId = "getRolesByUserId";
 
         // Word
         String getWords = "getWords";

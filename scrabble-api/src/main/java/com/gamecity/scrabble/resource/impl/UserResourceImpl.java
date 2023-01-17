@@ -27,7 +27,7 @@ class UserResourceImpl extends AbstractResourceImpl<User, UserDto, UserService> 
 
     @Override
     public Response findUserByUsername(String username) {
-        final User user = baseService.findByUsername(username);
+        final User user = baseService.loadUserByUsername(username);
         final UserDto userDto = Mapper.toDto(user);
         return Response.ok(userDto).tag(createETag(userDto)).build();
     }

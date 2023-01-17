@@ -1,6 +1,6 @@
 export interface Word {
   gameId: number;
-  playerNumber: number;
+  userId: number;
   word: string;
   score: number;
 }

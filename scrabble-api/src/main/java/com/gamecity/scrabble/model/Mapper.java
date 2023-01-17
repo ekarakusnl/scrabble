@@ -413,7 +413,6 @@ public class Mapper {
                 .lastUpdatedDate(chat.getLastUpdatedDate())
                 .message(chat.getMessage())
                 .userId(chat.getUserId())
-                .username(chat.getUsername())
                 .build();
 
         return chatDto;
@@ -431,7 +430,6 @@ public class Mapper {
         chat.setGameId(chatDto.getGameId());
         chat.setMessage(chatDto.getMessage());
         chat.setUserId(chatDto.getUserId());
-        chat.setUsername(chatDto.getUsername());
 
         return chat;
     }
@@ -486,7 +484,7 @@ public class Mapper {
         final WordDto wordDto = WordDto.builder()
                 .gameId(word.getGameId())
                 .lastUpdatedDate(word.getLastUpdatedDate())
-                .playerNumber(word.getPlayerNumber())
+                .userId(word.getUserId())
                 .roundNumber(word.getRoundNumber())
                 .score(word.getScore())
                 .word(word.getWord())
@@ -504,7 +502,7 @@ public class Mapper {
     public static Word toEntity(WordDto wordDto) {
         final Word word = new Word();
         word.setGameId(wordDto.getGameId());
-        word.setPlayerNumber(wordDto.getPlayerNumber());
+        word.setUserId(wordDto.getUserId());
         word.setRoundNumber(wordDto.getRoundNumber());
         word.setScore(wordDto.getScore());
         word.setWord(wordDto.getWord());

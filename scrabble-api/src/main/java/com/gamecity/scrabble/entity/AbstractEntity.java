@@ -11,6 +11,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import lombok.Data;
 
@@ -33,8 +34,9 @@ public abstract class AbstractEntity {
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
 
+    @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_updated_date")
+    @Column(name = "last_updated_date", nullable = false)
     private Date lastUpdatedDate;
 
 }

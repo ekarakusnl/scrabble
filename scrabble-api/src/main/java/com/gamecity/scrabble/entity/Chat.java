@@ -5,7 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.gamecity.scrabble.Constants;
 
@@ -39,9 +38,6 @@ public class Chat extends AbstractEntity {
     // "FK_CHAT_USER"))
     @Column(name = "user_id", nullable = false)
     private Long userId;
-
-    @Transient
-    private String username;
 
     @Column(name = "message", nullable = false)
     private String message;

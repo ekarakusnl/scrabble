@@ -25,8 +25,8 @@ public class WordDto extends AbstractDto implements Serializable {
     @JsonProperty("gameId")
     private Long gameId;
 
-    @JsonProperty("playerNumber")
-    private Integer playerNumber;
+    @JsonProperty("userId")
+    private Long userId;
 
     @JsonProperty("roundNumber")
     private Integer roundNumber;

@@ -27,17 +27,17 @@ import lombok.Setter;
 @Entity(name = "UserRole")
 @Table(name = "user_roles",
         uniqueConstraints = {
-                @UniqueConstraint(name = "UK_USER_ROLE", columnNames = { "username", "type", "enabled" }) })
-@NamedQuery(name = Constants.NamedQuery.getRoleTypesByUsername,
-        query = "Select type from UserRole where username = :username")
+                @UniqueConstraint(name = "UK_USER_ROLE", columnNames = { "user_id", "role", "enabled" }) })
+@NamedQuery(name = Constants.NamedQuery.getRolesByUserId,
+        query = "Select ur.role from UserRole ur where ur.userId = :userId")
 public class UserRole extends AbstractEntity {
 
-    @Column(name = "username", nullable = false)
-    private String username;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private RoleType type;
+    @Column(name = "role", nullable = false)
+    private Role role;
 
     @Type(type = "org.hibernate.type.NumericBooleanType")
     @Column(name = "enabled", nullable = false)

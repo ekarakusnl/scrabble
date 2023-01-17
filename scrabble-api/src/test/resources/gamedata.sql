@@ -2,15 +2,11 @@
 insert into users (username, email, password, enabled) values ('Edi', 'edi@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1);
 insert into users (username, email, password, enabled) values ('Budu', 'budu@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1);
 insert into users (username, email, password, enabled) values ('admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1);
--- pre-defined roles
-insert into roles (type, enabled) values ('USER', 1);
-insert into roles (type, enabled) values ('ADMIN', 1);
-insert into roles (type, enabled) values ('SYSTEM', 1);
 -- pre-defined user-role assignments
-insert into user_roles (username, type, enabled) values ('Edi', 'USER', 1);
-insert into user_roles (username, type, enabled) values ('Budu', 'USER', 1);
-insert into user_roles (username, type, enabled) values ('admin', 'ADMIN', 1);
-insert into user_roles (username, type, enabled) values ('admin', 'USER', 1);
+insert into user_roles (user_id, role, enabled) values (1, 'USER', 1);
+insert into user_roles (user_id, role, enabled) values (2, 'USER', 1);
+insert into user_roles (user_id, role, enabled) values (3, 'ADMIN', 1);
+insert into user_roles (user_id, role, enabled) values (3, 'USER', 1);
 -- pre-defined boards
 insert into boards (name, column_size, row_size) values ('15x15', 15, 15);
 -- pre-defined bags
@@ -269,11 +265,3 @@ insert into cells (board_id, cell_number, row_number, column_number, color, lett
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 223, 15, 13, 'white', 1, 1, 1, 1, 1, 0);
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 224, 15, 14, 'white', 1, 1, 1, 1, 1, 0);
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 225, 15, 15, 'red', 1, 3, 0, 1, 1, 0);
--- update last_update_dates
-update users set last_updated_date = CURRENT_TIMESTAMP() where last_updated_date is null;
-update roles set last_updated_date = CURRENT_TIMESTAMP() where last_updated_date is null;
-update user_roles set last_updated_date = CURRENT_TIMESTAMP() where last_updated_date is null;
-update bags set last_updated_date = CURRENT_TIMESTAMP() where last_updated_date is null;
-update boards set last_updated_date = CURRENT_TIMESTAMP() where last_updated_date is null;
-update tiles set last_updated_date = CURRENT_TIMESTAMP() where last_updated_date is null;
-update cells set last_updated_date = CURRENT_TIMESTAMP() where last_updated_date is null;

@@ -15,6 +15,6 @@ public interface UserService extends BaseService<User> {
      * @param username <code>username</code> of the user
      * @return the user
      */
-    User findByUsername(String username);
+    User loadUserByUsername(String username);
 
 }

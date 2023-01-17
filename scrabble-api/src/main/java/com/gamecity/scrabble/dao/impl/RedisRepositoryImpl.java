@@ -1,6 +1,5 @@
 package com.gamecity.scrabble.dao.impl;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,14 +12,11 @@ import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.RedisRepository;
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.Chat;
-import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.model.VirtualRack;
-import com.gamecity.scrabble.model.VirtualScoreboard;
 import com.gamecity.scrabble.model.Mapper;
 import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.rest.ActionDto;
 import com.gamecity.scrabble.model.rest.ChatDto;
-import com.gamecity.scrabble.model.rest.PlayerDto;
 import com.gamecity.scrabble.util.JsonUtils;
 
 @Repository(value = "redisRepository")
@@ -46,24 +42,6 @@ class RedisRepositoryImpl implements RedisRepository {
                 redisTemplate.boundListOps(Constants.CacheKey.ACTION + ":" + gameId);
         final String actionPayload = (String) actions.range(counter - 1, -1).stream().findFirst().orElse(null);
         return actionPayload == null ? null : Mapper.toEntity(JsonUtils.toDto(actionPayload, ActionDto.class));
-    }
-
-    @Override
-    public void updatePlayers(Long gameId, List<Player> players) {
-        final List<PlayerDto> playerDtos = players.stream().map(Mapper::toDto).collect(Collectors.toList());
-        redisTemplate.boundListOps(Constants.CacheKey.PLAYERS + ":" + gameId)
-                .rightPush(new VirtualScoreboard(playerDtos));
-        redisTemplate.convertAndSend(Constants.CacheKey.PLAYERS, playerDtos);
-    }
-
-    @Override
-    public List<Player> getPlayers(Long gameId, Integer actionCounter) {
-        final BoundListOperations<String, Object> players =
-                redisTemplate.boundListOps(Constants.CacheKey.PLAYERS + ":" + gameId);
-        final VirtualScoreboard virtualScoreboard =
-                (VirtualScoreboard) players.range(actionCounter - 1, -1).stream().findFirst().orElse(null);
-        return virtualScoreboard == null ? Collections.emptyList()
-                : virtualScoreboard.getPlayers().stream().map(Mapper::toEntity).collect(Collectors.toList());
     }
 
     @Override
@@ -97,7 +75,7 @@ class RedisRepositoryImpl implements RedisRepository {
     }
 
     @Override
-    public void refreshRack(Long gameId, Integer playerNumber, VirtualRack rack) {
+    public void fillRack(Long gameId, Integer playerNumber, VirtualRack rack) {
         redisTemplate.boundListOps(Constants.CacheKey.RACK + ":" + gameId + ":" + playerNumber).rightPush(rack);
         redisTemplate.convertAndSend(Constants.CacheKey.RACK, rack);
     }

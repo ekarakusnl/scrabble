@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.gamecity.scrabble.dao.RedisRepository;
 import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.model.Mapper;
 import com.gamecity.scrabble.model.rest.PlayerDto;
@@ -22,7 +21,6 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
 
     private PlayerService baseService;
     private ActionService actionService;
-    private RedisRepository redisRepository;
 
     PlayerService getBaseService() {
         return baseService;
@@ -38,11 +36,6 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
         this.actionService = actionService;
     }
 
-    @Autowired
-    void setRedisRepository(RedisRepository redisRepository) {
-        this.redisRepository = redisRepository;
-    }
-
     @Override
     public Response list(Long gameId, Integer actionCounter) {
         if (actionCounter < 1) {
@@ -54,7 +47,7 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
             return Response.ok().build();
         }
 
-        final List<Player> players = redisRepository.getPlayers(gameId, actionCounter);
+        final List<Player> players = baseService.getPlayers(gameId);
         if (CollectionUtils.isEmpty(players)) {
             return Response.ok().build();
         }
