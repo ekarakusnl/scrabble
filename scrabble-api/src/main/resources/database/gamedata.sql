@@ -1,18 +1,10 @@
 -- pre-defined users
-insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('Edi', 'edi@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
-insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('Budu', 'budu@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
+insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('user', 'user@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
 insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
-insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('Vicky', 'vicky@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
-insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('Erdem', 'erdem@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
-insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('Esra', 'esra@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
 -- pre-defined user-role assignments
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (1, 'USER', 1, now(), now());
+insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (2, 'ADMIN', 1, now(), now());
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (2, 'USER', 1, now(), now());
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (3, 'ADMIN', 1, now(), now());
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (3, 'USER', 1, now(), now());
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (4, 'USER', 1, now(), now());
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (5, 'USER', 1, now(), now());
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (6, 'USER', 1, now(), now());
 -- pre-defined boards
 insert into boards (name, column_size, row_size, enabled, created_date, last_updated_date) values ('15x15', 15, 15, 1, now(), now());
 insert into boards (name, column_size, row_size, enabled, created_date, last_updated_date) values ('20x20', 20, 20, 1, now(), now());

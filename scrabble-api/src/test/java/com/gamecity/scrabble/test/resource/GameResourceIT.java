@@ -45,7 +45,7 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         final List<PlayerDto> players = getPlayers(game.getId(), game.getActionCounter());
         assertEquals(1, players.size());
-        assertEquals("Edi", players.get(0).getUsername());
+        assertEquals("user", players.get(0).getUsername());
     }
 
     @Test
@@ -123,7 +123,7 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         final List<PlayerDto> players = getPlayers(game.getId(), joinGame.getActionCounter());
         assertEquals(2, players.size());
-        assertEquals("Budu", players.get(1).getUsername());
+        assertEquals("admin", players.get(1).getUsername());
     }
 
     @Test
@@ -144,7 +144,7 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         final List<PlayerDto> players = getPlayers(game.getId(), leaveGame.getActionCounter());
         assertEquals(1, players.size());
-        assertEquals("Edi", players.get(0).getUsername());
+        assertEquals("user", players.get(0).getUsername());
 
         leaveGameResponse.close();
     }

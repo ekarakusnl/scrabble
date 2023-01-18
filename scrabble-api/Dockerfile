@@ -12,8 +12,10 @@ RUN mvn clean install -e -DskipTests -DskipITs -Denvironment=prod
 
 FROM tomcat:9.0.70-jdk11
 
-# get connection properties
-ARG POSTGRES_CONNECTION_URL
+# get environment variables
+ARG DICTIONARY_PATH
+ARG LOG_PATH
+ARG POSTGRES_URL
 ARG POSTGRES_USERNAME
 ARG POSTGRES_PASSWORD
 ARG REDIS_HOST
@@ -31,11 +33,15 @@ RUN mkdir /tmp/scrabble
 # create dictionary directory
 RUN mkdir /tmp/scrabble/dictionary
 
+# create logs directory
+RUN mkdir /tmp/scrabble/logs
+
 # copy dictionaries to dictionary path
 COPY --from=build /scrabble/scrabble-api/src/main/resources/dictionary /tmp/scrabble/dictionary
 
-# set connection properties
-ENV JAVA_OPTS="-Dpostgres.connection.url=$POSTGRES_CONNECTION_URL -Dpostgres.username=$POSTGRES_USERNAME \
+# set environment variables
+ENV JAVA_OPTS="-Ddictionary.path=$DICTIONARY_PATH -Dlog.path=$LOG_PATH \
+               -Dpostgres.url=$POSTGRES_URL -Dpostgres.username=$POSTGRES_USERNAME \
                -Dpostgres.password=$POSTGRES_PASSWORD -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \
                -Dredis.username=$REDIS_USERNAME -Dredis.password=$REDIS_PASSWORD -Dredis.use.ssl=$REDIS_USE_SSL"
 

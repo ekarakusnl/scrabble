@@ -22,7 +22,7 @@ class UserResourceIT extends AbstractIntegrationTest {
 
     @Test
     void test_get_user() {
-        final Response response = target("/users/by/Edi").request().get();
+        final Response response = target("/users/by/user").request().get();
 
         if (Status.OK.getStatusCode() != response.getStatus()) {
             assertEquals(Status.OK.getStatusCode(), response.getStatus(), response.readEntity(String.class));
@@ -31,7 +31,7 @@ class UserResourceIT extends AbstractIntegrationTest {
 
         final UserDto responseDto = response.readEntity(UserDto.class);
 
-        assertEquals("Edi", responseDto.getUsername());
+        assertEquals("user", responseDto.getUsername());
         assertNotNull(responseDto.getId());
 
         response.close();
@@ -53,7 +53,7 @@ class UserResourceIT extends AbstractIntegrationTest {
 
         final UserDto responseDto = response.readEntity(UserDto.class);
 
-        assertEquals("mukawwaa", responseDto.getUsername());
+        assertEquals("friedrich", responseDto.getUsername());
         assertNotNull(responseDto.getId());
 
         response.close();
@@ -61,7 +61,7 @@ class UserResourceIT extends AbstractIntegrationTest {
 
     @Test
     void test_update_user() {
-        final Response response = target("/users/by/Edi").request().get();
+        final Response response = target("/users/by/user").request().get();
 
         final String etag = response.getHeaderString(HttpHeaders.ETAG);
         final UserDto responseDto = response.readEntity(UserDto.class);
@@ -87,7 +87,7 @@ class UserResourceIT extends AbstractIntegrationTest {
 
     @Test
     void test_update_user_without_etag() {
-        final Response response = target("/users/by/Edi").request().get();
+        final Response response = target("/users/by/user").request().get();
 
         final UserDto responseDto = response.readEntity(UserDto.class);
         responseDto.setPassword("$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVz");

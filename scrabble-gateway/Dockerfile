@@ -12,8 +12,10 @@ RUN mvn clean install -e -DskipTests -DskipITs -Denvironment=prod
 
 FROM tomcat:9.0.70-jdk11
 
-# get connection properties
-ARG SCRABBLE_API_ENDPOINT
+# get environment variables
+ARG API_ENDPOINT
+ARG JWT_SECRET
+ARG LOG_PATH
 ARG REDIS_HOST
 ARG REDIS_PORT
 ARG REDIS_USERNAME
@@ -26,9 +28,13 @@ COPY --from=build /scrabble/scrabble-gateway/target/scrabble-gateway.war /usr/lo
 # create scrabble directory
 RUN mkdir /tmp/scrabble
 
-# set connection properties
-ENV JAVA_OPTS="-Dscrabble.api.endpoint=$SCRABBLE_API_ENDPOINT -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT \
-               -Dredis.username=$REDIS_USERNAME -Dredis.password=$REDIS_PASSWORD -Dredis.use.ssl=$REDIS_USE_SSL"
+# create logs directory
+RUN mkdir /tmp/scrabble/logs
+
+# set environment variables
+ENV JAVA_OPTS="-Dapi.endpoint=$API_ENDPOINT -Djwt.secret=$JWT_SECRET -Dlog.path=$LOG_PATH \
+               -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT -Dredis.username=$REDIS_USERNAME \
+               -Dredis.password=$REDIS_PASSWORD -Dredis.use.ssl=$REDIS_USE_SSL"
 
 # run tomcat
 EXPOSE 8080

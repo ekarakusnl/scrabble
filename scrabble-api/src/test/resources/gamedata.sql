@@ -1,12 +1,10 @@
 -- pre-defined users
-insert into users (username, email, password, enabled) values ('Edi', 'edi@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1);
-insert into users (username, email, password, enabled) values ('Budu', 'budu@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1);
+insert into users (username, email, password, enabled) values ('user', 'user@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1);
 insert into users (username, email, password, enabled) values ('admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1);
 -- pre-defined user-role assignments
 insert into user_roles (user_id, role, enabled) values (1, 'USER', 1);
+insert into user_roles (user_id, role, enabled) values (2, 'ADMIN', 1);
 insert into user_roles (user_id, role, enabled) values (2, 'USER', 1);
-insert into user_roles (user_id, role, enabled) values (3, 'ADMIN', 1);
-insert into user_roles (user_id, role, enabled) values (3, 'USER', 1);
 -- pre-defined boards
 insert into boards (name, column_size, row_size) values ('15x15', 15, 15);
 -- pre-defined bags

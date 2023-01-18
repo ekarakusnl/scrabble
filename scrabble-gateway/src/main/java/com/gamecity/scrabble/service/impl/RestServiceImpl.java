@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @SuppressWarnings("unchecked")
 class RestServiceImpl implements RestService {
 
-    @Value("${api.resource.endpoint}")
+    @Value("${api.endpoint}")
     private String apiEndpoint;
 
     @Override

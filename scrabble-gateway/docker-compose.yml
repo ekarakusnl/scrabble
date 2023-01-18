@@ -1,0 +1,24 @@
+version: '3'
+services:
+  scrabble-gateway:
+    image: tomcat:9.0.70-jdk11
+    hostname: scrabble-gateway
+    container_name: scrabble-gateway
+    environment:
+      - JAVA_OPTS=-Dapi.endpoint=http://scrabble-api:8080/scrabble-api/rest
+                  -Djwt.secret=scrabble_secret
+                  -Dlog.path=/tmp/scrabble/logs
+                  -Dredis.host=scrabble-redis
+                  -Dredis.port=6380
+                  -Dredis.username=
+                  -Dredis.password=
+                  -Dredis.use.ssl=false
+    volumes:
+      - ./target/scrabble-gateway.war:/usr/local/tomcat/webapps/scrabble-gateway.war
+    ports:
+      - '6080:8080'
+    networks:
+      - scrabble_network
+networks:
+  scrabble_network:
+    external: true
