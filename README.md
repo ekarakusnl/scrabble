@@ -14,10 +14,13 @@ PostgreSQL 13
 Project has 4 modules. The modules are;
 
 scrabble-rest-model : Manages dto objects used by the gateway and the api servers for the rest calls
+
 scrabble-api        : Manages dao, service and resource layers. Hibernate persistence operations, redis cache
   operations, scheduled quartz jobs are all managed in this module
+  
 scrabble-gateway    : Manages authentication and authorization of frontend requests. Authentication is done by using
   spring authentication and a jwt token is generated and stored in cache for each successful login attempt
+  
 scrabble-web        : Angular frontend application
 
 ## Running in Development Environment
@@ -35,7 +38,9 @@ mvn clean install -DskipTests -DskipITs -Denvironment.prod -e
 
 Run the command below in /scrabble directory;
 
+```bash
 docker compose -f scrabble-api/docker-compose.yml up
+```
 
 This will run the api server on port 6081, redis server on port 6800 and postgresql server on port 11223. Then you can
 navigate to `http://localhost:6081/scrabble-api/rest/users/by/user` to get the sample user.
@@ -44,7 +49,9 @@ navigate to `http://localhost:6081/scrabble-api/rest/users/by/user` to get the s
 
 Run the command below in /scrabble directory;
 
+```bash
 docker compose -f scrabble-gateway/docker-compose.yml up
+```
 
 This will run the gateway server on port 6080. Then you can navigate to `http://localhost:6080/scrabble-gateway/rest/games`
 to test the `games` resource. Since games resource only is reachable for authenticated users, getting HTTP 401 response would
@@ -57,6 +64,7 @@ an .env file should be provided under /scrabble-web directory to get the environ
 needed to start the frontend server;
 
 GATEWAY_URL    : URL of the gateway server (eg: `http://localhost:6080/scrabble-gateway`)
+
 USER_IMAGE_URL : URL of the image server for user profile pictures (eg: `http://localhost:8080/users`). These images should be
   stored in .png format and should have userId as the file name (eg: `http://localhost:8080/users/1.png` for user with id 1)
 
@@ -70,6 +78,7 @@ to run the node server. Navigating to `http://localhost:4200` will directly redi
 login with
 
 `username: user
+
 password: 1
 `
 
@@ -80,7 +89,9 @@ user to use the application.
 Currently there are 3 menu items in the game;
 
 Create : Game: Creates a new game by specifying the game properties
+
 Lobby  : Shows the last 3 created games
+
 Lounge : Shows the games that the authenticated user currently is playing
 
 The rules of the game are mostly traditional with some custom changes. Properties such as board size, cell values, rack size,
