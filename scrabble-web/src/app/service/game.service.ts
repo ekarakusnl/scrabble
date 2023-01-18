@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Globals } from '../common/globals';
 
 import { Game } from '../model/game';
 import { VirtualRack } from '../model/virtual-rack';
+
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,31 +20,31 @@ export class GameService {
   }
 
   createGame(game: Game): Observable<Game> {
-    return this.http.put<Game>(Globals.GATEWAY_URL + '/rest/games', game);
+    return this.http.put<Game>(environment.GATEWAY_URL + '/rest/games', game);
   }
 
   getGame(id: number): Observable<Game> {
-    return this.http.get<Game>(Globals.GATEWAY_URL + '/rest/games/' + id);
+    return this.http.get<Game>(environment.GATEWAY_URL + '/rest/games/' + id);
   }
 
   getGames(): Observable<Game[]> {
-    return this.http.get<Game[]>(Globals.GATEWAY_URL + '/rest/games');
+    return this.http.get<Game[]>(environment.GATEWAY_URL + '/rest/games');
   }
 
   getMyGames(): Observable<Game[]> {
-    return this.http.get<Game[]>(Globals.GATEWAY_URL + '/rest/games/my');
+    return this.http.get<Game[]>(environment.GATEWAY_URL + '/rest/games/my');
   }
 
   joinGame(id: number): Observable<void> {
-    return this.http.post<void>(Globals.GATEWAY_URL + '/rest/games/' + id + '/join', null);
+    return this.http.post<void>(environment.GATEWAY_URL + '/rest/games/' + id + '/join', null);
   }
 
   leaveGame(id: number): Observable<void> {
-    return this.http.post<void>(Globals.GATEWAY_URL + '/rest/games/' + id + '/leave', null);
+    return this.http.post<void>(environment.GATEWAY_URL + '/rest/games/' + id + '/leave', null);
   }
 
   play(id: number, virtualRack: VirtualRack): Observable<void> {
-    return this.http.post<void>(Globals.GATEWAY_URL + '/rest/games/' + id + '/play', virtualRack);
+    return this.http.post<void>(environment.GATEWAY_URL + '/rest/games/' + id + '/play', virtualRack);
   }
 
 }

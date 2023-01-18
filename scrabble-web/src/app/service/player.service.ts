@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Globals } from '../common/globals';
 
 import { Player } from '../model/player';
+
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class PlayerService {
   }
 
   getPlayers(gameId: number, actionCounter: number): Observable<Player[]> {
-    return this.http.get<Player[]>(Globals.GATEWAY_URL + '/rest/games/' + gameId + '/players?actionCounter=' + actionCounter);
+    return this.http.get<Player[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/players?actionCounter=' + actionCounter);
   }
 
 }

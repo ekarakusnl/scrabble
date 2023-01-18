@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { GameService } from '../service/game.service';
 import { PlayerService } from '../service/player.service';
-import { Game } from '../model/game';
-import { Player } from '../model/player';
 import { AuthenticationService } from '../service/authentication.service';
-import { Router } from '@angular/router';
-import { Globals } from '../common/globals';
 import { BoardService } from '../service/board.service';
 import { BagService } from '../service/bag.service';
+
+import { Game } from '../model/game';
+import { Player } from '../model/player';
 import { Board } from '../model/board';
 import { Bag } from '../model/bag';
+
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-lounge',
@@ -19,7 +21,7 @@ import { Bag } from '../model/bag';
 })
 export class LoungeComponent implements OnInit {
 
-  imageResourceURL: string = Globals.USER_IMAGE_URL;
+  imageResourceURL: string = environment.USER_IMAGE_URL;
 
   userId: number;
   username: string;

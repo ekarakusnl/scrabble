@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Globals } from '../common/globals';
 
 import { Board } from '../model/board';
+
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -18,11 +19,11 @@ export class BoardService {
   }
 
   getBoards(): Observable<Board[]> {
-    return this.http.get<Board[]>(Globals.GATEWAY_URL + '/rest/boards');
+    return this.http.get<Board[]>(environment.GATEWAY_URL + '/rest/boards');
   }
 
   getBoard(id: number): Observable<Board> {
-    return this.http.get<Board>(Globals.GATEWAY_URL + '/rest/boards/' + id);
+    return this.http.get<Board>(environment.GATEWAY_URL + '/rest/boards/' + id);
   }
 
 }

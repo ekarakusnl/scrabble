@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Globals } from '../common/globals';
+
 import { VirtualBoard } from '../model/virtual-board';
+
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +19,7 @@ export class VirtualBoardService {
   }
 
   getBoard(gameId: number, actionCounter: number): Observable<VirtualBoard> {
-    return this.http.get<VirtualBoard>(Globals.GATEWAY_URL + '/rest/games/' + gameId + '/boards?actionCounter=' +
+    return this.http.get<VirtualBoard>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/boards?actionCounter=' +
         actionCounter);
   }
 

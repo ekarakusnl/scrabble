@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Globals } from '../common/globals';
 
 import { Word } from '../model/word';
+
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class WordService {
   }
 
   getWordLogs(gameId: number): Observable<Word[]> {
-    return this.http.get<Word[]>(Globals.GATEWAY_URL  + '/rest/games/' + gameId + '/words');
+    return this.http.get<Word[]>(environment.GATEWAY_URL  + '/rest/games/' + gameId + '/words');
   }
 
 }

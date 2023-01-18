@@ -1,14 +1,6 @@
 import { AfterViewChecked, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-
-import { Action } from '../model/action';
-import { Cell } from '../model/cell';
-import { Chat } from '../model/chat';
-import { Game } from '../model/game';
-import { Player } from '../model/player';
-import { Tile } from '../model/tile';
-import { Board } from '../model/board';
-import { Word } from '../model/word';
+import { timer } from 'rxjs';
 
 import { WordService } from '../service/word.service';
 import { ActionService } from '../service/action.service';
@@ -20,14 +12,22 @@ import { PlayerService } from '../service/player.service';
 import { VirtualRackService } from '../service/virtual-rack.service';
 import { BoardService } from '../service/board.service';
 import { ToastService } from '../service/toast.service';
+import { TranslateService } from '@ngx-translate/core';
+import { BagService } from '../service/bag.service';
+
+import { Action } from '../model/action';
+import { Cell } from '../model/cell';
+import { Chat } from '../model/chat';
+import { Game } from '../model/game';
+import { Player } from '../model/player';
+import { Tile } from '../model/tile';
+import { Board } from '../model/board';
+import { Word } from '../model/word';
+import { Bag } from '../model/bag';
 import { VirtualRack } from '../model/virtual-rack';
 import { VirtualBoard } from '../model/virtual-board';
-import { TranslateService } from '@ngx-translate/core';
-import { Globals } from '../common/globals';
 
-import { timer } from 'rxjs';
-import { BagService } from '../service/bag.service';
-import { Bag } from '../model/bag';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-game',
@@ -37,7 +37,7 @@ import { Bag } from '../model/bag';
 export class GameComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollToBottom') private scrollContainer: ElementRef
 
-  imageResourceURL: string = Globals.USER_IMAGE_URL;
+  imageResourceURL: string = environment.USER_IMAGE_URL;
 
   id: number;
   userId: number;

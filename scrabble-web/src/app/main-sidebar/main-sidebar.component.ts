@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Globals } from '../common/globals';
+
 import { AuthenticationService } from '../service/authentication.service';
+
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-main-sidebar',
@@ -9,7 +11,7 @@ import { AuthenticationService } from '../service/authentication.service';
 })
 export class MainSidebarComponent implements OnInit {
 
-  imageResourceURL: string = Globals.USER_IMAGE_URL;
+  imageResourceURL: string = environment.USER_IMAGE_URL;
 
   userId: number;
   username: string;

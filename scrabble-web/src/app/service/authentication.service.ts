@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Globals } from '../common/globals';
 
 import { User } from '../model/user';
 import { UserToken } from '../model/user-token';
+
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class AuthenticationService {
   ) { }
 
   login(user: User) {
-    this.http.post<UserToken>(Globals.GATEWAY_URL + '/login', user).subscribe((userToken: UserToken) => {
+    this.http.post<UserToken>(environment.GATEWAY_URL + '/login', user).subscribe((userToken: UserToken) => {
       sessionStorage.setItem('username', user.username);
       sessionStorage.setItem('userId', String(userToken.id));
       sessionStorage.setItem('token', 'HTTP_TOKEN ' + userToken.token);
