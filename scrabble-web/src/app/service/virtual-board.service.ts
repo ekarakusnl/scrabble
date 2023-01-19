@@ -15,9 +15,6 @@ export class VirtualBoardService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getBoard(gameId: number, actionCounter: number): Observable<VirtualBoard> {
     return this.http.get<VirtualBoard>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/boards?actionCounter=' +
         actionCounter);

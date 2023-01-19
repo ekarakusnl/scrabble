@@ -10,9 +10,6 @@ export class ToastService {
     private toastrService: ToastrService,
   ) { }
 
-  ngOnInit(): void {
-  }
-
   playSound() {
     const audio = new Audio();
     audio.src = '../../assets/sounds/alert.mp3';

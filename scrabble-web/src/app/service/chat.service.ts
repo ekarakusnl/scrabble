@@ -15,9 +15,6 @@ export class ChatService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getChats(gameId: number, actionCounter: number): Observable<Chat[]> {
     return this.http.get<Chat[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/chats?actionCounter=' + actionCounter);
   }

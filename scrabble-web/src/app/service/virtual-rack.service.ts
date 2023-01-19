@@ -15,9 +15,6 @@ export class VirtualRackService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getRack(gameId: number, roundNumber: number): Observable<VirtualRack> {
     return this.http.get<VirtualRack>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/racks?roundNumber=' +
         roundNumber);

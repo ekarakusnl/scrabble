@@ -15,9 +15,6 @@ export class ActionService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getAction(gameId: number, counter: number): Observable<Action> {
     return this.http.get<Action>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/action?counter=' + counter);
   }

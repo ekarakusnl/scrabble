@@ -14,9 +14,6 @@ export class WordService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getWordLogs(gameId: number): Observable<Word[]> {
     return this.http.get<Word[]>(environment.GATEWAY_URL  + '/rest/games/' + gameId + '/words');
   }

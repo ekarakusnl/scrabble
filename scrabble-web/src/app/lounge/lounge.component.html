@@ -1,5 +1,5 @@
 <div class="row"
-     *ngIf="!games || games.length == 0">
+     *ngIf="!games || games.length === 0">
   <div class="col-12">
     <div class="callout callout-info">
       <h5><i class="fas fa-info"></i> {{'game.not.found' | translate}}</h5>
@@ -75,16 +75,16 @@
               <div class="card-body box-profile">
                 <div class="text-center">
                   <img class="profile-user-img img-fluid img-circle"
-                    src="{{imageResourceURL}}/{{player.userId}}.png"
-                    alt="User profile picture">
+                       src="{{imageResourceURL}}/{{player.userId}}.png"
+                       alt="User profile picture">
                 </div>
                 <h3 class="profile-username text-center">{{ player.username ? player.username : '?' }}</h3>
                 <p class="text-muted text-center"
-                   *ngIf="player.userId == game.ownerId">
+                   *ngIf="player.userId === game.ownerId">
                   {{ 'game.owner' | translate }}
                 </p>
                 <p class="text-muted text-center"
-                   *ngIf="player.userId != game.ownerId">
+                   *ngIf="player.userId !== game.ownerId">
                   {{ 'game.player' | translate }}
                 </p>
               </div>
@@ -97,7 +97,7 @@
               <i class="fas fa-eye"></i> {{ 'game.open' | translate }}
             </a>
             <a class="btn btn-app bg-danger"
-               [ngClass]="userId != game.ownerId && game.status == 'WAITING' ? '' : 'disabled'"
+               [ngClass]="userId !== game.ownerId && game.status === 'WAITING' ? '' : 'disabled'"
                (click)="leaveGame(game.id)">
               <i class="fas fa-thumbs-down"></i> {{ 'game.leave' | translate }}
             </a>

@@ -15,9 +15,6 @@ export class BoardService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getBoards(): Observable<Board[]> {
     return this.http.get<Board[]>(environment.GATEWAY_URL + '/rest/boards');
   }

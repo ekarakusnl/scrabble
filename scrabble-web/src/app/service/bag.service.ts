@@ -15,9 +15,6 @@ export class BagService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getBags(): Observable<Bag[]> {
     return this.http.get<Bag[]>(environment.GATEWAY_URL + '/rest/bags');
   }

@@ -15,9 +15,6 @@ export class PlayerService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   getPlayers(gameId: number, actionCounter: number): Observable<Player[]> {
     return this.http.get<Player[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/players?actionCounter=' + actionCounter);
   }

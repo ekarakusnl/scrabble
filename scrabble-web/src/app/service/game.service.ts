@@ -16,9 +16,6 @@ export class GameService {
     private http: HttpClient
   ) { }
 
-  ngOnInit(): void {
-  }
-
   createGame(game: Game): Observable<Game> {
     return this.http.put<Game>(environment.GATEWAY_URL + '/rest/games', game);
   }
