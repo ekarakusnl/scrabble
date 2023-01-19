@@ -47,6 +47,8 @@
   "game.last.round": "Torbadaki harfler sonra erdi, son raund oynanıyor",
   "game.you.won": "Tebrikler! Oyunu kazandınız!",
   "game.another.player.won": "{{0}} oyunu kazandı",
+  "game.round": "Raund",
+  "game.tile.count": "Harf Sayısı",
 
   "error.2001": "Oyun bulunamadı!",
   "error.2002": "Zaten oyundasınız!",

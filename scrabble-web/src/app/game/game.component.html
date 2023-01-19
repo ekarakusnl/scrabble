@@ -4,7 +4,7 @@
     <div class="card">
       <div class="card-header title-header">
         <h2 class="card-title title">
-          {{ 'game' | translate }}: {{ game.name }}
+          {{ 'game' | translate }}: {{ game.name }} - {{ 'game.round' | translate }}: {{ game.roundNumber }} - {{ 'game.tile.count' | translate }}: {{ remainingTileCount }}
         </h2>
       </div>
       <div class="card-body title-body">
@@ -67,7 +67,11 @@
               </div>
             </div>
             <div class="info-box player border"
-                 [ngClass]="winnerPlayer && winnerPlayer.playerNumber === player.playerNumber ? 'border-success' : player.playerNumber === currentPlayerNumber ? 'border border-secondary' : 'border-light'"
+                 [ngClass]="{
+                   'border-success': winnerPlayer && winnerPlayer.playerNumber === player.playerNumber,
+                   'border-secondary': player.playerNumber === currentPlayerNumber,
+                   'border-light': player.playerNumber !== currentPlayerNumber
+                 }"
                  *ngIf="currentStatus && currentStatus !== 'WAITING'">
               <span class="info-box-icon">
                 <img class="img-circle"
@@ -111,9 +115,12 @@
                   *ngFor="let c of [].constructor(board.columnSize); index as columnIndex"
                   (click)="putTile(getCell(rowIndex, columnIndex))"
                   [style.background-color]="getCell(rowIndex, columnIndex).letter ? '' : getCell(rowIndex, columnIndex).color">
-                <div class="cell-div text-center"
+                <div class="cell-div text-center cell"
                      *ngIf="getCell(rowIndex, columnIndex).letter"
-                     [ngClass]="getCell(rowIndex, columnIndex).lastPlayed ? 'sealed-cell' : 'cell'">
+                     [ngClass]="{
+                       'played-cell': getCell(rowIndex, columnIndex).lastPlayed,
+                       'sealed-cell': getCell(rowIndex, columnIndex).tileNumber 
+                     }">
                   <span class="cell-letter">{{ getCell(rowIndex, columnIndex).letter }}</span>
                   <span class="cell-score">{{ getCell(rowIndex, columnIndex).value }}</span>
                 </div>
@@ -146,13 +153,14 @@
               <td class="tile-td"
                   *ngFor="let tile of virtualRack.tiles"
                   (click)="selectTile(tile)">
-                <div class="tile-div text-center"
+                <div class="tile-div text-center tile"
                      *ngIf="tile"
-                     [ngClass]="tile.sealed ? 'sealed-tile' : tile.roundNumber === currentRoundNumber && tile.roundNumber > 1 ? 'new-tile' : 'tile'">
-                  <span class="tile-letter"
-                        *ngIf="!tile.selected">{{ tile.letter }}</span>
-                  <span class="tile-score"
-                        *ngIf="!tile.selected">{{ tile.value }}</span>
+                     [ngClass]="{
+                       'sealed-tile': tile.sealed || tile.selected,
+                       'new-tile': tile.roundNumber === currentRoundNumber && tile.roundNumber > 1
+                      }">
+                  <span class="tile-letter">{{ tile.letter }}</span>
+                  <span class="tile-score">{{ tile.value }}</span>
                 </div>
               </td>
             </tr>

@@ -47,6 +47,8 @@
   "game.last.round": "The bag is empty, this is the last round of the game",
   "game.you.won": "Congratulations! You have won the game!",
   "game.another.player.won": "{{0}} has won the game",
+  "game.round": "Round",
+  "game.tile.count": "Tile Count",
 
   "error.2001": "Game is not found!",
   "error.2002": "You are already in the game!",

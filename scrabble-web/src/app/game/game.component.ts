@@ -61,6 +61,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   currentPlayerNumber: number;
   currentStatus: string;
   winnerPlayer: Player;
+  remainingTileCount: number;
 
   // play duration
   durationTimer: any;
@@ -255,6 +256,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
     const counter = this.actionCounter - this.game.expectedPlayerCount;
     this.virtualBoardService.getBoard(this.game.id, counter).subscribe((virtualBoard: VirtualBoard) => {
       this.virtualBoard = virtualBoard;
+      const usedCellCount = virtualBoard.cells.reduce((sum, current) => sum + (current.letter ? 1 : 0), 0);
+      this.remainingTileCount = this.bag.tileCount - usedCellCount;
     });
   };
 
@@ -335,6 +338,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
       } else if (cell.letter) {
         this.toastService.error(this.translateService.instant('error.2010', { 0: cell.rowNumber, 1: cell.columnNumber }));
         this.selectedTile.sealed = false;
+        this.selectedTile.selected = false;
         this.selectedTile = null;
       }
     } else if (cell.letter && cell.tileNumber) {

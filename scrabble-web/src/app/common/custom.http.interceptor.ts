@@ -32,7 +32,7 @@ export class CustomHttpInterceptor implements HttpInterceptor {
               if (response.error.code === 2012) {
                   // error 2012 has the language parameter which needs to be translated
                   this.toastService.error(this.translateService.instant('error.' + response.error.code,
-                      { 0: response.error.params[0], 1: this.translateService.instant('game.bag.language.' + response.error.params[1]) }));
+                      { 0: response.error.params[0], 1: this.translateService.instant('game.language.' + response.error.params[1]) }));
               } else {
                   this.toastService.error(this.translateService.instant('error.' + response.error.code,
                       response.error.params));

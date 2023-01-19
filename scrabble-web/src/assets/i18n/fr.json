@@ -47,6 +47,8 @@
   "game.last.round": "Le sac est vide, c'est le dernier tour du jeu",
   "game.you.won": "Toutes nos félicitations ! Tu as gagné le jeu !",
   "game.another.player.won": "{{0}} a gagné le match",
+  "game.round": "Tour",
+  "game.tile.count": "Nombre de Tuiles",
 
   "error.2001": "Jeu introuvable !",
   "error.2002": "Vous êtes déjà dans le jeu !",

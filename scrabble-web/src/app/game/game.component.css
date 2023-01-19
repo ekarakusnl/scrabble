@@ -63,8 +63,15 @@
   margin: 0px;
 }
 
-.sealed-cell {
+.played-cell {
   background: -webkit-gradient(linear, 100% 100%, 0% 5%,from(#abdbe3), to(#abdbe3));
+  border-radius: 7px;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.sealed-cell {
+  background: -webkit-gradient(linear, 100% 100%, 0% 5%,from(#f5b7b1), to(#f5b7b1));
   border-radius: 7px;
   border-style: solid;
   border-width: 1px;
