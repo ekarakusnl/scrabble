@@ -8,7 +8,6 @@ Hibernate 5
 Spring 5  
 Redis 4  
 PostgreSQL 13
-`
 
 ## Project Composition
 
@@ -43,7 +42,7 @@ Run the command below in `/scrabble` directory;
 docker compose -f scrabble-api/docker-compose.yml up
 ```
 
-This will run the api server on port `6081`, redis server on port `6800` and postgresql server on port `11223`. Then you can
+This will run the api server on port `6081`, redis server on port `6380` and postgresql server on port `11223`. Then you can
 navigate to `http://localhost:6081/scrabble-api/rest/users/by/user` to get the sample user.
 
 ### Running scrabble-gateway Project
