@@ -124,9 +124,9 @@ public class PersistenceConfig {
         final ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
         boolean createSchema = env.getProperty("hibernate.create_schema", Boolean.class);
         if (createSchema) {
-            databasePopulator.addScript(new ClassPathResource("database.sql"));
+            databasePopulator.addScript(new ClassPathResource("database/database.sql"));
         }
-        databasePopulator.addScript(new ClassPathResource("gamedata.sql"));
+        databasePopulator.addScript(new ClassPathResource("database/gamedata.sql"));
         return databasePopulator;
     }
 
