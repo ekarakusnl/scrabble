@@ -1,7 +1,5 @@
 package com.gamecity.scrabble.service;
 
-import java.util.Date;
-
 import org.quartz.Job;
 import org.quartz.Scheduler;
 
@@ -16,16 +14,33 @@ import com.gamecity.scrabble.entity.Player;
 public interface SchedulerService {
 
     /**
-     * Schedules a {@link Job job} to run at the end of the play duration of a {@link Player player} in a
-     * {@link Game game}
+     * Schedules a {@link Job job} to run at the end of the play duration of the {@link Player player} in a
+     * {@link Game game} to skip the turn
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param playerNumber  <code>number</code> of the player
-     * @param duration      <code>duration</code> of the play
-     * @param actionCounter <code>counter</code> of the action
-     * @param actionDate    <code>date</code> of the action
+     * @param game the game
      */
-    void schedulePlayDuration(Long gameId, Integer playerNumber, Integer duration, Integer actionCounter,
-            Date actionDate);
+    void scheduleSkipTurnJob(Game game);
+
+    /**
+     * Terminates the scheduled {@link Job job}
+     * 
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the action
+     */
+    void terminateSkipTurnJob(Long gameId, Integer version);
+
+    /**
+     * Schedules a {@link Job job} to start the {@link Game game} when the game status is ready to start
+     * 
+     * @param gameId <code>id</code> of the game
+     */
+    void scheduleStartGameJob(Long gameId);
+
+    /**
+     * Schedules a {@link Job job} to end the {@link Game game} when the game status is ready to end
+     * 
+     * @param gameId <code>id</code> of the game
+     */
+    void scheduleEndGameJob(Long gameId);
 
 }

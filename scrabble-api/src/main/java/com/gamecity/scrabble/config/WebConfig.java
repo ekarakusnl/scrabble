@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 @EnableWebMvc
 @ComponentScan(
         basePackages = { "com.gamecity.scrabble.dao", "com.gamecity.scrabble.service", "com.gamecity.scrabble.resource",
-                "com.gamecity.scrabble.job" },
+                "com.gamecity.scrabble.job", "com.gamecity.scrabble.aspect" },
         basePackageClasses = { PersistenceConfig.class, AspectConfig.class, PropertyConfig.class })
 public class WebConfig implements WebMvcConfigurer {
 

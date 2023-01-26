@@ -2,6 +2,7 @@ package com.gamecity.scrabble.service;
 
 import java.util.List;
 
+import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.entity.User;
@@ -46,9 +47,10 @@ public interface GameService extends BaseService<Game> {
      * @param id          <code>id</code> of the game
      * @param userId      <code>id</code> of the user in the game
      * @param virtualRack player rack
+     * @param actionType  <code>type</code> of the action
      * @return the updated entity
      */
-    Game play(Long id, Long userId, VirtualRack virtualRack);
+    Game play(Long id, Long userId, VirtualRack virtualRack, ActionType actionType);
 
     /**
      * Ends the {@link Game game}

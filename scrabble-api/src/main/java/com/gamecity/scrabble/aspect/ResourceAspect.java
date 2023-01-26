@@ -39,14 +39,12 @@ public class ResourceAspect {
      */
     @Around("resource()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (log.isDebugEnabled()) {
-            long start = System.currentTimeMillis();
-            final String className = joinPoint.getSignature().getDeclaringTypeName();
-            final String methodName = joinPoint.getSignature().getName();
-            long elapsedTime = System.currentTimeMillis() - start;
-            log.debug("Method {}.{}({}) -> execution time : {} ms", className, methodName,
-                    Arrays.toString(joinPoint.getArgs()), elapsedTime);
-        }
+        long start = System.currentTimeMillis();
+        final String className = joinPoint.getSignature().getDeclaringTypeName();
+        final String methodName = joinPoint.getSignature().getName();
+        long elapsedTime = System.currentTimeMillis() - start;
+        log.debug("Method {}.{}({}) -> execution time : {} ms", className, methodName,
+                Arrays.toString(joinPoint.getArgs()), elapsedTime);
         return joinPoint.proceed();
     }
 

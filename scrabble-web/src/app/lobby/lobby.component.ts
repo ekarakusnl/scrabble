@@ -69,7 +69,7 @@ export class LobbyComponent implements OnInit {
   }
 
   loadPlayers(game: Game): void {
-    this.playerService.getPlayers(game.id, game.actionCounter).subscribe((players: Player[]) => {
+    this.playerService.getPlayers(game.id, game.version).subscribe((players: Player[]) => {
       const userExist = players.some(gamePlayer => gamePlayer.userId == this.userId);
       if (userExist) {
           return;

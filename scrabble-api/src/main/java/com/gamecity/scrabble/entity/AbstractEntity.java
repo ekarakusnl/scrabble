@@ -13,7 +13,10 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Base entity class for entities
@@ -22,6 +25,9 @@ import lombok.Data;
  */
 @Data
 @MappedSuperclass
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class AbstractEntity {
 
     @Id

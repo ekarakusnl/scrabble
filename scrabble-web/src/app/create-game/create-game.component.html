@@ -55,7 +55,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="duration">{{ 'game.duration' | translate }} ({{ 'game.duration.minutes' | translate: { '0': 'x' } }})</label>
+            <label for="duration">{{ 'game.duration' | translate }} ({{ 'game.duration.seconds' | translate: { '0': 'x' } }})</label>
             <input id="duration" type="number" class="form-control"
               [ngClass]="duration.invalid && duration.touched ? 'is-invalid' : ''"
               placeholder="{{ 'game.duration' | translate }}" formControlName="duration">

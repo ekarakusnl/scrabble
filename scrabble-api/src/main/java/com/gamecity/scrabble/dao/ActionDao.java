@@ -28,4 +28,13 @@ public interface ActionDao extends BaseDao<Action> {
      */
     Action getLastAction(Long gameId);
 
+    /**
+     * Gets the {@link Action action} in the {@link Game game} by the specified <code>version</code>
+     * 
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the action
+     * @return the action
+     */
+    Action getActionByVersion(Long gameId, Integer version);
+
 }

@@ -5,7 +5,6 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualRack;
@@ -30,12 +29,7 @@ class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void create(Game game, ActionType actionType) {
-        if (actionType != ActionType.START) {
-            return;
-        }
-
-        // the game is ready to start, prepare the board and the racks
+    public void create(Game game) {
         // create the board
         virtualBoardService.createBoard(game.getId(), game.getBoardId());
 

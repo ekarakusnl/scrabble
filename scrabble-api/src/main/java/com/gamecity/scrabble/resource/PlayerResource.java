@@ -24,12 +24,12 @@ public interface PlayerResource {
     /**
      * Gets the {@link List list} of {@link PlayerDto players} in a {@link GameDto game}
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter <code>counter</code> of the action
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the action
      * @return the list of games
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    Response list(@PathParam("gameId") Long gameId, @QueryParam("actionCounter") Integer actionCounter);
+    Response list(@PathParam("gameId") Long gameId, @QueryParam("version") Integer version);
 
 }

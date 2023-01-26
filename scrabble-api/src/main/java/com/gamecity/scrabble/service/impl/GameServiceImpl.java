@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import com.gamecity.scrabble.dao.GameDao;
+import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Bag;
 import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Game;
@@ -29,6 +30,7 @@ import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualCell;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
+import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.BagService;
 import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
@@ -60,6 +62,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private ContentService contentService;
     private DictionaryService dictionaryService;
     private WordService wordService;
+    private ActionService actionService;
 
     private enum Direction {
         VERTICAL, HORIZONTAL
@@ -146,6 +149,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         this.wordService = wordService;
     }
 
+    @Autowired
+    void setActionService(ActionService actionService) {
+        this.actionService = actionService;
+    }
+
     @Override
     public Game get(Long gameId) {
         final Game game = baseDao.get(gameId);
@@ -170,11 +178,13 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setOwnerId(user.getId());
         game.setStatus(GameStatus.WAITING);
         game.setActivePlayerCount(1);
-        game.setActionCounter(1);
+        game.setVersion(1);
 
         final Game savedGame = baseDao.save(game);
 
         playerService.add(game.getId(), user.getId(), game.getActivePlayerCount());
+
+        log.debug("Game {} is created", game.getId());
 
         return savedGame;
     }
@@ -182,7 +192,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private Game update(Game game) {
         final Game existingGame = get(game.getId());
 
-        if (existingGame.getActionCounter() > 1) {
+        if (existingGame.getVersion() > 1) {
             throw new GameException(GameError.IN_PROGRESS);
         }
 
@@ -213,13 +223,13 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         }
 
         game.setActivePlayerCount(game.getActivePlayerCount() + 1);
-        game.setActionCounter(game.getActionCounter() + 1);
+        game.setVersion(game.getVersion() + 1);
 
         playerService.add(game.getId(), userId, game.getActivePlayerCount());
 
         // expected player count has been reached
         if (game.getActivePlayerCount().equals(game.getExpectedPlayerCount())) {
-            log.debug("Expected player count has been reached, game {} is ready to start", game.getId());
+            log.info("Expected player count has been reached, game {} is ready to start", game.getId());
             game.setStatus(GameStatus.READY_TO_START);
         }
 
@@ -251,7 +261,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         playerService.remove(player);
 
         game.setActivePlayerCount(game.getActivePlayerCount() - 1);
-        game.setActionCounter(game.getActionCounter() + 1);
+        game.setVersion(game.getVersion() + 1);
 
         return baseDao.save(game);
     }
@@ -275,21 +285,23 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setStatus(GameStatus.IN_PROGRESS);
         game.setCurrentPlayerNumber(1);
         game.setRoundNumber(1);
-        game.setActionCounter(game.getActionCounter() + 1);
+        game.setVersion(game.getVersion() + 1);
 
-        log.debug("Game {} has been started", game.getId());
+        log.info("Game {} is started", game.getId());
 
-        return baseDao.save(game);
+        final Game updatedGame = baseDao.save(game);
+        contentService.create(updatedGame);
+        return updatedGame;
     }
 
     @Override
     @Transactional
-    public Game play(Long id, Long userId, VirtualRack virtualRack) {
+    public Game play(Long id, Long userId, VirtualRack virtualRack, ActionType actionType) {
         Assert.notNull(id, "id cannot be null");
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(virtualRack, "rack cannot be null");
 
-        final Game game = get(id);
+        final Game game = getAndLock(id);
 
         if (GameStatus.IN_PROGRESS != game.getStatus() && GameStatus.LAST_ROUND != game.getStatus()) {
             throw new GameException(GameError.WAITING);
@@ -304,30 +316,23 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         isCurrentPlayer(player.getPlayerNumber(), currentPlayerNumber);
         isValidRack(game, player.getPlayerNumber(), virtualRack);
 
-        final Integer boardActionCounter = game.getActionCounter() - game.getExpectedPlayerCount();
+        final Integer boardVersion = game.getVersion() - game.getExpectedPlayerCount();
+        final VirtualBoard virtualBoard = virtualBoardService.getBoard(game.getId(), boardVersion);
 
-        final Bag bag = bagService.get(game.getBagId());
-        final Board board = boardService.get(game.getBoardId());
-
-        final VirtualBoard virtualBoard = virtualBoardService.getBoard(game.getId(), boardActionCounter);
-
-        findAndPlayWords(game, bag, board, virtualRack, virtualBoard, userId);
+        findAndPlayWords(game, virtualRack, virtualBoard, userId);
         assignNextPlayer(game);
 
-        game.setActionCounter(game.getActionCounter() + 1);
+        game.setVersion(game.getVersion() + 1);
 
-        boolean newRound = false;
         // if the next user is the owner, then a new round starts
-        if (game.getActionCounter() % game.getExpectedPlayerCount() == 1) {
+        if (game.getVersion() % game.getExpectedPlayerCount() == 1) {
             game.setRoundNumber(currentRoundNumber + 1);
-            newRound = true;
         }
 
-        contentService.update(game, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
-
-        if (newRound) {
+        // end game validations
+        if (game.getRoundNumber() > currentRoundNumber) {
             if (GameStatus.LAST_ROUND == game.getStatus()) {
-                log.debug("The last round has been played, game {} is ready to end", game.getId());
+                log.info("The last round has been played, game {} is ready to end", game.getId());
                 game.setStatus(GameStatus.READY_TO_END);
             } else {
                 final List<Tile> tiles = virtualBagService.getTiles(game.getId(), game.getBagId())
@@ -336,14 +341,17 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                         .collect(Collectors.toList());
                 // the bag is empty, set the last round
                 if (tiles.isEmpty()) {
-                    log.debug("No tiles left in the bag, the last round is going to be played on game {}",
-                            game.getId());
+                    log.info("No tiles left in the bag, the last round is going to be played on game {}", game.getId());
                     game.setStatus(GameStatus.LAST_ROUND);
                 }
             }
         }
 
-        return baseDao.save(game);
+        final Game updatedGame = baseDao.save(game);
+        contentService.update(updatedGame, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
+        actionService.add(updatedGame, userId, actionType);
+
+        return updatedGame;
     }
 
     @Override
@@ -377,9 +385,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         game.setEndDate(new Date());
         game.setStatus(GameStatus.ENDED);
-        game.setActionCounter(game.getActionCounter() + 1);
+        game.setVersion(game.getVersion() + 1);
 
-        log.debug("Game {} has been ended", game.getId());
+        log.info("Game {} is ended", game.getId());
 
         return baseDao.save(game);
     }
@@ -387,6 +395,16 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     @Override
     public List<Game> listByUser(Long userId) {
         return baseDao.getByUser(userId);
+    }
+
+    private Game getAndLock(Long gameId) {
+        final Game game = baseDao.getAndLock(gameId);
+
+        if (game == null || GameStatus.TERMINATED == game.getStatus()) {
+            throw new GameException(GameError.NOT_FOUND);
+        }
+
+        return game;
     }
 
     /**
@@ -422,20 +440,22 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
      * Assigns the turn to the next player in the game
      */
     private void assignNextPlayer(Game game) {
-        int nextPlayerNumber = (game.getActionCounter() % game.getExpectedPlayerCount()) + 1;
+        int nextPlayerNumber = (game.getVersion() % game.getExpectedPlayerCount()) + 1;
         game.setCurrentPlayerNumber(nextPlayerNumber);
-        log.debug("Current player is set as player {} on game {}", nextPlayerNumber, game.getId());
+        log.info("Current player is set as player {} on game {}", nextPlayerNumber, game.getId());
     }
 
     /**
      * Does the validations and play the words
      */
-    private void findAndPlayWords(Game game, Bag bag, Board board, VirtualRack updatedRack, VirtualBoard virtualBoard,
-            Long userId) {
+    private void findAndPlayWords(Game game, VirtualRack updatedRack, VirtualBoard virtualBoard, Long userId) {
         boolean hasNewMove = updatedRack.getTiles().stream().anyMatch(VirtualTile::isSealed);
         if (!hasNewMove) {
             return;
         }
+
+        final Bag bag = bagService.get(game.getBagId());
+        final Board board = boardService.get(game.getBoardId());
 
         final VirtualCell[][] boardMatrix = new VirtualCell[board.getRowSize()][board.getColumnSize()];
         virtualBoard.getCells().stream().forEach(cell -> {

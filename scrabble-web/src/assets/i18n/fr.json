@@ -19,7 +19,7 @@
   "game.language.de": "Allemand",
   "game.language.nl": "Néerlandais",
   "game.duration": "Durée de Lecture",
-  "game.duration.minutes": "{{0}} minutes par tour",
+  "game.duration.seconds": "{{0}} seconds par tour",
   "game.create": "Créer",
 
   "game.owner": "Propriétaire",

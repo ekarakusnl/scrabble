@@ -15,9 +15,8 @@ export class VirtualBoardService {
     private http: HttpClient
   ) { }
 
-  getBoard(gameId: number, actionCounter: number): Observable<VirtualBoard> {
-    return this.http.get<VirtualBoard>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/boards?actionCounter=' +
-        actionCounter);
+  getBoard(gameId: number, version: number): Observable<VirtualBoard> {
+    return this.http.get<VirtualBoard>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/boards?version=' + version);
   }
 
 }

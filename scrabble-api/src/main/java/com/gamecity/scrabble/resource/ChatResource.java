@@ -8,7 +8,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -38,12 +37,11 @@ public interface ChatResource {
     /**
      * Gets the {@link List list} of {@link ChatDto chats} in a {@link GameDto game}
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter <code>counter</code> of the action
+     * @param gameId <code>id</code> of the game
      * @return the list of chats
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    Response list(@PathParam("gameId") Long gameId, @QueryParam("actionCounter") Integer actionCounter);
+    Response list(@PathParam("gameId") Long gameId);
 
 }

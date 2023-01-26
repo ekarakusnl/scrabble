@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.gamecity.scrabble.model.rest.ActionDto;
-import com.gamecity.scrabble.model.rest.GameDto;
 import com.gamecity.scrabble.util.JsonUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -37,19 +36,19 @@ public class ActionController extends AbstractController implements MessageListe
     private final Map<DeferredResult<ActionDto>, Pair<Long, Integer>> actions = new ConcurrentHashMap<>();
 
     /**
-     * Gets an {@link ActionDto action} by action counter
+     * Gets an {@link ActionDto action} by version
      * 
      * @param gameId  <code>id</code> of the game
-     * @param counter action counter
+     * @param version the expected version
      * @return the action
      */
     @GetMapping
     @ResponseBody
-    public DeferredResult<ActionDto> getAction(@PathVariable Long gameId, @RequestParam Integer counter) {
+    public DeferredResult<ActionDto> getAction(@PathVariable Long gameId, @RequestParam Integer version) {
 
         final DeferredResult<ActionDto> deferredResult =
                 new DeferredResult<>(ASYNCHRONOUS_REQUEST_DURATION, Collections.emptyList());
-        actions.put(deferredResult, Pair.of(gameId, counter));
+        actions.put(deferredResult, Pair.of(gameId, version));
 
         deferredResult.onCompletion(new Runnable() {
             @Override
@@ -58,7 +57,7 @@ public class ActionController extends AbstractController implements MessageListe
             }
         });
 
-        final ActionDto actionDto = get(API_RESOURCE_PATH + "/{actionCounter}", ActionDto.class, gameId, counter);
+        final ActionDto actionDto = get(API_RESOURCE_PATH + "/{version}", ActionDto.class, gameId, version);
         if (actionDto != null) {
             deferredResult.setResult(actionDto);
         }
@@ -70,19 +69,9 @@ public class ActionController extends AbstractController implements MessageListe
     public void onMessage(Message message, byte[] pattern) {
         final ActionDto actionDto = JsonUtils.toDto(JsonUtils.formatRedisPayload(message.toString()), ActionDto.class);
 
-        if ("READY_TO_START".equals(actionDto.getGameStatus())) {
-            post("/games/{gameId}/start", GameDto.class, null, actionDto.getGameId());
-        }
-
-        if ("READY_TO_END".equals(actionDto.getGameStatus())) {
-            post("/games/{gameId}/end", GameDto.class, null, actionDto.getGameId());
-        }
-
         try {
             for (Entry<DeferredResult<ActionDto>, Pair<Long, Integer>> entry : actions.entrySet()) {
-                log.info("onMessage is called with : {}", message.toString());
-
-                if (entry.getValue().getRight().equals(actionDto.getCounter())
+                if (entry.getValue().getRight().equals(actionDto.getVersion())
                         && entry.getValue().getLeft().equals(actionDto.getGameId())) {
                     entry.getKey().setResult(actionDto);
                 }

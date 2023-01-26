@@ -70,18 +70,18 @@ class VirtualBoardServiceImpl implements VirtualBoardService {
 
         final VirtualBoard virtualBoard = new VirtualBoard(Arrays.asList(virtualCells));
         redisRepository.updateBoard(gameId, virtualBoard);
-        log.debug("Board has been created for game {} with the size {}", gameId, board.getName());
+        log.info("Board has been created for game {} with the size {}", gameId, board.getName());
     }
 
     @Override
     public void updateBoard(Long gameId, VirtualBoard virtualBoard) {
         redisRepository.updateBoard(gameId, virtualBoard);
-        log.debug("Board has been updated for game {}", gameId);
+        log.info("Board has been updated for game {}", gameId);
     }
 
     @Override
-    public VirtualBoard getBoard(Long gameId, Integer actionCounter) {
-        return redisRepository.getBoard(gameId, actionCounter);
+    public VirtualBoard getBoard(Long gameId, Integer version) {
+        return redisRepository.getBoard(gameId, version);
     }
 
 }

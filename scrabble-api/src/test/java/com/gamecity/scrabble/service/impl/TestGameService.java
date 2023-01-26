@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import com.gamecity.scrabble.dao.GameDao;
+import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Player;
@@ -28,6 +29,7 @@ import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualCell;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
+import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.BagService;
 import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
@@ -77,6 +79,9 @@ class TestGameService extends AbstractServiceTest {
 
     @Mock
     private DictionaryService dictionaryService;
+
+    @Mock
+    private ActionService actionService;
 
     private Game game;
     private List<VirtualTile> tiles;
@@ -198,7 +203,7 @@ class TestGameService extends AbstractServiceTest {
         assertEquals(GameStatus.WAITING, game.getStatus());
         assertEquals(DEFAULT_USER_ID, game.getOwnerId());
         assertEquals(DEFAULT_BOARD_ID, game.getBoardId());
-        assertEquals(1, game.getActionCounter());
+        assertEquals(1, game.getVersion());
         assertEquals(1, game.getActivePlayerCount());
     }
 
@@ -218,7 +223,7 @@ class TestGameService extends AbstractServiceTest {
         verify(playerService, times(1)).add(sampleGame.getId(), 2L, sampleGame.getActivePlayerCount());
 
         assertEquals(GameStatus.WAITING, game.getStatus());
-        assertEquals(2, game.getActionCounter());
+        assertEquals(2, game.getVersion());
         assertEquals(2, game.getActivePlayerCount());
     }
 
@@ -275,7 +280,7 @@ class TestGameService extends AbstractServiceTest {
     void test_leave_game() {
         final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 3);
         sampleGame.setId(DEFAULT_GAME_ID);
-        sampleGame.setActionCounter(2);
+        sampleGame.setVersion(2);
         sampleGame.setActivePlayerCount(2);
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
@@ -293,7 +298,7 @@ class TestGameService extends AbstractServiceTest {
         verify(playerService, times(1)).remove(any(Player.class));
 
         assertEquals(GameStatus.WAITING, game.getStatus());
-        assertEquals(3, game.getActionCounter());
+        assertEquals(3, game.getVersion());
         assertEquals(1, game.getActivePlayerCount());
     }
 
@@ -368,7 +373,7 @@ class TestGameService extends AbstractServiceTest {
         assertEquals(2, game.getDuration());
         assertEquals(1, game.getCurrentPlayerNumber());
         assertEquals(1, game.getRoundNumber());
-        assertEquals(2, game.getActionCounter());
+        assertEquals(2, game.getVersion());
     }
 
     @Test
@@ -435,7 +440,7 @@ class TestGameService extends AbstractServiceTest {
         sampleGame.setDuration(4);
 
         final Game existingGame = createSampleGame(DEFAULT_USER_ID, 2);
-        existingGame.setActionCounter(2);
+        existingGame.setVersion(2);
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(existingGame);
 
@@ -451,10 +456,10 @@ class TestGameService extends AbstractServiceTest {
     void test_play_not_started_game() {
         final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
 
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
+        when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack());
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(), ActionType.PLAY);
             fail("The game is started");
         } catch (GameException e) {
             assertEquals(GameError.WAITING.getCode(), e.getCode());
@@ -470,7 +475,7 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
             fail("Starting cell is not empty");
         } catch (GameException e) {
             assertEquals(GameError.CENTER_CANNOT_BE_EMPTY.getCode(), e.getCode());
@@ -489,7 +494,9 @@ class TestGameService extends AbstractServiceTest {
         // the word is valid
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
-        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the word HEAL is found in the dictionary
         verify(dictionaryService, times(1)).hasWord("WEAK", Language.en);
@@ -523,7 +530,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(eq("WEAK"), any(Language.class))).thenReturn(false);
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
             fail("The word is valid");
         } catch (GameException e) {
             assertEquals(GameError.WORDS_ARE_NOT_FOUND.getCode(), e.getCode());
@@ -543,7 +550,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
             fail("New word is linked to existing words");
         } catch (GameException e) {
             assertEquals(GameError.WORDS_ARE_NOT_LINKED.getCode(), e.getCode());
@@ -568,7 +575,9 @@ class TestGameService extends AbstractServiceTest {
         // the words are valid
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
-        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the words are found in the dictionary
         verify(dictionaryService, times(1)).hasWord("RAW", Language.en);
@@ -626,7 +635,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(eq("WEAKENIN"), any(Language.class))).thenReturn(false);
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
             fail("Word detection does not end in right");
         } catch (GameException e) {
             assertEquals(GameError.WORDS_ARE_NOT_FOUND.getCode(), e.getCode());
@@ -646,7 +655,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(eq("WEAKENIN"), any(Language.class))).thenReturn(false);
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
             fail("Word detection does not end in bottom");
         } catch (GameException e) {
             assertEquals(GameError.WORDS_ARE_NOT_FOUND.getCode(), e.getCode());
@@ -667,7 +676,9 @@ class TestGameService extends AbstractServiceTest {
         // the words are valid
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
-        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the words are found in the dictionary
         verify(dictionaryService, times(1)).hasWord("WEAKENING", Language.en);
@@ -706,7 +717,9 @@ class TestGameService extends AbstractServiceTest {
         // the words are valid
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
-        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the words are found in the dictionary
         verify(dictionaryService, times(1)).hasWord("WEAKENING", Language.en);
@@ -754,7 +767,9 @@ class TestGameService extends AbstractServiceTest {
         // the words are valid
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
-        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the word is found in the dictionary
         verify(dictionaryService, times(1)).hasWord("WEAK", Language.en);
@@ -785,7 +800,7 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
             fail("Single letter words are not detected");
         } catch (GameException e) {
             assertEquals(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode(), e.getCode());
@@ -804,7 +819,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
         try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles));
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
             fail("Single letter words are not detected");
         } catch (GameException e) {
             assertEquals(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode(), e.getCode());
@@ -816,10 +831,10 @@ class TestGameService extends AbstractServiceTest {
         game.setId(DEFAULT_GAME_ID);
         game.setStatus(GameStatus.IN_PROGRESS);
         game.setCurrentPlayerNumber(1);
-        game.setActionCounter(3);
+        game.setVersion(3);
         game.setRoundNumber(1);
 
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(game);
+        when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(game);
         when(boardService.get(eq(DEFAULT_BOARD_ID))).thenReturn(createSampleBoard());
         when(bagService.get(eq(DEFAULT_BAG_ID))).thenReturn(createSampleBag());
 

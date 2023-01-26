@@ -27,15 +27,15 @@ public class PlayerController extends AbstractController {
     /**
      * Gets the {@link List list} of {@link PlayerDto players}
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter action counter
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the player list
      * @return the player list
      */
     @GetMapping
     @ResponseBody
-    public ResponseEntity<List<PlayerDto>> getPlayers(@PathVariable Long gameId, @RequestParam Integer actionCounter) {
+    public ResponseEntity<List<PlayerDto>> getPlayers(@PathVariable Long gameId, @RequestParam Integer version) {
         final List<PlayerDto> players =
-                list(API_RESOURCE_PATH + "?actionCounter={actionCounter}", PlayerDto.class, gameId, actionCounter);
+                list(API_RESOURCE_PATH + "?version={version}", PlayerDto.class, gameId, version);
         return new ResponseEntity<>(players, HttpStatus.OK);
     }
 

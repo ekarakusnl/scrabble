@@ -29,10 +29,10 @@ public interface VirtualBoardService {
     /**
      * Returns the {@link VirtualBoard board} for the given {@link Game game}
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter <code>counter</code> of the action
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the board
      * @return the board
      */
-    VirtualBoard getBoard(Long gameId, Integer actionCounter);
+    VirtualBoard getBoard(Long gameId, Integer version);
 
 }

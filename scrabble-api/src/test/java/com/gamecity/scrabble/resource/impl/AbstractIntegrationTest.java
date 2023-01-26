@@ -1,4 +1,4 @@
-package com.gamecity.scrabble.test.resource;
+package com.gamecity.scrabble.resource.impl;
 
 import java.io.IOException;
 
@@ -16,7 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import com.gamecity.scrabble.config.AspectConfig;
 import com.gamecity.scrabble.config.RedisConfig;
-import com.gamecity.scrabble.resource.impl.ResourceExceptionMapper;
 
 import redis.embedded.RedisServer;
 
@@ -49,7 +48,7 @@ abstract class AbstractIntegrationTest extends JerseyTest {
     private static void initializeApplicationContext() {
         applicationContext = new AnnotationConfigApplicationContext();
         applicationContext.scan("com.gamecity.scrabble.dao", "com.gamecity.scrabble.service",
-                "com.gamecity.scrabble.resource", "com.gamecity.scrabble.job");
+                "com.gamecity.scrabble.resource", "com.gamecity.scrabble.job", "com.gamecity.scrabble.aspect");
         applicationContext.register(PersistenceConfig.class, RedisConfig.class, AspectConfig.class,
                 PropertyConfig.class, QuartzConfig.class);
         applicationContext.refresh();

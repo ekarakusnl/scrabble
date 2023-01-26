@@ -1,7 +1,7 @@
 export interface Action {
   gameId: number;
   userId: number;
-  counter: number;
+  version: number;
   type: string;
   gameStatus: string;
   roundNumber: number;

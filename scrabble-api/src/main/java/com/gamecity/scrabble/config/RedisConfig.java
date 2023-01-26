@@ -21,8 +21,6 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Spring configuration of Redis including push messages and cache connection
  * 
@@ -31,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @EnableCaching
 @PropertySource("classpath:redis.properties")
-@Slf4j
 public class RedisConfig extends CachingConfigurerSupport {
 
     private static final Integer TTL_SECONDS = 3600;
@@ -53,7 +50,6 @@ public class RedisConfig extends CachingConfigurerSupport {
 
     @Bean
     JedisConnectionFactory connectionFactory() {
-        log.debug("Connecting to '{}:{}'", redisHost, redisPort);
         final RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
         if (StringUtils.isNotEmpty(redisUsername) && StringUtils.isNotEmpty(redisPassword)) {
             redisConfiguration.setUsername(redisUsername);
@@ -64,7 +60,6 @@ public class RedisConfig extends CachingConfigurerSupport {
         jedisConfigurationBuilder.connectTimeout(Duration.ofSeconds(60));
         jedisConfigurationBuilder.readTimeout(Duration.ofSeconds(60));
         if (useSsl) {
-            log.debug("Redis server is ssl secured");
             jedisConfigurationBuilder.useSsl();
         }
         jedisConfigurationBuilder.usePooling();

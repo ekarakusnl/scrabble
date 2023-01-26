@@ -11,6 +11,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 
 import com.gamecity.scrabble.Constants;
 
@@ -77,8 +78,9 @@ public class Game extends AbstractEntity {
     @Column(name = "round_number")
     private Integer roundNumber;
 
-    @Column(name = "action_counter", nullable = false)
-    private Integer actionCounter;
+    @Version
+    @Column(name = "version", nullable = false)
+    private Integer version;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_date")

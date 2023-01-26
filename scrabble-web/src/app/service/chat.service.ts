@@ -15,8 +15,8 @@ export class ChatService {
     private http: HttpClient
   ) { }
 
-  getChats(gameId: number, actionCounter: number): Observable<Chat[]> {
-    return this.http.get<Chat[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/chats?actionCounter=' + actionCounter);
+  getChats(gameId: number, messageCount: number): Observable<Chat[]> {
+    return this.http.get<Chat[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/chats?messageCount=' + messageCount);
   }
 
   sendMessage(gameId: number, message: string): Observable<void> {

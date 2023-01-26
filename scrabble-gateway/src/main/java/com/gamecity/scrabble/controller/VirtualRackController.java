@@ -25,7 +25,7 @@ public class VirtualRackController extends AbstractController {
     private static final String API_RESOURCE_PATH = "/games/{gameId}/racks";
 
     /**
-     * Gets the {@link VirtualRackDto rack} by game id and action counter
+     * Gets the {@link VirtualRackDto rack} by game id and round number
      * 
      * @param gameId      <code>id</code> of the game
      * @param roundNumber <code>number</code> of the round

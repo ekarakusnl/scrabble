@@ -1,6 +1,5 @@
 package com.gamecity.scrabble.service;
 
-import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.model.VirtualBoard;
@@ -17,10 +16,9 @@ public interface ContentService {
     /**
      * Creates the content of the {@link Game game} data after it starts
      * 
-     * @param game       the game that is currently played on
-     * @param actionType <code>type</code> of the action happened
+     * @param game the game that is currently played on
      */
-    void create(Game game, ActionType actionType);
+    void create(Game game);
 
     /**
      * Updates the content of a {@link Game game} after each {@link Player player} turn

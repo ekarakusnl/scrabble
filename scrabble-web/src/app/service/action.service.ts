@@ -15,8 +15,8 @@ export class ActionService {
     private http: HttpClient
   ) { }
 
-  getAction(gameId: number, counter: number): Observable<Action> {
-    return this.http.get<Action>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/action?counter=' + counter);
+  getAction(gameId: number, version: number): Observable<Action> {
+    return this.http.get<Action>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/action?version=' + version);
   }
 
 }

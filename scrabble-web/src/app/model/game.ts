@@ -14,7 +14,7 @@ export interface Game {
   status?: string;
   currentPlayerNumber?: number;
   roundNumber?: number;
-  actionCounter?: number;
+  version?: number;
   board?: Board;
   bag?: Bag;
   players?: Player[];

@@ -21,14 +21,12 @@ import com.gamecity.scrabble.resource.GameResource;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
 import com.gamecity.scrabble.service.SchedulerService;
-import com.gamecity.scrabble.service.ContentService;
 
 @Component(value = "gameResource")
 class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> implements GameResource {
 
     private GameService baseService;
     private ActionService actionService;
-    private ContentService contentService;
     private SchedulerService schedulerService;
     private RedisRepository redisRepository;
 
@@ -47,11 +45,6 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     }
 
     @Autowired
-    void setContentService(ContentService contentService) {
-        this.contentService = contentService;
-    }
-
-    @Autowired
     void setSchedulerService(SchedulerService schedulerService) {
         this.schedulerService = schedulerService;
     }
@@ -67,12 +60,30 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     }
 
     @Override
+    public Response getAction(Long id, Integer version) {
+        if (version < 1) {
+            return Response.ok().build();
+        }
+
+        boolean hasNewAction = actionService.hasNewAction(id, version);
+        if (!hasNewAction) {
+            return Response.ok().build();
+        }
+
+        final Action action = actionService.getAction(id, version);
+        if (action == null) {
+            return Response.ok().build();
+        }
+
+        return Response.ok(Mapper.toDto(action)).build();
+    }
+
+    @Override
     public Response create(GameDto gameDto) {
         final Game game = baseService.save(Mapper.toEntity(gameDto));
 
         final ActionType actionType = ActionType.JOIN;
-        final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(), null,
-                game.getRoundNumber(), actionType, GameStatus.WAITING);
+        final Action action = actionService.add(game, game.getOwnerId(), actionType);
         redisRepository.publishAction(action.getGameId(), action);
 
         final GameDto responseDto = Mapper.toDto(game);
@@ -84,30 +95,14 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Game game = baseService.join(id, userId);
 
         final ActionType actionType = ActionType.JOIN;
-        final Action action = actionService.add(game.getId(), userId, game.getActionCounter(), null,
-                game.getRoundNumber(), actionType, game.getStatus());
+        final Action action = actionService.add(game, userId, actionType);
         redisRepository.publishAction(action.getGameId(), action);
 
+        if (GameStatus.READY_TO_START == game.getStatus()) {
+            schedulerService.scheduleStartGameJob(id);
+        }
+
         return Response.ok(Mapper.toDto(game)).build();
-    }
-
-    @Override
-    public Response getAction(Long id, Integer counter) {
-        if (counter < 1) {
-            return Response.ok().build();
-        }
-
-        boolean hasNewAction = actionService.hasNewAction(id, counter);
-        if (!hasNewAction) {
-            return Response.ok().build();
-        }
-
-        final Action action = redisRepository.getAction(id, counter);
-        if (action == null) {
-            return Response.ok().build();
-        }
-
-        return Response.ok(Mapper.toDto(action)).build();
     }
 
     @Override
@@ -115,8 +110,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final Game game = baseService.leave(id, userId);
 
         final ActionType actionType = ActionType.LEAVE;
-        final Action action = actionService.add(game.getId(), userId, game.getActionCounter(), null,
-                game.getRoundNumber(), actionType, GameStatus.WAITING);
+        final Action action = actionService.add(game, userId, actionType);
         redisRepository.publishAction(action.getGameId(), action);
 
         return Response.ok(Mapper.toDto(game)).build();
@@ -125,43 +119,19 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     @Override
     public Response play(Long id, Long userId, VirtualRackDto rackDto) {
         final VirtualRack rack = Mapper.toEntity(rackDto);
-        final Game game = baseService.play(id, userId, rack);
+        final Game game = baseService.play(id, userId, rack, ActionType.PLAY);
 
-        final ActionType actionType = ActionType.PLAY;
-        final Action action = actionService.add(game.getId(), userId, game.getActionCounter(),
-                game.getCurrentPlayerNumber(), game.getRoundNumber(), actionType, game.getStatus());
-        redisRepository.publishAction(action.getGameId(), action);
+        final Action action = actionService.getAction(id, game.getVersion());
+        redisRepository.publishAction(game.getId(), action);
 
-        schedulerService.schedulePlayDuration(game.getId(), game.getCurrentPlayerNumber(), game.getDuration(),
-                game.getActionCounter(), action.getCreatedDate());
-
-        return Response.ok(Mapper.toDto(game)).build();
-    }
-
-    @Override
-    public Response start(Long id) {
-        final Game game = baseService.start(id);
-
-        final ActionType actionType = ActionType.START;
-        contentService.create(game, actionType);
-
-        final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(),
-                game.getCurrentPlayerNumber(), game.getRoundNumber(), actionType, GameStatus.IN_PROGRESS);
-        redisRepository.publishAction(action.getGameId(), action);
-
-        schedulerService.schedulePlayDuration(game.getId(), game.getCurrentPlayerNumber(), game.getDuration(),
-                game.getActionCounter(), action.getCreatedDate());
-
-        return Response.ok(Mapper.toDto(game)).build();
-    }
-
-    @Override
-    public Response end(Long id) {
-        final Game game = baseService.end(id);
-
-        final Action action = actionService.add(game.getId(), game.getOwnerId(), game.getActionCounter(),
-                game.getCurrentPlayerNumber(), game.getRoundNumber(), ActionType.END, GameStatus.ENDED);
-        redisRepository.publishAction(action.getGameId(), action);
+        schedulerService.terminateSkipTurnJob(id, game.getVersion() - 1);
+        if (GameStatus.READY_TO_END == game.getStatus()) {
+            // the last round has been played, schedule the end game job
+            schedulerService.scheduleEndGameJob(id);
+        } else {
+            // schedule the skip turn job for the next turn
+            schedulerService.scheduleSkipTurnJob(game);
+        }
 
         return Response.ok(Mapper.toDto(game)).build();
     }

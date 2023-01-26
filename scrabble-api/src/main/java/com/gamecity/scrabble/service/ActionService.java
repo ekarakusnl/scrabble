@@ -4,7 +4,6 @@ import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Player;
-import com.gamecity.scrabble.entity.GameStatus;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.model.VirtualBoard;
 
@@ -19,25 +18,29 @@ public interface ActionService {
     /**
      * Adds an {@link Action action} item after the last happened action in the {@link Game game}
      * 
-     * @param gameId              <code>id</code> of the game
-     * @param userId              <code>id</code> of the user
-     * @param counter             <code>counter</code> of the action
-     * @param currentPlayerNumber <code>number</code> of the current player
-     * @param roundNumber         <code>number</code> of the round played
-     * @param actionType          <code>type</code> of the action
-     * @param status              <code>status</code> of the game
+     * @param game       the game
+     * @param userId     <code>id</code> of the user
+     * @param actionType <code>type</code> of the action
      * @return the added action
      */
-    Action add(Long gameId, Long userId, Integer counter, Integer currentPlayerNumber, Integer roundNumber,
-            ActionType actionType, GameStatus status);
+    Action add(Game game, Long userId, ActionType actionType);
 
     /**
      * Whether a new {@link Action action} happened in the {@link Game game}
      * 
      * @param gameId  <code>id</code> of the game
-     * @param counter incremental counter of the action count
+     * @param version the expected version
      * @return true if there is a new action
      */
-    boolean hasNewAction(Long gameId, Integer counter);
+    boolean hasNewAction(Long gameId, Integer version);
+
+    /**
+     * Gets the {@link Action action} in the {@link Game game} by the specified <code>version</code>
+     * 
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the action
+     * @return the action
+     */
+    Action getAction(Long gameId, Integer version);
 
 }

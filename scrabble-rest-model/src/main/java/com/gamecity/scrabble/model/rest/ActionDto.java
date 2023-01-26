@@ -28,8 +28,8 @@ public class ActionDto extends AbstractDto implements Serializable {
     @JsonProperty("userId")
     private Long userId;
 
-    @JsonProperty("counter")
-    private Integer counter;
+    @JsonProperty("version")
+    private Integer version;
 
     @JsonProperty("currentPlayerNumber")
     private Integer currentPlayerNumber;

@@ -1,5 +1,7 @@
 package com.gamecity.scrabble.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,11 @@ class ChatServiceImpl extends AbstractServiceImpl<Chat, ChatDao> implements Chat
         redisRepository.publishChat(chat.getGameId(), chat);
 
         return savedChat;
+    }
+
+    @Override
+    public List<Chat> getChats(Long gameId) {
+        return baseDao.getChats(gameId);
     }
 
 }

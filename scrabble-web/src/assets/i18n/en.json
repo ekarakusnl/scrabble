@@ -19,7 +19,7 @@
   "game.language.de": "German",
   "game.language.nl": "Dutch",
   "game.duration": "Play Duration",
-  "game.duration.minutes": "{{0}} minutes per round",
+  "game.duration.seconds": "{{0}} seconds per round",
   "game.create": "Create",
 
   "game.owner": "Owner",

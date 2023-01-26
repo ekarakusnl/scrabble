@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -38,6 +39,11 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
     @Override
     public T get(Long id) {
         return entityManager.find(clazz, id);
+    }
+
+    @Override
+    public T getAndLock(Long id) {
+        return entityManager.find(clazz, id, LockModeType.PESSIMISTIC_READ);
     }
 
     @Override

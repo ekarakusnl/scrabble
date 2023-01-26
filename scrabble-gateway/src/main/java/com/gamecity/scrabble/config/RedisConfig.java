@@ -26,8 +26,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.gamecity.scrabble.controller.ActionController;
 import com.gamecity.scrabble.controller.ChatController;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Spring configuration for Redis
  * 
@@ -35,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Configuration
 @PropertySource("classpath:redis.properties")
-@Slf4j
 public class RedisConfig extends CachingConfigurerSupport {
 
     private static final Integer MAX_SUBSCRIPTION_REGISTRATION_MILLISECONDS = 300000;
@@ -66,7 +63,6 @@ public class RedisConfig extends CachingConfigurerSupport {
 
     @Bean
     JedisConnectionFactory connectionFactory() {
-        log.debug("Connecting to '{}:{}'", redisHost, redisPort);
         final RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration(redisHost, redisPort);
         if (StringUtils.isNotEmpty(redisUsername) && StringUtils.isNotEmpty(redisPassword)) {
             redisConfiguration.setUsername(redisUsername);
@@ -77,7 +73,6 @@ public class RedisConfig extends CachingConfigurerSupport {
         jedisConfigurationBuilder.connectTimeout(Duration.ofSeconds(60));
         jedisConfigurationBuilder.readTimeout(Duration.ofSeconds(60));
         if (useSsl) {
-            log.debug("Redis server is ssl secured");
             jedisConfigurationBuilder.useSsl();
         }
         jedisConfigurationBuilder.usePooling();

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +34,7 @@ public class ChatController extends AbstractController implements MessageListene
 
     private static final String API_RESOURCE_PATH = "/games/{gameId}/chats";
 
-    private final Map<DeferredResult<List<ChatDto>>, Pair<Long, Integer>> chats = new ConcurrentHashMap<>();
+    private final Map<DeferredResult<List<ChatDto>>, Long> chats = new ConcurrentHashMap<>();
 
     /**
      * Sends a {@link ChatDto chat} message
@@ -55,19 +54,19 @@ public class ChatController extends AbstractController implements MessageListene
     }
 
     /**
-     * Gets the {@link List list} of {@link ChatDto chat} by game id and action counter
+     * Gets the {@link List list} of {@link ChatDto chat} by game id and version
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter acton counter
+     * @param gameId       <code>id</code> of the game
+     * @param messageCount <code>count</code> of the messages
      * @return the chat list
      */
     @GetMapping
     @ResponseBody
-    public DeferredResult<List<ChatDto>> getMessages(@PathVariable Long gameId, @RequestParam Integer actionCounter) {
+    public DeferredResult<List<ChatDto>> getMessages(@PathVariable Long gameId, @RequestParam Integer messageCount) {
 
         final DeferredResult<List<ChatDto>> deferredResult =
                 new DeferredResult<>(ASYNCHRONOUS_REQUEST_DURATION, Collections.emptyList());
-        chats.put(deferredResult, Pair.of(gameId, actionCounter));
+        chats.put(deferredResult, gameId);
 
         deferredResult.onCompletion(new Runnable() {
             @Override
@@ -76,10 +75,9 @@ public class ChatController extends AbstractController implements MessageListene
             }
         });
 
-        final List<ChatDto> newChats =
-                list(API_RESOURCE_PATH + "?actionCounter={actionCounter}", ChatDto.class, gameId, actionCounter);
-        if (newChats != null && newChats.size() > 0) {
-            deferredResult.setResult(newChats);
+        final List<ChatDto> chats = list(API_RESOURCE_PATH, ChatDto.class, gameId);
+        if (chats != null && chats.size() > messageCount) {
+            deferredResult.setResult(chats);
         }
 
         return deferredResult;
@@ -88,11 +86,10 @@ public class ChatController extends AbstractController implements MessageListene
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            for (Entry<DeferredResult<List<ChatDto>>, Pair<Long, Integer>> entry : chats.entrySet()) {
-                final List<ChatDto> newMessages = list(API_RESOURCE_PATH + "?actionCounter={actionCounter}",
-                        ChatDto.class, entry.getValue().getLeft(), entry.getValue().getRight());
-                if (newMessages != null) {
-                    entry.getKey().setResult(newMessages);
+            for (Entry<DeferredResult<List<ChatDto>>, Long> entry : chats.entrySet()) {
+                final List<ChatDto> messages = list(API_RESOURCE_PATH, ChatDto.class, entry.getValue());
+                if (messages != null) {
+                    entry.getKey().setResult(messages);
                 }
             }
         } catch (Exception e) {

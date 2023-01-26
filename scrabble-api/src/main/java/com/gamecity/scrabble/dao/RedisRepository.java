@@ -1,7 +1,5 @@
 package com.gamecity.scrabble.dao;
 
-import java.util.List;
-
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.Chat;
 import com.gamecity.scrabble.entity.Game;
@@ -25,31 +23,12 @@ public interface RedisRepository {
     void publishAction(Long gameId, Action action);
 
     /**
-     * Gets the last {@link Action action} in the {@link Game game} by the specified <code>counter</code>
-     * 
-     * @param gameId  <code>id</code> of the game
-     * @param counter <code>counter</code> of the action
-     * @return the action
-     */
-    Action getAction(Long gameId, Integer counter);
-
-    /**
      * Publishes the new {@link Chat chat} in the {@link Game game}
      * 
      * @param gameId <code>id</code> of the game
      * @param chat   chat to publish
      */
     void publishChat(Long gameId, Chat chat);
-
-    /**
-     * Gets the {@link List list} of {@link Chat chats} in the {@link Game game} by the specified
-     * <code>actionCounter</code>
-     * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter <code>counter</code> of the action
-     * @return the list of chats
-     */
-    List<Chat> getChats(Long gameId, Integer actionCounter);
 
     /**
      * Updates the {@link VirtualBoard board} in the {@link Game game}
@@ -60,14 +39,13 @@ public interface RedisRepository {
     void updateBoard(Long gameId, VirtualBoard board);
 
     /**
-     * Gets the {@link VirtualBoard board} in the {@link Game game} by the specified
-     * <code>actionCounter</code>
+     * Gets the {@link VirtualBoard board} in the {@link Game game} by the specified <code>version</code>
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter <code>counter</code> of the action
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the board
      * @return the board
      */
-    VirtualBoard getBoard(Long gameId, Integer actionCounter);
+    VirtualBoard getBoard(Long gameId, Integer version);
 
     /**
      * Fills the {@link VirtualRack rack} of the {@link Player player} in the {@link Game game}
@@ -81,15 +59,15 @@ public interface RedisRepository {
     /**
      * Updates the {@link VirtualRack rack} of the {@link Player player} in the {@link Game game}
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param playerNumber  <code>number</code> of the player
-     * @param actionCounter <code>counter</code> of the action
-     * @param rack          the rack to cache
+     * @param gameId       <code>id</code> of the game
+     * @param playerNumber <code>number</code> of the player
+     * @param version      <code>version</code> of the action
+     * @param rack         the rack to cache
      */
-    void updateRack(Long gameId, Integer playerNumber, Integer actionCounter, VirtualRack rack);
+    void updateRack(Long gameId, Integer playerNumber, Integer version, VirtualRack rack);
 
     /**
-     * Gets the {@link VirtualRack rack} in the {@link Game game} by the specified <code>actionCounter</code>
+     * Gets the {@link VirtualRack rack} in the {@link Game game} by the specified <code>version</code>
      * 
      * @param gameId       <code>id</code> of the game
      * @param playerNumber <code>number</code> of the player

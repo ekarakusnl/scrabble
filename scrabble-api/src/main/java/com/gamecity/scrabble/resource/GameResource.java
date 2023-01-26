@@ -73,29 +73,16 @@ public interface GameResource extends BaseResource<GameDto> {
     Response leave(@PathParam("id") Long id, @PathParam("userId") Long userId);
 
     /**
-     * Starts the {@link GameDto game}
-     * 
-     * @param id <code>id</code> of the game
-     * @return the updated game dto
-     */
-    // TODO replace this resource with a patch operation
-    @POST
-    @Path("/{id}/start")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    Response start(@PathParam("id") Long id);
-
-    /**
      * Gets the {@link ActionDto action} in the {@link GameDto game}
      * 
      * @param id      <code>id</code> of the game
-     * @param counter <code>counter</code> of the action
+     * @param version <code>version</code> of the action
      * @return the action
      */
     @GET
-    @Path("/{id}/actions/{counter}")
+    @Path("/{id}/actions/{version}")
     @Produces(MediaType.APPLICATION_JSON)
-    Response getAction(@PathParam("id") Long id, @PathParam("counter") Integer counter);
+    Response getAction(@PathParam("id") Long id, @PathParam("version") Integer version);
 
     /**
      * Plays the word in the {@link GameDto game}
@@ -110,18 +97,5 @@ public interface GameResource extends BaseResource<GameDto> {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     Response play(@PathParam("id") Long id, @PathParam("userId") Long userId, VirtualRackDto rackDto);
-
-    /**
-     * Ends the {@link GameDto game}
-     * 
-     * @param id <code>id</code> of the game
-     * @return the updated game dto
-     */
-    // TODO replace this resource with a patch operation
-    @POST
-    @Path("/{id}/end")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    Response end(@PathParam("id") Long id);
 
 }

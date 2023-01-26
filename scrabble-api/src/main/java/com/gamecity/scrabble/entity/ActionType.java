@@ -28,6 +28,11 @@ public enum ActionType {
     PLAY,
 
     /**
+     * The turn is skipped
+     */
+    SKIP,
+
+    /**
      * Game is ended
      */
     END

@@ -56,12 +56,13 @@ export class GameComponent implements OnInit, AfterViewChecked {
   selectedTile: Tile;
   message: string;
 
-  actionCounter: number = 0;
+  version: number = 0;
   currentRoundNumber: number;
   currentPlayerNumber: number;
   currentStatus: string;
   winnerPlayer: Player;
   remainingTileCount: number;
+  chatMessageCount: number;
 
   // play duration
   durationTimer: any;
@@ -117,7 +118,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
         return;
       }
 
-      this.actionCounter = game.actionCounter - 1;
+      this.version = game.version - 1;
       this.loadBoard();
       this.loadBag();
       this.loadChats();
@@ -145,17 +146,17 @@ export class GameComponent implements OnInit, AfterViewChecked {
       return;
     }
 
-    var actionCounter = this.actionCounter + 1;
-    this.actionService.getAction(this.game.id, actionCounter).subscribe((action: Action) => {
-      if (action && action.counter) {
-        this.actionCounter = action.counter;
+    var version = this.version + 1;
+    this.actionService.getAction(this.game.id, version).subscribe((action: Action) => {
+      if (action && action.version) {
+        this.version = action.version;
         this.currentRoundNumber = action.roundNumber;
         this.currentPlayerNumber = action.currentPlayerNumber;
         this.currentStatus = action.gameStatus;
 
         if (this.currentStatus === 'ENDED') {
-          // game is ended, use the previous actionCounter to show the latest results
-          this.actionCounter = this.actionCounter - 1; 
+          // game is ended, use the previous version to show the latest results
+          this.version = this.version - 1; 
           this.stopTimer();
           this.loadAction();
           return;
@@ -175,7 +176,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   resetTimer(actionTimestamp: Date): void {
     this.stopTimer();
 
-    this.remainingDurationInSeconds = this.game.duration * 60;
+    this.remainingDurationInSeconds = this.game.duration;
     const passedDurationInSeconds = (new Date().getTime() - new Date(actionTimestamp).getTime()) / 1000;
     const defaultDurationInSeconds = this.remainingDurationInSeconds - passedDurationInSeconds;
     this.durationTimer = timer(0, 1000).subscribe(interval => {
@@ -203,7 +204,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   loadPlayers(): void {
-    this.playerService.getPlayers(this.game.id, this.actionCounter).subscribe((players: Player[]) => {
+    this.playerService.getPlayers(this.game.id, this.version).subscribe((players: Player[]) => {
       this.players = players;
       this.playerNumber = this.players.find(player => player.userId == this.userId).playerNumber;
       if (this.currentStatus === 'WAITING') {
@@ -253,8 +254,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
         return;
     }
 
-    const counter = this.actionCounter - this.game.expectedPlayerCount;
-    this.virtualBoardService.getBoard(this.game.id, counter).subscribe((virtualBoard: VirtualBoard) => {
+    const boardVersion = this.version - this.game.expectedPlayerCount;
+    this.virtualBoardService.getBoard(this.game.id, boardVersion).subscribe((virtualBoard: VirtualBoard) => {
       this.virtualBoard = virtualBoard;
       const usedCellCount = virtualBoard.cells.reduce((sum, current) => sum + (current.letter ? 1 : 0), 0);
       this.remainingTileCount = this.bag.tileCount - usedCellCount;
@@ -262,14 +263,13 @@ export class GameComponent implements OnInit, AfterViewChecked {
   };
 
   loadChats(): void {
-    this.chatService.getChats(this.game.id, this.chats ? this.chats.length + 1 : 1).subscribe((chats: Chat[]) => {
+    this.chatService.getChats(this.game.id, this.chats ? this.chats.length : 0).subscribe((chats: Chat[]) => {
       if (chats && chats.length > 0) {
-        if (!this.chats) {
-          this.chats = chats;
-        } else {
-          this.chats = this.chats.concat(chats);
+        this.chats = chats;
+        if (this.chatMessageCount && this.chatMessageCount < chats.length) {
           this.toastService.playSound();
         }
+        this.chatMessageCount = chats.length;
       }
       this.loadChats();
     });

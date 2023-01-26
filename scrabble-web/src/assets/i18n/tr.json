@@ -19,7 +19,7 @@
   "game.language.de": "Almanca",
   "game.language.nl": "Hollandaca",
   "game.duration": "Oynama Süresi",
-  "game.duration.minutes": "Round başına {{0}} dakika",
+  "game.duration.seconds": "Round başına {{0}} saniye",
   "game.create": "Oluştur",
 
   "game.owner": "Oyun Sahibi",

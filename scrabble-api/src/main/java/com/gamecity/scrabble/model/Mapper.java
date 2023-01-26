@@ -148,7 +148,7 @@ public class Mapper {
      */
     public static GameDto toDto(Game game) {
         final GameDto gameDto = GameDto.builder()
-                .actionCounter(game.getActionCounter())
+                .version(game.getVersion())
                 .activePlayerCount(game.getActivePlayerCount())
                 .bagId(game.getBagId())
                 .boardId(game.getBoardId())
@@ -174,7 +174,7 @@ public class Mapper {
      */
     public static Game toEntity(GameDto gameDto) {
         final Game game = new Game();
-        game.setActionCounter(gameDto.getActionCounter());
+        game.setVersion(gameDto.getVersion());
         game.setActivePlayerCount(gameDto.getActivePlayerCount());
         game.setBagId(gameDto.getBagId());
         game.setBoardId(gameDto.getBoardId());
@@ -442,7 +442,7 @@ public class Mapper {
      */
     public static ActionDto toDto(Action action) {
         final ActionDto actionDto = ActionDto.builder()
-                .counter(action.getCounter())
+                .version(action.getVersion())
                 .currentPlayerNumber(action.getCurrentPlayerNumber())
                 .gameId(action.getGameId())
                 .lastUpdatedDate(action.getLastUpdatedDate())
@@ -462,7 +462,7 @@ public class Mapper {
      */
     public static Action toEntity(ActionDto actionDto) {
         final Action action = new Action();
-        action.setCounter(actionDto.getCounter());
+        action.setVersion(actionDto.getVersion());
         action.setCurrentPlayerNumber(actionDto.getCurrentPlayerNumber());
         // .currentStatus(actionDto.getCurrentStatus())
         action.setGameId(actionDto.getGameId());

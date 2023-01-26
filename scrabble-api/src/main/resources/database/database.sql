@@ -28,13 +28,13 @@ CREATE TABLE public.actions (
     id bigint NOT NULL,
     created_date timestamp without time zone NOT NULL,
     last_updated_date timestamp without time zone NOT NULL,
-    counter integer,
     current_player_number integer,
     game_id bigint,
     game_status character varying(255),
     round_number integer,
     type character varying(255),
-    user_id bigint
+    user_id bigint,
+    version integer
 );
 
 
@@ -193,7 +193,6 @@ CREATE TABLE public.games (
     id bigint NOT NULL,
     created_date timestamp without time zone NOT NULL,
     last_updated_date timestamp without time zone NOT NULL,
-    action_counter integer NOT NULL,
     active_player_count integer NOT NULL,
     bag_id bigint NOT NULL,
     board_id bigint NOT NULL,
@@ -205,7 +204,8 @@ CREATE TABLE public.games (
     owner_id bigint NOT NULL,
     round_number integer,
     start_date timestamp without time zone,
-    status character varying(255) NOT NULL
+    status character varying(255) NOT NULL,
+    version integer NOT NULL
 );
 
 

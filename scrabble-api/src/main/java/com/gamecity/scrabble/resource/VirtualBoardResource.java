@@ -23,12 +23,12 @@ public interface VirtualBoardResource {
     /**
      * Gets the {@link VirtualBoard board} in the {@link Game game}
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter <code>counter</code> of the action
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> of the action
      * @return the virtual board
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    Response get(@PathParam("gameId") Long gameId, @QueryParam("actionCounter") Integer actionCounter);
+    Response get(@PathParam("gameId") Long gameId, @QueryParam("version") Integer version);
 
 }

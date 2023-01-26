@@ -37,12 +37,12 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
     }
 
     @Override
-    public Response list(Long gameId, Integer actionCounter) {
-        if (actionCounter < 1) {
+    public Response list(Long gameId, Integer version) {
+        if (version < 1) {
             return Response.ok().build();
         }
 
-        boolean hasNewAction = actionService.hasNewAction(gameId, actionCounter);
+        boolean hasNewAction = actionService.hasNewAction(gameId, version);
         if (!hasNewAction) {
             return Response.ok().build();
         }

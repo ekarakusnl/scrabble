@@ -1,4 +1,4 @@
-package com.gamecity.scrabble.job;
+package com.gamecity.scrabble.config;
 
 import org.quartz.Job;
 import org.quartz.Scheduler;

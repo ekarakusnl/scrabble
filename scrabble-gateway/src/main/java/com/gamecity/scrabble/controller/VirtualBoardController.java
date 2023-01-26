@@ -23,17 +23,17 @@ public class VirtualBoardController extends AbstractController {
     private static final String API_RESOURCE_PATH = "/games/{gameId}/boards";
 
     /**
-     * Gets the {@link VirtualBoardDto board} by game id and action counter
+     * Gets the {@link VirtualBoardDto board} by game id and version
      * 
-     * @param gameId        <code>id</code> of the game
-     * @param actionCounter action counter
+     * @param gameId  <code>id</code> of the game
+     * @param version <code>version</code> version of the board
      * @return the virtual board
      */
     @GetMapping
     @ResponseBody
-    public ResponseEntity<VirtualBoardDto> getBoard(@PathVariable Long gameId, @RequestParam Integer actionCounter) {
+    public ResponseEntity<VirtualBoardDto> getBoard(@PathVariable Long gameId, @RequestParam Integer version) {
         final VirtualBoardDto boardDto =
-                get(API_RESOURCE_PATH + "?actionCounter={actionCounter}", VirtualBoardDto.class, gameId, actionCounter);
+                get(API_RESOURCE_PATH + "?version={version}", VirtualBoardDto.class, gameId, version);
         return new ResponseEntity<>(boardDto, HttpStatus.OK);
     }
 

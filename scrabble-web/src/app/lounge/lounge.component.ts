@@ -69,7 +69,7 @@ export class LoungeComponent implements OnInit {
   }
 
   loadPlayers(game: Game): void {
-    this.playerService.getPlayers(game.id, game.actionCounter).subscribe((players: Player[]) => {
+    this.playerService.getPlayers(game.id, game.version).subscribe((players: Player[]) => {
       for (var player of players) {
         game.players.push(player);
       }

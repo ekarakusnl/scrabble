@@ -48,7 +48,7 @@ public class GameDto extends AbstractDto {
     @JsonProperty("roundNumber")
     private Integer roundNumber;
 
-    @JsonProperty("actionCounter")
-    private Integer actionCounter;
+    @JsonProperty("version")
+    private Integer version;
 
 }

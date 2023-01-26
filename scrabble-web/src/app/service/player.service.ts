@@ -15,8 +15,8 @@ export class PlayerService {
     private http: HttpClient
   ) { }
 
-  getPlayers(gameId: number, actionCounter: number): Observable<Player[]> {
-    return this.http.get<Player[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/players?actionCounter=' + actionCounter);
+  getPlayers(gameId: number, version: number): Observable<Player[]> {
+    return this.http.get<Player[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/players?version=' + version);
   }
 
 }

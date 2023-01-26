@@ -1,4 +1,4 @@
-package com.gamecity.scrabble.test.resource;
+package com.gamecity.scrabble.resource.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 

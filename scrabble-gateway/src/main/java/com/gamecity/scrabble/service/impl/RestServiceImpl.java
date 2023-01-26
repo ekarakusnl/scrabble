@@ -154,8 +154,6 @@ class RestServiceImpl implements RestService {
         final ResourceURLCreator resourceURLCreator = new ResourceURLCreator(resource, params);
         final String resourceURL = resourceURLCreator.createURL();
 
-        log.debug("Calling the resource url {}", resourceURL);
-
         try {
             final URL url = new URL(resourceURL);
             return (HttpURLConnection) url.openConnection();

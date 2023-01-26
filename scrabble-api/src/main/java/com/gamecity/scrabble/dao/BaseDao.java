@@ -19,6 +19,14 @@ public interface BaseDao<T> {
     T get(Long id);
 
     /**
+     * Gets an entity by <code>id</code> and locks it
+     * 
+     * @param id <code>id</code> of the entity
+     * @return the entity
+     */
+    T getAndLock(Long id);
+
+    /**
      * Saves an entity
      * 
      * @param entity the entity to be saved

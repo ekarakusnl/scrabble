@@ -53,7 +53,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
         final VirtualRack rack = new VirtualRack(false, Arrays.asList(tiles));
         redisRepository.fillRack(gameId, playerNumber, rack);
-        log.debug("Rack has been created for player {} on game {}", playerNumber, gameId);
+        log.info("Rack has been created for player {} on game {}", playerNumber, gameId);
     }
 
     /**
@@ -126,7 +126,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
         final VirtualRack filledRack = new VirtualRack(false, updatedTiles);
         redisRepository.fillRack(gameId, playerNumber, filledRack);
-        log.debug("Rack has been refilled for player {} on game {}", playerNumber, gameId);
+        log.info("Rack has been refilled for player {} on game {}", playerNumber, gameId);
 
         return filledRack;
     }
@@ -135,7 +135,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
     public void updateRack(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber,
             VirtualRack virtualRack) {
         redisRepository.updateRack(gameId, playerNumber, roundNumber, virtualRack);
-        log.debug("Rack has been updated for player {} on game {}", playerNumber, gameId);
+        log.info("Rack has been updated for player {} on game {}", playerNumber, gameId);
     }
 
     @Override
@@ -174,7 +174,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
         final VirtualRack updatedVirtualRack = new VirtualRack(true, updatedTiles);
         updateRack(gameId, bagId, playerNumber, roundNumber, updatedVirtualRack);
 
-        log.debug("Letter {} has been exchanged with {} for player {} on game {}", exchangedVirtualTile.getLetter(),
+        log.info("Letter {} has been exchanged with {} for player {} on game {}", exchangedVirtualTile.getLetter(),
                 newVirtualTile.getLetter(), playerNumber, gameId);
 
         return updatedVirtualRack;

@@ -35,7 +35,7 @@ abstract class AbstractServiceTest {
         game.setExpectedPlayerCount(playerCount);
         game.setDuration(2);
         game.setStatus(GameStatus.WAITING);
-        game.setActionCounter(1);
+        game.setVersion(1);
         game.setActivePlayerCount(1);
         return game;
     }
