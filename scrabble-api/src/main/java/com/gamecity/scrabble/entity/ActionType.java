@@ -28,9 +28,14 @@ public enum ActionType {
     PLAY,
 
     /**
-     * The turn is skipped
+     * The turn is skipped by the player
      */
     SKIP,
+
+    /**
+     * The turn is skipped due to pkay duration timeout
+     */
+    TIMEOUT,
 
     /**
      * Game is ended

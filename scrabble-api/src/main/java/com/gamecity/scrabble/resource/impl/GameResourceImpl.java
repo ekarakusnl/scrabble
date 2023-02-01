@@ -17,6 +17,7 @@ import com.gamecity.scrabble.model.Mapper;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.rest.GameDto;
 import com.gamecity.scrabble.model.rest.VirtualRackDto;
+import com.gamecity.scrabble.model.rest.VirtualTileDto;
 import com.gamecity.scrabble.resource.GameResource;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
@@ -115,7 +116,10 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     @Override
     public Response play(Long id, Long userId, VirtualRackDto rackDto) {
         final VirtualRack rack = Mapper.toEntity(rackDto);
-        final Game game = baseService.play(id, userId, rack, ActionType.PLAY);
+
+        final ActionType actionType =
+                rackDto.getTiles().stream().noneMatch(VirtualTileDto::isSealed) ? ActionType.SKIP : ActionType.PLAY;
+        final Game game = baseService.play(id, userId, rack, actionType);
 
         publishLastAction(game);
 
@@ -125,8 +129,15 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
             // the last round has been played, schedule the end game job
             schedulerService.scheduleEndGameJob(id);
         } else {
-            // schedule the skip turn job for the next turn
-            schedulerService.scheduleSkipTurnJob(game);
+            final boolean isMaximumSkipCountReached =
+                    actionService.isMaximumSkipCountReached(id, game.getExpectedPlayerCount());
+            if (isMaximumSkipCountReached) {
+                // maximum skip count in a row has been reached, schedule the end game job
+                schedulerService.scheduleEndGameJob(id);
+            } else {
+                // schedule the skip turn job for the next turn
+                schedulerService.scheduleSkipTurnJob(game);
+            }
         }
 
         return Response.ok(Mapper.toDto(game)).build();

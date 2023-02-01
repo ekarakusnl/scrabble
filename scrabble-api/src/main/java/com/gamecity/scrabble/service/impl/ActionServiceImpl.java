@@ -15,7 +15,7 @@ import com.gamecity.scrabble.service.ActionService;
 @Service(value = "actionService")
 class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implements ActionService {
 
-    private static final Integer MAXIMUM_SKIP_COUNT_IN_A_ROW = 4;
+    private static final Integer MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW = 2;
 
     @Override
     @Transactional
@@ -50,11 +50,12 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
     }
 
     @Override
-    public boolean isMaximumSkipCountReached(Long gameId) {
-        // if 4 turns has been skipped in a row, then the game should end
-        final List<Action> lastActions = baseDao.getLastActionsByCount(gameId, MAXIMUM_SKIP_COUNT_IN_A_ROW);
-        return lastActions.size() == MAXIMUM_SKIP_COUNT_IN_A_ROW
-                && lastActions.stream().allMatch(action -> ActionType.SKIP == action.getType());
+    public boolean isMaximumSkipCountReached(Long gameId, Integer playerCount) {
+        final Integer maximumSkippedTurns = MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
+        // if 2 rounds have been skipped in a row, then the game should end
+        final List<Action> lastActions = baseDao.getLastActionsByCount(gameId, maximumSkippedTurns);
+        return lastActions.size() == maximumSkippedTurns && lastActions.stream()
+                .allMatch(action -> ActionType.TIMEOUT == action.getType() || ActionType.SKIP == action.getType());
     }
 
 }

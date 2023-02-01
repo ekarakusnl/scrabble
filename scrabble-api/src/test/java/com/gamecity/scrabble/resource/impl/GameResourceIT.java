@@ -960,7 +960,38 @@ class GameResourceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void test_skip_4_times_in_a_row_ends_the_game() throws IOException, InterruptedException {
+    void test_skip_2_rounds_in_a_row_by_the_players_ends_the_game() throws IOException, InterruptedException {
+        final GameDto game = createNewGame(2);
+        joinGame(game.getId(), 2L);
+
+        waitUntilGameStarts();
+
+        final GameDto startedGame = getGame(game.getId());
+
+        VirtualRackDto virtualRack = getVirtualRack(game.getId(), 1L, startedGame.getRoundNumber());
+        GameDto playedGame = playWord(game.getId(), 1L, virtualRack);
+
+        virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        playedGame = playWord(game.getId(), 2L, virtualRack);
+
+        virtualRack = getVirtualRack(game.getId(), 1L, playedGame.getRoundNumber());
+        playedGame = playWord(game.getId(), 1L, virtualRack);
+
+        virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        playedGame = playWord(game.getId(), 2L, virtualRack);
+
+        // wait until the end game job ends
+        Thread.sleep(1000);
+
+        final GameDto endedGame = getGame(game.getId());
+
+        assertNotNull(endedGame);
+        assertEquals(8, endedGame.getVersion());
+        assertEquals(GameStatus.ENDED.name(), endedGame.getStatus());
+    }
+
+    @Test
+    void test_skip_2_rounds_in_a_row_by_the_job_ends_the_game() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
         joinGame(game.getId(), 2L);
 

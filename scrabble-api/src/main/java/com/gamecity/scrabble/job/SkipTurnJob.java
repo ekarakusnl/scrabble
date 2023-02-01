@@ -84,7 +84,7 @@ public class SkipTurnJob implements Job {
         final Player player = playerService.getByPlayerNumber(gameId, playerNumber);
         final VirtualRack virtualRack = virtualRackService.getRack(gameId, playerNumber, game.getRoundNumber());
 
-        final ActionType actionType = ActionType.SKIP;
+        final ActionType actionType = ActionType.TIMEOUT;
         final Game updatedGame = gameService.play(game.getId(), player.getUserId(), virtualRack, actionType);
         if (updatedGame == null) {
             return;
@@ -97,7 +97,8 @@ public class SkipTurnJob implements Job {
             // the last round has been played, schedule the end game job
             schedulerService.scheduleEndGameJob(updatedGame.getId());
         } else {
-            final boolean isMaximumSkipCountReached = actionService.isMaximumSkipCountReached(gameId);
+            final boolean isMaximumSkipCountReached =
+                    actionService.isMaximumSkipCountReached(gameId, game.getExpectedPlayerCount());
             if (isMaximumSkipCountReached) {
                 // maximum skip count in a row has been reached, schedule the end game job
                 schedulerService.scheduleEndGameJob(gameId);
