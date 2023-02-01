@@ -407,6 +407,30 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     @Override
+    @Transactional
+    public Game terminate(Long id) {
+        Assert.notNull(id, "id cannot be null");
+
+        final Game game = get(id);
+
+        if (GameStatus.WAITING != game.getStatus()) {
+            throw new GameException(GameError.IN_PROGRESS);
+        }
+
+        game.setEndDate(new Date());
+        game.setStatus(GameStatus.TERMINATED);
+        game.setVersion(game.getVersion() + 1);
+
+        log.info("Game {} is terminated", game.getId());
+
+        final Game updatedGame = baseDao.save(game);
+
+        actionService.add(updatedGame, game.getOwnerId(), ActionType.TERMINATE);
+
+        return updatedGame;
+    }
+
+    @Override
     public List<Game> listByUser(Long userId) {
         return baseDao.getByUser(userId);
     }

@@ -84,6 +84,8 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
 
         publishLastAction(game);
 
+        schedulerService.scheduleTerminateGameJob(game.getId());
+
         final GameDto responseDto = Mapper.toDto(game);
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
     }

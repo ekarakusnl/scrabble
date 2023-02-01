@@ -35,6 +35,11 @@ public enum ActionType {
     /**
      * Game is ended
      */
-    END
+    END,
+
+    /**
+     * Game is terminated
+     */
+    TERMINATE
 
 }

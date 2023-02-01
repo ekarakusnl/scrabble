@@ -1,6 +1,7 @@
 package com.gamecity.scrabble.service.impl;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -17,6 +18,7 @@ import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.job.EndGameJob;
 import com.gamecity.scrabble.job.SkipTurnJob;
 import com.gamecity.scrabble.job.StartGameJob;
+import com.gamecity.scrabble.job.TerminateGameJob;
 import com.gamecity.scrabble.service.SchedulerService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,10 @@ class SchedulerServiceImpl implements SchedulerService {
     public static final String END_GAME_JOB_IDENTITY = "endGameJob_%s";
     public static final String END_GAME_JOB_GROUP = "endGame";
     public static final String END_GAME_TRIGGER_IDENTITY = "endGameTrigger_%s";
+
+    public static final String TERMINATE_GAME_JOB_IDENTITY = "terminateGameJob_%s";
+    public static final String TERMINATE_GAME_JOB_GROUP = "terminateGame";
+    public static final String TERMINATE_GAME_TRIGGER_IDENTITY = "terminateGameTrigger_%s";
 
     private SchedulerFactoryBean schedulerFactory;
 
@@ -134,6 +140,48 @@ class SchedulerServiceImpl implements SchedulerService {
             log.info("EndGameJob has been created on game {}", gameId);
         } catch (SchedulerException e) {
             log.error("An error occured while scheduling the end game job", e);
+        }
+    }
+
+    @Override
+    public void scheduleTerminateGameJob(Long gameId) {
+        try {
+            final JobDetail jobDetail = JobBuilder.newJob(TerminateGameJob.class)
+                    .withIdentity(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP)
+                    .usingJobData("gameId", gameId)
+                    .build();
+
+            // terminate the game if it doesn't start in 10 minutes
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.add(Calendar.MINUTE, 10);
+
+            final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
+                    .withIdentity(String.format(TERMINATE_GAME_TRIGGER_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP)
+                    .startAt(calendar.getTime())
+                    .forJob(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP)
+                    .build();
+
+            final Scheduler scheduler = schedulerFactory.getScheduler();
+            scheduler.scheduleJob(jobDetail, trigger);
+            scheduler.start();
+
+            log.info("TerminateGameJob has been created on game {}", gameId);
+        } catch (SchedulerException e) {
+            log.error("An error occured while scheduling the terminate game job", e);
+        }
+    }
+
+    @Override
+    public void terminateTerminateGameJob(Long gameId) {
+        try {
+            final JobKey jobKey =
+                    new JobKey(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP);
+            schedulerFactory.getScheduler().interrupt(jobKey);
+
+            log.info("TerminateGameJob has been terminated on game {}", gameId);
+        } catch (SchedulerException e) {
+            log.error("An error occured while terminating the terminate game job", e);
         }
     }
 

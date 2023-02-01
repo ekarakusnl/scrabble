@@ -12,19 +12,17 @@ import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
-import com.gamecity.scrabble.service.SchedulerService;
 
 /**
- * A Quartz {@link Job job} to start a game when the status of a {@link Game game} is ready to start
+ * A Quartz {@link Job job} to end a game when the status of a {@link Game game} is ready to end
  * 
  * @author ekarakus
  */
 @Component
-public class StartGameJob implements Job {
+public class TerminateGameJob implements Job {
 
     private ActionService actionService;
     private GameService gameService;
-    private SchedulerService schedulerService;
     private RedisRepository redisRepository;
 
     @Autowired
@@ -38,11 +36,6 @@ public class StartGameJob implements Job {
     }
 
     @Autowired
-    void setSchedulerService(SchedulerService schedulerService) {
-        this.schedulerService = schedulerService;
-    }
-
-    @Autowired
     void setRedisRepository(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
@@ -52,15 +45,10 @@ public class StartGameJob implements Job {
         final JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
         final Long gameId = dataMap.getLong("gameId");
-        final Game game = gameService.start(gameId);
+        final Game game = gameService.terminate(gameId);
 
         final Action action = actionService.getAction(gameId, game.getVersion());
         redisRepository.publishAction(action.getGameId(), action);
-
-        // terminate the scheduled game termination since the game is started
-        schedulerService.terminateTerminateGameJob(game.getId());
-
-        schedulerService.scheduleSkipTurnJob(game);
     }
 
 }

@@ -22,7 +22,7 @@ public interface SchedulerService {
     void scheduleSkipTurnJob(Game game);
 
     /**
-     * Terminates the scheduled {@link Job job}
+     * Terminates the scheduled skip turn {@link Job job}
      * 
      * @param gameId  <code>id</code> of the game
      * @param version <code>version</code> of the action
@@ -42,5 +42,20 @@ public interface SchedulerService {
      * @param gameId <code>id</code> of the game
      */
     void scheduleEndGameJob(Long gameId);
+
+    /**
+     * Schedules a {@link Job job} to terminate the {@link Game game} in case it doesn't start after a
+     * certain time
+     * 
+     * @param gameId <code>id</code> of the game
+     */
+    void scheduleTerminateGameJob(Long gameId);
+
+    /**
+     * Terminates the scheduled terminate game {@link Job job}
+     * 
+     * @param gameId  <code>id</code> of the game
+     */
+    void terminateTerminateGameJob(Long gameId);
 
 }

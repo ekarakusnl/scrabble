@@ -68,4 +68,12 @@ public interface GameService extends BaseService<Game> {
      */
     List<Game> listByUser(Long userId);
 
+    /**
+     * Terminates the {@link Game game}
+     * 
+     * @param id <code>id</code> of the game
+     * @return the updated entity
+     */
+    Game terminate(Long id);
+
 }
