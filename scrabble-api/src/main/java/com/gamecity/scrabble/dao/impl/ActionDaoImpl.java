@@ -29,4 +29,10 @@ class ActionDaoImpl extends AbstractDaoImpl<Action> implements ActionDao {
                 Arrays.asList(Pair.of("gameId", gameId), Pair.of("version", version)));
     }
 
+    @Override
+    public List<Action> getLastActionsByCount(Long gameId, Integer count) {
+        return listByNamedQuery(Constants.NamedQuery.getLastActionsByCount, Arrays.asList(Pair.of("gameId", gameId)),
+                count);
+    }
+
 }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.gamecity.scrabble.dao.RedisRepository;
 import com.gamecity.scrabble.entity.Action;
-import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
@@ -48,7 +47,7 @@ public class EndGameJob implements Job {
         final Long gameId = dataMap.getLong("gameId");
         final Game game = gameService.end(gameId);
 
-        final Action action = actionService.add(game, game.getOwnerId(), ActionType.END);
+        final Action action = actionService.getAction(gameId, game.getVersion());
         redisRepository.publishAction(action.getGameId(), action);
     }
 

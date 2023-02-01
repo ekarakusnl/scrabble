@@ -959,6 +959,23 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(7, refreshedVirtualRack.getTiles().size());
     }
 
+    @Test
+    void test_skip_4_times_in_a_row_ends_the_game() throws IOException, InterruptedException {
+        final GameDto game = createNewGame(2);
+        joinGame(game.getId(), 2L);
+
+        waitUntilGameStarts();
+
+        // Wait more than 4 turns durations
+        Thread.sleep(25000);
+
+        final GameDto endedGame = getGame(game.getId());
+
+        assertNotNull(endedGame);
+        assertEquals(8, endedGame.getVersion());
+        assertEquals(GameStatus.ENDED.name(), endedGame.getStatus());
+    }
+
     private GameDto getGame(Long gameId) {
         final Response response = target("/games/" + gameId).request().get();
 

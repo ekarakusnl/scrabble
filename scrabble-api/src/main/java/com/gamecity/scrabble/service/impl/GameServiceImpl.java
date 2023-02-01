@@ -184,6 +184,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         playerService.add(game.getId(), user.getId(), game.getActivePlayerCount());
 
+        actionService.add(savedGame, game.getOwnerId(), ActionType.JOIN);
+
         log.debug("Game {} is created", game.getId());
 
         return savedGame;
@@ -233,7 +235,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             game.setStatus(GameStatus.READY_TO_START);
         }
 
-        return baseDao.save(game);
+        final Game updatedGame = baseDao.save(game);
+
+        actionService.add(updatedGame, userId, ActionType.JOIN);
+
+        return updatedGame;
     }
 
     @Override
@@ -263,7 +269,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setActivePlayerCount(game.getActivePlayerCount() - 1);
         game.setVersion(game.getVersion() + 1);
 
-        return baseDao.save(game);
+        final Game updatedGame = baseDao.save(game);
+
+        actionService.add(updatedGame, userId, ActionType.LEAVE);
+
+        return updatedGame;
     }
 
     @Override
@@ -290,7 +300,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         log.info("Game {} is started", game.getId());
 
         final Game updatedGame = baseDao.save(game);
+
+        actionService.add(updatedGame, game.getOwnerId(), ActionType.START);
         contentService.create(updatedGame);
+
         return updatedGame;
     }
 
@@ -329,7 +342,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             game.setRoundNumber(currentRoundNumber + 1);
         }
 
-        // end game validations
+        // do the end game validations if a new round is started
         if (game.getRoundNumber() > currentRoundNumber) {
             if (GameStatus.LAST_ROUND == game.getStatus()) {
                 log.info("The last round has been played, game {} is ready to end", game.getId());
@@ -348,8 +361,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         }
 
         final Game updatedGame = baseDao.save(game);
-        contentService.update(updatedGame, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
+
         actionService.add(updatedGame, userId, actionType);
+        contentService.update(updatedGame, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
 
         return updatedGame;
     }
@@ -379,17 +393,17 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game game = get(id);
 
-        if (GameStatus.READY_TO_END != game.getStatus()) {
-            throw new GameException(GameError.NOT_STARTED);
-        }
-
         game.setEndDate(new Date());
         game.setStatus(GameStatus.ENDED);
         game.setVersion(game.getVersion() + 1);
 
         log.info("Game {} is ended", game.getId());
 
-        return baseDao.save(game);
+        final Game updatedGame = baseDao.save(game);
+
+        actionService.add(updatedGame, game.getOwnerId(), ActionType.END);
+
+        return updatedGame;
     }
 
     @Override
@@ -470,7 +484,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 game.getRoundNumber(), board, boardMatrix);
 
         hasInvalidWords(newWords, bag.getLanguage());
-        hasValidLink(newWords, boardMatrix);
+        hasValidLinks(newWords, boardMatrix);
         hasSingleLetterWords(virtualBoard);
 
         final Integer newWordsScore = calculateNewWordsScore(newWords);
@@ -645,7 +659,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Whether the words are linked to existing words
      */
-    private void hasValidLink(List<BoardWord> newWords, VirtualCell[][] boardMatrix) {
+    private void hasValidLinks(List<BoardWord> newWords, VirtualCell[][] boardMatrix) {
         final List<BoardWord> unlinkedWords =
                 newWords.stream().filter(word -> !word.isLinked()).collect(Collectors.toList());
 
@@ -675,6 +689,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         }
     }
 
+    /**
+     * Whether there are any words in the board with a single letter
+     */
     private void hasSingleLetterWords(VirtualBoard virtualBoard) {
         // detect single word letter
         final List<String> singleLetterWords = virtualBoard.getCells()
@@ -691,6 +708,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         }
     }
 
+    /**
+     * Link the new words to the existing words
+     */
     private BoardWord linkWord(BoardWord word, VirtualCell[][] boardMatrix) {
         word.getBoard().getCells().forEach(cell -> {
             if (word.isLinked()) {

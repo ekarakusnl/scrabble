@@ -43,4 +43,12 @@ public interface ActionService {
      */
     Action getAction(Long gameId, Integer version);
 
+    /**
+     * Whether 4 turns have been skipped in a row to determine whether to end the game
+     * 
+     * @param gameId <code>id</code> of the game
+     * @return whether the skip count to end the game has been reached
+     */
+    boolean isMaximumSkipCountReached(Long gameId);
+
 }

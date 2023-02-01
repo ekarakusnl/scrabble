@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.gamecity.scrabble.dao.RedisRepository;
 import com.gamecity.scrabble.entity.Action;
-import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
@@ -55,8 +54,7 @@ public class StartGameJob implements Job {
         final Long gameId = dataMap.getLong("gameId");
         final Game game = gameService.start(gameId);
 
-        final ActionType actionType = ActionType.START;
-        final Action action = actionService.add(game, game.getOwnerId(), actionType);
+        final Action action = actionService.getAction(gameId, game.getVersion());
         redisRepository.publishAction(action.getGameId(), action);
 
         schedulerService.scheduleSkipTurnJob(game);

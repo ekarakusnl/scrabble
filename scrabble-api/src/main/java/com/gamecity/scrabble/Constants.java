@@ -27,6 +27,7 @@ public interface Constants {
         String getActions = "getActions";
         String getLastAction = "getLastAction";
         String getActionByVersion = "getActionByVersion";
+        String getLastActionsByCount = "getLastActionsByCount";
 
         // Cell
         String getCells = "getCells";

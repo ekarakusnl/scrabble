@@ -37,7 +37,9 @@ import lombok.experimental.SuperBuilder;
         @NamedQuery(name = Constants.NamedQuery.getLastAction,
                 query = "Select a from Action a where a.gameId = :gameId order by id desc"),
         @NamedQuery(name = Constants.NamedQuery.getActionByVersion,
-                query = "Select a from Action a where a.gameId = :gameId and a.version = :version order by id desc") })
+                query = "Select a from Action a where a.gameId = :gameId and a.version = :version order by id desc"),
+        @NamedQuery(name = Constants.NamedQuery.getLastActionsByCount,
+                query = "Select a from Action a where a.gameId = :gameId order by id desc") })
 public class Action extends AbstractEntity implements Serializable {
 
     private static final long serialVersionUID = -8857819980114071959L;

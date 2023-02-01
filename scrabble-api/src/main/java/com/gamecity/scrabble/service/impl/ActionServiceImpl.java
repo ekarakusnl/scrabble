@@ -1,5 +1,7 @@
 package com.gamecity.scrabble.service.impl;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import com.gamecity.scrabble.service.ActionService;
 
 @Service(value = "actionService")
 class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implements ActionService {
+
+    private static final Integer MAXIMUM_SKIP_COUNT_IN_A_ROW = 4;
 
     @Override
     @Transactional
@@ -43,6 +47,14 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
     @Override
     public Action getAction(Long gameId, Integer version) {
         return baseDao.getActionByVersion(gameId, version);
+    }
+
+    @Override
+    public boolean isMaximumSkipCountReached(Long gameId) {
+        // if 4 turns has been skipped in a row, then the game should end
+        final List<Action> lastActions = baseDao.getLastActionsByCount(gameId, MAXIMUM_SKIP_COUNT_IN_A_ROW);
+        return lastActions.size() == MAXIMUM_SKIP_COUNT_IN_A_ROW
+                && lastActions.stream().allMatch(action -> ActionType.SKIP == action.getType());
     }
 
 }

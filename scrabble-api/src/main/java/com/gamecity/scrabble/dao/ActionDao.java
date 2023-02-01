@@ -37,4 +37,14 @@ public interface ActionDao extends BaseDao<Action> {
      */
     Action getActionByVersion(Long gameId, Integer version);
 
+    /**
+     * Gets the {@link List list} of last {@link Action actions} in a {@link Game game} specified by the
+     * <code>count</code>
+     * 
+     * @param gameId <code>id</code> of the game
+     * @param count  <code>count</code> of the actions
+     * @return the action
+     */
+    List<Action> getLastActionsByCount(Long gameId, Integer count);
+
 }

@@ -83,21 +83,28 @@ public class SkipTurnJob implements Job {
 
         final Player player = playerService.getByPlayerNumber(gameId, playerNumber);
         final VirtualRack virtualRack = virtualRackService.getRack(gameId, playerNumber, game.getRoundNumber());
-        final Game updatedGame = gameService.play(game.getId(), player.getUserId(), virtualRack, ActionType.SKIP);
+
+        final ActionType actionType = ActionType.SKIP;
+        final Game updatedGame = gameService.play(game.getId(), player.getUserId(), virtualRack, actionType);
         if (updatedGame == null) {
             return;
         }
 
-        final ActionType actionType = ActionType.SKIP;
-        final Action action = actionService.add(updatedGame, player.getUserId(), actionType);
+        final Action action = actionService.getAction(gameId, updatedGame.getVersion());
         redisRepository.publishAction(action.getGameId(), action);
 
         if (GameStatus.READY_TO_END == game.getStatus()) {
             // the last round has been played, schedule the end game job
             schedulerService.scheduleEndGameJob(updatedGame.getId());
         } else {
-            // schedule the skip turn job for the next turn
-            schedulerService.scheduleSkipTurnJob(updatedGame);
+            final boolean isMaximumSkipCountReached = actionService.isMaximumSkipCountReached(gameId);
+            if (isMaximumSkipCountReached) {
+                // maximum skip count in a row has been reached, schedule the end game job
+                schedulerService.scheduleEndGameJob(gameId);
+            } else {
+                // schedule the skip turn job for the next turn
+                schedulerService.scheduleSkipTurnJob(updatedGame);
+            }
         }
     }
 

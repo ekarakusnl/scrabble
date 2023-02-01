@@ -107,7 +107,7 @@ class SchedulerServiceImpl implements SchedulerService {
             scheduler.scheduleJob(jobDetail, trigger);
             scheduler.start();
 
-            log.info("StartGameJob has been created on game {} for version {}", gameId);
+            log.info("StartGameJob has been created on game {}", gameId);
         } catch (SchedulerException e) {
             log.error("An error occured while scheduling the start game job", e);
         }
@@ -131,7 +131,7 @@ class SchedulerServiceImpl implements SchedulerService {
             scheduler.scheduleJob(jobDetail, trigger);
             scheduler.start();
 
-            log.info("EndGameJob has been created on game {} for version {}", gameId);
+            log.info("EndGameJob has been created on game {}", gameId);
         } catch (SchedulerException e) {
             log.error("An error occured while scheduling the end game job", e);
         }

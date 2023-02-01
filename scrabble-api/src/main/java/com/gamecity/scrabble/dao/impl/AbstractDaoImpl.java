@@ -84,7 +84,6 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
         return query.getResultList();
     }
 
-    @SuppressWarnings("unused")
     protected T getByNamedQuery(String querySql, List<Pair<String, Object>> paramPairs) {
         try {
             final Query query = createQueryWithParams(querySql, paramPairs);
@@ -105,7 +104,6 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
         return query;
     }
 
-    @SuppressWarnings("unused")
     protected <G> G findGenericTypeByNamedQuery(String querySql, List<Pair<String, Object>> paramPairs) {
         try {
             final Query query = createQueryWithParams(querySql, paramPairs);

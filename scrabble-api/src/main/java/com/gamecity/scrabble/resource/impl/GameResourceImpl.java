@@ -82,9 +82,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     public Response create(GameDto gameDto) {
         final Game game = baseService.save(Mapper.toEntity(gameDto));
 
-        final ActionType actionType = ActionType.JOIN;
-        final Action action = actionService.add(game, game.getOwnerId(), actionType);
-        redisRepository.publishAction(action.getGameId(), action);
+        publishLastAction(game);
 
         final GameDto responseDto = Mapper.toDto(game);
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
@@ -94,9 +92,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     public Response join(Long id, Long userId) {
         final Game game = baseService.join(id, userId);
 
-        final ActionType actionType = ActionType.JOIN;
-        final Action action = actionService.add(game, userId, actionType);
-        redisRepository.publishAction(action.getGameId(), action);
+        publishLastAction(game);
 
         if (GameStatus.READY_TO_START == game.getStatus()) {
             schedulerService.scheduleStartGameJob(id);
@@ -109,9 +105,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     public Response leave(Long id, Long userId) {
         final Game game = baseService.leave(id, userId);
 
-        final ActionType actionType = ActionType.LEAVE;
-        final Action action = actionService.add(game, userId, actionType);
-        redisRepository.publishAction(action.getGameId(), action);
+        publishLastAction(game);
 
         return Response.ok(Mapper.toDto(game)).build();
     }
@@ -121,9 +115,9 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final VirtualRack rack = Mapper.toEntity(rackDto);
         final Game game = baseService.play(id, userId, rack, ActionType.PLAY);
 
-        final Action action = actionService.getAction(id, game.getVersion());
-        redisRepository.publishAction(game.getId(), action);
+        publishLastAction(game);
 
+        // terminate the previous skipTurnJob
         schedulerService.terminateSkipTurnJob(id, game.getVersion() - 1);
         if (GameStatus.READY_TO_END == game.getStatus()) {
             // the last round has been played, schedule the end game job
@@ -144,6 +138,11 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
 
         final List<Game> games = baseService.listByUser(userId);
         return Response.ok(games.stream().map(Mapper::toDto).collect(Collectors.toList())).build();
+    }
+
+    private void publishLastAction(Game game) {
+        final Action action = actionService.getAction(game.getId(), game.getVersion());
+        redisRepository.publishAction(game.getId(), action);
     }
 
 }
