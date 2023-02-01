@@ -88,6 +88,7 @@ class SchedulerServiceImpl implements SchedulerService {
             final JobKey jobKey =
                     new JobKey(String.format(SKIP_TURN_JOB_IDENTITY, gameId, version), SKIP_TURN_JOB_GROUP);
             schedulerFactory.getScheduler().interrupt(jobKey);
+            schedulerFactory.getScheduler().deleteJob(jobKey);
 
             log.info("SkipTurnJob has been terminated on game {} for version {}", gameId, version);
         } catch (SchedulerException e) {
@@ -178,6 +179,7 @@ class SchedulerServiceImpl implements SchedulerService {
             final JobKey jobKey =
                     new JobKey(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP);
             schedulerFactory.getScheduler().interrupt(jobKey);
+            schedulerFactory.getScheduler().deleteJob(jobKey);
 
             log.info("TerminateGameJob has been terminated on game {}", gameId);
         } catch (SchedulerException e) {
