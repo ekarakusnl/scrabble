@@ -1,4 +1,5 @@
 export interface Action {
+  id: number;
   gameId: number;
   userId: number;
   version: number;

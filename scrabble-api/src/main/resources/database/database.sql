@@ -362,6 +362,7 @@ CREATE TABLE public.words (
     id bigint NOT NULL,
     created_date timestamp without time zone NOT NULL,
     last_updated_date timestamp without time zone NOT NULL,
+    action_id bigint NOT NULL,
     game_id bigint NOT NULL,
     round_number integer NOT NULL,
     score integer NOT NULL,

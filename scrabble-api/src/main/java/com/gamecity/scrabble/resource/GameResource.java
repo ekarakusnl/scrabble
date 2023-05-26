@@ -15,7 +15,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.gamecity.scrabble.model.rest.ActionDto;
 import com.gamecity.scrabble.model.rest.GameDto;
 import com.gamecity.scrabble.model.rest.VirtualRackDto;
 
@@ -71,18 +70,6 @@ public interface GameResource extends BaseResource<GameDto> {
     @Path("/{id}/users/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     Response leave(@PathParam("id") Long id, @PathParam("userId") Long userId);
-
-    /**
-     * Gets the {@link ActionDto action} in the {@link GameDto game}
-     * 
-     * @param id      <code>id</code> of the game
-     * @param version <code>version</code> of the action
-     * @return the action
-     */
-    @GET
-    @Path("/{id}/actions/{version}")
-    @Produces(MediaType.APPLICATION_JSON)
-    Response getAction(@PathParam("id") Long id, @PathParam("version") Integer version);
 
     /**
      * Plays the word in the {@link GameDto game}

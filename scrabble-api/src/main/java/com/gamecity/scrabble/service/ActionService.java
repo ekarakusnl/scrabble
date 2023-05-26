@@ -1,5 +1,7 @@
 package com.gamecity.scrabble.service;
 
+import java.util.List;
+
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
@@ -13,7 +15,7 @@ import com.gamecity.scrabble.model.VirtualBoard;
  * 
  * @author ekarakus
  */
-public interface ActionService {
+public interface ActionService extends BaseService<Action> {
 
     /**
      * Adds an {@link Action action} item after the last happened action in the {@link Game game}
@@ -51,5 +53,13 @@ public interface ActionService {
      * @return whether the skip count to end the game has been reached
      */
     boolean isMaximumSkipCountReached(Long gameId, Integer playerCount);
+
+    /**
+     * Gets the {@link List list} of {@link Action actions} in the {@link Game game}
+     * 
+     * @param gameId <code>id</code> of the game
+     * @return the list of action
+     */
+    List<Action> getActions(Long gameId);
 
 }

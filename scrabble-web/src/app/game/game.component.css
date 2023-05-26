@@ -192,6 +192,11 @@
   text-align: center;
 }
 
-.words {
+.actions {
 	height: 300px;
+}
+
+.actions .info-box-text {
+  white-space: nowrap;
+  display: block;
 }

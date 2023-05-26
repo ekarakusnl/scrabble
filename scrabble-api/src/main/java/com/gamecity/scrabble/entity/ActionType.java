@@ -8,6 +8,11 @@ package com.gamecity.scrabble.entity;
 public enum ActionType {
 
     /**
+     * A player created the game
+     */
+    CREATE,
+
+    /**
      * A player joined to the game
      */
     JOIN,

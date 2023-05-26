@@ -139,6 +139,7 @@ CREATE TABLE words (
   last_updated_date datetime default now() not null,
   game_id bigint not null,
   user_id bigint not null,
+  action_id bigint not null,
   round_number integer not null,
   score integer not null,
   word varchar(255) not null,

@@ -1,4 +1,5 @@
-import { AfterViewChecked, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { formatDate } from '@angular/common';
+import { AfterViewChecked, Component, ElementRef, Inject, LOCALE_ID, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { timer } from 'rxjs';
 
@@ -35,7 +36,8 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./game.component.css']
 })
 export class GameComponent implements OnInit, AfterViewChecked {
-  @ViewChild('scrollToBottom') private scrollContainer: ElementRef
+  @ViewChild('scrollMessages') private messageContainer: ElementRef
+  @ViewChild('scrollActions') private actionContainer: ElementRef
 
   imageResourceURL: string = environment.USER_IMAGE_URL;
 
@@ -52,6 +54,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
   players: Player[];
   chats: Chat[];
   words: Word[];
+  actions: Action[];
+  actionMessages: string[];
 
   selectedTile: Tile;
   message: string;
@@ -69,7 +73,12 @@ export class GameComponent implements OnInit, AfterViewChecked {
   remainingDurationInSeconds: number;
   remainingDuration: string;
 
+  // scrolling
+  newAction: boolean = false;
+  newMessage: boolean = false;
+
   constructor(
+    @Inject(LOCALE_ID) private locale: string,
     private route: ActivatedRoute,
     private router: Router,
     private gameService: GameService,
@@ -94,18 +103,22 @@ export class GameComponent implements OnInit, AfterViewChecked {
     this.loadGame();
   }
 
-  ngAfterViewChecked() {
-    this.scrollToBottom();
+  ngAfterViewChecked(): void {
+    this.scrollMessages();
+    this.scrollActions();
   }
 
-  scrollToBottom(): void {
-    if (!this.scrollContainer || !this.scrollContainer.nativeElement) {
-      return;
+  scrollMessages(): void {
+    if (this.newMessage && this.messageContainer && this.messageContainer.nativeElement) {
+      this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+      this.newMessage = false;
     }
-    try {
-      this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-    } catch(error) {
-      this.toastService.error('An error occured');
+  }
+
+  scrollActions(): void {
+    if (this.newAction && this.actionContainer && this.actionContainer.nativeElement) {
+      this.actionContainer.nativeElement.scrollTop = this.actionContainer.nativeElement.scrollHeight;
+      this.newAction = false;
     }
   }
 
@@ -119,30 +132,31 @@ export class GameComponent implements OnInit, AfterViewChecked {
       }
 
       this.version = game.version - 1;
-      this.loadBoard();
-      this.loadBag();
-      this.loadChats();
-      this.loadAction();
+      this.getBoard();
+      this.getBag();
+      this.getChats();
+      this.getLastAction();
     });
   }
 
-  loadBoard(): void {
+  getBoard(): void {
     this.boardService.getBoard(this.game.boardId).subscribe((board: Board) => {
       this.board = board;
     });
   }
 
-  loadBag(): void {
+  getBag(): void {
     this.bagService.getBag(this.game.bagId).subscribe((bag: Bag) => {
       this.bag = bag;
+      this.remainingTileCount = bag.tileCount;
     });
   }
 
-  loadAction(): void {
+  getLastAction(): void {
     if (this.currentStatus === 'ENDED') {
       this.loadCells();
-      this.loadPlayers();
-      this.loadWords();
+      this.getPlayers();
+      this.getWords();
       return;
     }
 
@@ -158,7 +172,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
           // game is ended, use the previous version to show the latest results
           this.version = this.version - 1; 
           this.stopTimer();
-          this.loadAction();
+          this.getLastAction();
           return;
         } else if (this.currentStatus === 'LAST_ROUND') {
           this.toastService.info(this.translateService.instant('game.last.round'));
@@ -166,10 +180,10 @@ export class GameComponent implements OnInit, AfterViewChecked {
 
         this.resetTimer(action.lastUpdatedDate);
         this.loadCells();
-        this.loadPlayers();
-        this.loadWords();
+        this.getPlayers();
+        this.getWords();
       }
-      this.loadAction();
+      this.getLastAction();
     });
   }
 
@@ -203,9 +217,10 @@ export class GameComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  loadPlayers(): void {
+  getPlayers(): void {
     this.playerService.getPlayers(this.game.id, this.version).subscribe((players: Player[]) => {
       this.players = players;
+      this.setChatUsernames();
       this.playerNumber = this.players.find(player => player.userId == this.userId).playerNumber;
       if (this.currentStatus === 'WAITING') {
           // add missing players for remaining slots
@@ -213,7 +228,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
             const player: Player = { userId: 0, username: '?', playerNumber: -1, score: 0 };
             this.players.push(player);
           }
-          return;
       } else if (this.currentStatus === 'ENDED') {
         this.winnerPlayer = players.reduce(
           (previous, current) => {
@@ -232,8 +246,49 @@ export class GameComponent implements OnInit, AfterViewChecked {
         } else {
           this.toastService.info(this.translateService.instant('game.another.player.turn', { 0 : currentPlayer.username }));
         }
+        this.loadRack();
       }
-      this.loadRack();
+      this.getActions();
+    });
+  }
+
+  getActions(): void {
+    this.actionService.getActions(this.game.id).subscribe((actions: Action[]) => {
+      this.actions = actions;
+      this.actionMessages = [];
+      this.actions.forEach((action: Action) => {
+        this.actionMessages.push(this.getActionMessage(action));
+      });
+      this.newAction = true;
+    });
+  }
+
+  getActionMessage(action: Action): string {
+    const actionDate = '(' + formatDate(action.lastUpdatedDate,'HH:mm:ss', this.locale) +  ') ';
+    if (action.type === 'CREATE') {
+      return actionDate + this.translateService.instant('game.actions.create', { '0': this.getUsername(action.userId) });
+    } else if (action.type === 'JOIN') {
+      return actionDate + this.translateService.instant('game.actions.join', { '0': this.getUsername(action.userId) });
+    } else if (action.type === 'LEAVE') {
+      return actionDate + this.translateService.instant('game.actions.leave', { '0': this.getUsername(action.userId) });
+    } else if (action.type === 'START') {
+      return actionDate + this.translateService.instant('game.actions.start');
+    } else if (action.type === 'PLAY') {
+      return actionDate + this.getPlayedWordsMessage(action.userId, action.id);
+    } else if (action.type === 'SKIP') {
+      return actionDate + this.translateService.instant('game.actions.skip', { '0': this.getUsername(action.userId) });
+    } else if (action.type === 'TIMEOUT') {
+      return actionDate + this.translateService.instant('game.actions.timeout', { '0': this.getUsername(action.userId) });
+    } else if (action.type === 'END') {
+      return actionDate + this.translateService.instant('game.actions.end');
+    } else {
+      return '';
+    }
+  }
+
+  setActionUsernames(): void {
+    this.chats.forEach((chat: Chat) => {
+      chat.username = this.getUsername(chat.userId);
     });
   }
 
@@ -257,25 +312,37 @@ export class GameComponent implements OnInit, AfterViewChecked {
     const boardVersion = this.version - this.game.expectedPlayerCount;
     this.virtualBoardService.getBoard(this.game.id, boardVersion).subscribe((virtualBoard: VirtualBoard) => {
       this.virtualBoard = virtualBoard;
-      const usedCellCount = virtualBoard.cells.reduce((sum, current) => sum + (current.letter ? 1 : 0), 0);
-      this.remainingTileCount = this.bag.tileCount - usedCellCount;
+      if (virtualBoard) {
+        const usedCellCount = virtualBoard.cells.reduce((sum, current) => sum + (current.letter ? 1 : 0), 0);
+        this.remainingTileCount = this.bag.tileCount - usedCellCount;
+      }
     });
   };
 
-  loadChats(): void {
+  getChats(): void {
     this.chatService.getChats(this.game.id, this.chats ? this.chats.length : 0).subscribe((chats: Chat[]) => {
       if (chats && chats.length > 0) {
         this.chats = chats;
+        this.setChatUsernames();
         if (this.chatMessageCount && this.chatMessageCount < chats.length) {
           this.toastService.playSound();
         }
         this.chatMessageCount = chats.length;
+        this.newMessage = true;
       }
-      this.loadChats();
+      this.getChats();
     });
   };
 
-  loadWords(): void {
+  setChatUsernames(): void {
+    if (this.chats) {
+      this.chats.forEach((chat: Chat) => {
+        chat.username = this.getUsername(chat.userId);
+      });
+    }
+  }
+
+  getWords(): void {
     this.wordService.getWordLogs(this.game.id).subscribe((words: Word[]) => {
       if (words && words.length > 0) {
         this.words = words;
@@ -287,7 +354,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
     return this.virtualBoard.cells[rowIndex * this.board.columnSize + columnIndex];
   }
 
-  chatKeyPress(event: KeyboardEvent) {
+  chatKeyPress(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       this.sendMessage();
     }
@@ -301,7 +368,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
 
   selectTile(tile: Tile): void {
     if (this.playerNumber != this.currentPlayerNumber) {
-      this.toastService.error(this.translateService.instant('error.2007'));
       return;
     } else if (this.remainingDurationInSeconds <= 0) {
       this.toastService.error(this.translateService.instant('error.2007'));
@@ -390,6 +456,9 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   getUsername(userId: number): string {
+    if (!this.players) {
+      return null;
+    }
     const player = this.players.find(player => player.userId === userId);
     return player.username;
   }
@@ -398,6 +467,16 @@ export class GameComponent implements OnInit, AfterViewChecked {
     this.gameService.leaveGame(id).subscribe(() => {
       this.router.navigate(['lobby']);
     });
+  }
+
+  getPlayedWordsMessage(userId: number, actionId: number): string {
+    if (!this.words) {
+      return null;
+    }
+    const playedWords = this.words.filter((word: Word) => word.actionId === actionId)
+      .map((word: Word) => word.word + '(' + word.score + ')');
+    const actionMessage = playedWords.length === 1 ? 'game.actions.play.word' : 'game.actions.play.words';
+    return this.translateService.instant(actionMessage, { '0': this.getUsername(userId), '1': playedWords.join(', ') })
   }
 
 }

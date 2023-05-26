@@ -445,10 +445,12 @@ public class Mapper {
                 .version(action.getVersion())
                 .currentPlayerNumber(action.getCurrentPlayerNumber())
                 .gameId(action.getGameId())
+                .id(action.getId())
                 .lastUpdatedDate(action.getLastUpdatedDate())
                 .roundNumber(action.getRoundNumber())
                 .gameStatus(action.getGameStatus().name())
                 .type(action.getType().name())
+                .userId(action.getUserId())
                 .build();
 
         return actionDto;
@@ -464,12 +466,12 @@ public class Mapper {
         final Action action = new Action();
         action.setVersion(actionDto.getVersion());
         action.setCurrentPlayerNumber(actionDto.getCurrentPlayerNumber());
-        // .currentStatus(actionDto.getCurrentStatus())
         action.setGameId(actionDto.getGameId());
         action.setLastUpdatedDate(actionDto.getLastUpdatedDate());
         action.setRoundNumber(actionDto.getRoundNumber());
         action.setGameStatus(GameStatus.valueOf(actionDto.getGameStatus()));
         action.setType(ActionType.valueOf(actionDto.getType()));
+        action.setUserId(actionDto.getUserId());
 
         return action;
     }
@@ -482,6 +484,7 @@ public class Mapper {
      */
     public static WordDto toDto(Word word) {
         final WordDto wordDto = WordDto.builder()
+                .actionId(word.getActionId())
                 .gameId(word.getGameId())
                 .lastUpdatedDate(word.getLastUpdatedDate())
                 .userId(word.getUserId())
@@ -501,6 +504,7 @@ public class Mapper {
      */
     public static Word toEntity(WordDto wordDto) {
         final Word word = new Word();
+        word.setActionId(wordDto.getActionId());
         word.setGameId(wordDto.getGameId());
         word.setUserId(wordDto.getUserId());
         word.setRoundNumber(wordDto.getRoundNumber());

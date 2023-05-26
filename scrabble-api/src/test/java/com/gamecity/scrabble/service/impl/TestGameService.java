@@ -495,6 +495,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -509,6 +510,7 @@ class TestGameService extends AbstractServiceTest {
         verify(playerService, times(1)).save(updatedPlayer);
 
         final Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
@@ -576,6 +578,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -592,6 +595,7 @@ class TestGameService extends AbstractServiceTest {
         verify(playerService, times(1)).save(updatedPlayer);
 
         Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
@@ -602,6 +606,7 @@ class TestGameService extends AbstractServiceTest {
         verify(wordService, times(1)).save(word);
 
         word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
@@ -612,6 +617,7 @@ class TestGameService extends AbstractServiceTest {
         verify(wordService, times(1)).save(word);
 
         word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
@@ -677,6 +683,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -691,6 +698,7 @@ class TestGameService extends AbstractServiceTest {
         verify(playerService, times(1)).save(updatedPlayer);
 
         Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
@@ -718,6 +726,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -734,6 +743,7 @@ class TestGameService extends AbstractServiceTest {
 
         // the word WEAKENING is logged in the words
         Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
@@ -744,6 +754,7 @@ class TestGameService extends AbstractServiceTest {
 
         // the word WEAKENING is logged in the words
         word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
@@ -768,6 +779,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -783,6 +795,7 @@ class TestGameService extends AbstractServiceTest {
 
         // the word WEAKENING is logged in the words
         Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);

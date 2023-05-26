@@ -1,6 +1,7 @@
 package com.gamecity.scrabble.controller;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,10 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -27,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author ekarakus
  */
 @RestController
-@RequestMapping("/rest/games/{gameId}/action")
+@RequestMapping("/rest/games/{gameId}/actions")
 @Slf4j
 public class ActionController extends AbstractController implements MessageListener {
 
@@ -36,15 +38,27 @@ public class ActionController extends AbstractController implements MessageListe
     private final Map<DeferredResult<ActionDto>, Pair<Long, Integer>> actions = new ConcurrentHashMap<>();
 
     /**
+     * Gets the {@link List list} of {@link ActionDto actions}
+     * 
+     * @param gameId <code>id</code> of the game
+     * @return the bag list
+     */
+    @GetMapping
+    public ResponseEntity<List<ActionDto>> list(@PathVariable Long gameId) {
+        final List<ActionDto> actions = list(API_RESOURCE_PATH, ActionDto.class, gameId);
+        return new ResponseEntity<>(actions, HttpStatus.OK);
+    }
+
+    /**
      * Gets an {@link ActionDto action} by version
      * 
      * @param gameId  <code>id</code> of the game
      * @param version the expected version
      * @return the action
      */
-    @GetMapping
+    @GetMapping("/{version}")
     @ResponseBody
-    public DeferredResult<ActionDto> getAction(@PathVariable Long gameId, @RequestParam Integer version) {
+    public DeferredResult<ActionDto> getAction(@PathVariable Long gameId, @PathVariable Integer version) {
 
         final DeferredResult<ActionDto> deferredResult =
                 new DeferredResult<>(ASYNCHRONOUS_REQUEST_DURATION, Collections.emptyList());

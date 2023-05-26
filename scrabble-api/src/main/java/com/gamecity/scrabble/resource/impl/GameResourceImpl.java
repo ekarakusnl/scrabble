@@ -61,25 +61,6 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     }
 
     @Override
-    public Response getAction(Long id, Integer version) {
-        if (version < 1) {
-            return Response.ok().build();
-        }
-
-        boolean hasNewAction = actionService.hasNewAction(id, version);
-        if (!hasNewAction) {
-            return Response.ok().build();
-        }
-
-        final Action action = actionService.getAction(id, version);
-        if (action == null) {
-            return Response.ok().build();
-        }
-
-        return Response.ok(Mapper.toDto(action)).build();
-    }
-
-    @Override
     public Response create(GameDto gameDto) {
         final Game game = baseService.save(Mapper.toEntity(gameDto));
 

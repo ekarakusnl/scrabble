@@ -16,7 +16,11 @@ export class ActionService {
   ) { }
 
   getAction(gameId: number, version: number): Observable<Action> {
-    return this.http.get<Action>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/action?version=' + version);
+    return this.http.get<Action>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/actions/' + version);
+  }
+
+  getActions(gameId: number): Observable<Action[]> {
+    return this.http.get<Action[]>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/actions');
   }
 
 }

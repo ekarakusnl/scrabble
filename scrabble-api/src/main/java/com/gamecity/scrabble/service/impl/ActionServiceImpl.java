@@ -58,4 +58,9 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
                 .allMatch(action -> ActionType.TIMEOUT == action.getType() || ActionType.SKIP == action.getType());
     }
 
+    @Override
+    public List<Action> getActions(Long gameId) {
+        return baseDao.getActions(gameId);
+    }
+
 }

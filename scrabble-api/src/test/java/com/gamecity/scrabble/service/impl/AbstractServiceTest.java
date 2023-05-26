@@ -3,6 +3,7 @@ package com.gamecity.scrabble.service.impl;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.Bag;
 import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Game;
@@ -13,6 +14,7 @@ import com.gamecity.scrabble.entity.User;
 @ExtendWith(MockitoExtension.class)
 abstract class AbstractServiceTest {
 
+    protected static final Long DEFAULT_ACTION_ID = 1L;
     protected static final Long DEFAULT_BOARD_ID = 1L;
     protected static final Long DEFAULT_BAG_ID = 1L;
     protected static final Long DEFAULT_GAME_ID = 1L;
@@ -54,6 +56,12 @@ abstract class AbstractServiceTest {
         bag.setLanguage(Language.en);
         bag.setTileCount(96);
         return bag;
+    }
+
+    protected Action createSampleAction() {
+        final Action action = new Action();
+        action.setId(DEFAULT_ACTION_ID);
+        return action;
     }
 
 }

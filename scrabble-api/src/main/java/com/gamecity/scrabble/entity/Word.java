@@ -23,14 +23,19 @@ import lombok.EqualsAndHashCode;
 public class Word extends AbstractEntity {
 
     // @JoinColumn(name = "game_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
-    // "FK_WORD_LOG_GAME"))
+    // "FK_WORD_GAME"))
     @Column(name = "game_id", nullable = false)
     private Long gameId;
 
     // @JoinColumn(name = "user_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
-    // "FK_WORD_LOG_USER"))
+    // "FK_WORD_USER"))
     @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    // @JoinColumn(name = "action_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
+    // "FK_WORD_ACTION"))
+    @Column(name = "action_id", nullable = false)
+    private Long actionId;
 
     @Column(name = "round_number", nullable = false)
     private Integer roundNumber;
