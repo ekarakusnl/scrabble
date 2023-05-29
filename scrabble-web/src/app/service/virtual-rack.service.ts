@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { VirtualRack } from '../model/virtual-rack';
 
 import { environment } from '../../environments/environment';
+import { Tile } from '../model/tile';
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +21,8 @@ export class VirtualRackService {
         roundNumber);
   }
 
-  exchangeTile(gameId: number, tileNumber: number): Observable<VirtualRack> {
-    return this.http.post<VirtualRack>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/racks/tiles/' +
+  exchangeTile(gameId: number, tileNumber: number): Observable<Tile> {
+    return this.http.post<Tile>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/racks/tiles/' +
         tileNumber, null);
   }
 

@@ -144,7 +144,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
     }
 
     @Override
-    public VirtualRack exchangeTile(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber,
+    public VirtualTile exchangeTile(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber,
             Integer tileNumber) {
         final VirtualRack virtualRack = getRack(gameId, playerNumber, roundNumber);
         if (virtualRack.isExchanged()) {
@@ -156,7 +156,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
         // return the default rack if the requested letter was not able to be created
         if (newVirtualTile == null) {
-            return virtualRack;
+            return exchangedVirtualTile;
         }
 
         final List<VirtualTile> updatedTiles = new ArrayList<>(virtualRack.getTiles());
@@ -177,7 +177,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
         log.info("Letter {} has been exchanged with {} for player {} on game {}", exchangedVirtualTile.getLetter(),
                 newVirtualTile.getLetter(), playerNumber, gameId);
 
-        return updatedVirtualRack;
+        return newVirtualTile;
     }
 
 }

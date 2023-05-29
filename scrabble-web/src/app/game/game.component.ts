@@ -246,6 +246,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
         } else {
           this.toastService.info(this.translateService.instant('game.another.player.turn', { 0 : currentPlayer.username }));
         }
+        this.toastService.playSound();
         this.loadRack();
       }
       this.getActions();
@@ -449,8 +450,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
       return;
     }
 
-    this.virtualRackService.exchangeTile(this.game.id, this.selectedTile.number).subscribe((virtualRack: VirtualRack) => {
-      this.virtualRack = virtualRack;
+    this.virtualRackService.exchangeTile(this.game.id, this.selectedTile.number).subscribe((tile: Tile) => {
+      this.virtualRack.tiles[this.selectedTile.number - 1] = tile;
       this.selectedTile = null;
     });
   }

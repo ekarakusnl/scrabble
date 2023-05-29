@@ -525,17 +525,17 @@ class GameResourceIT extends AbstractIntegrationTest {
                 target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
                         .post(Entity.entity("", MediaType.APPLICATION_JSON));
 
-        VirtualRackDto virtualRack = exchangeTileResponse.readEntity(VirtualRackDto.class);
+        VirtualTileDto virtualTile = exchangeTileResponse.readEntity(VirtualTileDto.class);
 
-        assertNotNull(virtualRack);
-        assertNotEquals("B", virtualRack.getTiles().get(0).getLetter());
-        assertTrue(virtualRack.getTiles().get(0).isVowel());
+        assertNotNull(virtualTile);
+        assertNotEquals("B", virtualTile.getLetter());
+        assertTrue(virtualTile.isVowel());
 
         final VirtualRackDto updatedRack =
                 getVirtualRack(game.getId(), game.getOwnerId(), startedGame.getRoundNumber());
 
-        assertEquals(virtualRack.getTiles().get(0).getLetter(), updatedRack.getTiles().get(0).getLetter());
-        assertEquals(virtualRack.getTiles().get(0).isVowel(), updatedRack.getTiles().get(0).isVowel());
+        assertEquals(virtualTile.getLetter(), updatedRack.getTiles().get(0).getLetter());
+        assertEquals(virtualTile.isVowel(), updatedRack.getTiles().get(0).isVowel());
 
         tiles = getTiles(game.getId());
         exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);
@@ -597,16 +597,16 @@ class GameResourceIT extends AbstractIntegrationTest {
                 target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
                         .post(Entity.entity("", MediaType.APPLICATION_JSON));
 
-        final VirtualRackDto virtualRack = exchangeTileResponse.readEntity(VirtualRackDto.class);
+        final VirtualTileDto virtualTile = exchangeTileResponse.readEntity(VirtualTileDto.class);
 
-        assertNotNull(virtualRack);
-        assertEquals("B", virtualRack.getTiles().get(0).getLetter());
+        assertNotNull(virtualTile);
+        assertEquals("B", virtualTile.getLetter());
 
         final VirtualRackDto updatedRack =
                 getVirtualRack(game.getId(), game.getOwnerId(), startedGame.getRoundNumber());
 
-        assertEquals(virtualRack.getTiles().get(0).getLetter(), updatedRack.getTiles().get(0).getLetter());
-        assertEquals(virtualRack.getTiles().get(0).isVowel(), updatedRack.getTiles().get(0).isVowel());
+        assertEquals(virtualTile.getLetter(), updatedRack.getTiles().get(0).getLetter());
+        assertEquals(virtualTile.isVowel(), updatedRack.getTiles().get(0).isVowel());
 
         tiles = getTiles(game.getId());
         exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);
@@ -657,16 +657,16 @@ class GameResourceIT extends AbstractIntegrationTest {
                 target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
                         .post(Entity.entity("", MediaType.APPLICATION_JSON));
 
-        final VirtualRackDto virtualRack = exchangeTileResponse.readEntity(VirtualRackDto.class);
+        final VirtualTileDto virtualTile = exchangeTileResponse.readEntity(VirtualTileDto.class);
 
-        assertNotNull(virtualRack);
-        assertEquals("B", virtualRack.getTiles().get(0).getLetter());
+        assertNotNull(virtualTile);
+        assertEquals("B", virtualTile.getLetter());
 
         final VirtualRackDto updatedRack =
                 getVirtualRack(game.getId(), game.getOwnerId(), startedGame.getRoundNumber());
 
-        assertEquals(virtualRack.getTiles().get(0).getLetter(), updatedRack.getTiles().get(0).getLetter());
-        assertEquals(virtualRack.getTiles().get(0).isVowel(), updatedRack.getTiles().get(0).isVowel());
+        assertEquals(virtualTile.getLetter(), updatedRack.getTiles().get(0).getLetter());
+        assertEquals(virtualTile.isVowel(), updatedRack.getTiles().get(0).isVowel());
 
         tiles = getTiles(game.getId());
         exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);

@@ -318,8 +318,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game game = getAndLock(id);
 
-        if (GameStatus.IN_PROGRESS != game.getStatus() && GameStatus.LAST_ROUND != game.getStatus()) {
+        if (GameStatus.WAITING == game.getStatus()) {
             throw new GameException(GameError.WAITING);
+        } else if (GameStatus.ENDED == game.getStatus()) {
+            throw new GameException(GameError.NOT_FOUND);
         }
 
         log.info("Playing on game {} as player {}", game.getId(), game.getCurrentPlayerNumber());

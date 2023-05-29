@@ -14,10 +14,6 @@
   font-size: 1.5rem;
 }
 
-.info-box.player {
-  margin: 0px;
-}
-
 /* custom styles */
 .game-table {
   overflow: hidden;
@@ -149,42 +145,50 @@
     position: relative;
     bottom: 5px;
   }
+  .info-box {
+    margin: 0px;
+  }
 }
 
 @media screen and (max-width: 767px) {
   .cell-div{
-    width: 21px;
-    height: 21px;
+    width: 22px;
+    height: 22px;
   }
   .tile-td {
     padding: 6px;
     border: 1px;
   }
   .tile-div {
-    height: 21px;
-    width: 21px;
+    height: 22px;
+    width: 22px;
   }
   .cell-letter {
     font-size: 16px;
     position: relative;
-    bottom: 2px;
+    bottom: 3px;
   }
   .cell-score {
-    font-size: 6px;
+    font-size: 11px;
     position: relative;
     bottom: 2px;
-    right: 2px;
   }
   .tile-letter {
     font-size: 16px;
     position: relative;
-    bottom: 2px;
+    bottom: 3px;
   }
   .tile-score {
-    font-size: 6px;
+    font-size: 11px;
     position: relative;
     bottom: 2px;
-    right: 2px;
+  }
+  .cell-multiplier {
+    font-size: 10px;
+    padding-left: 3px;
+  }
+  .info-box {
+    margin-bottom: 10px;
   }
 }
 

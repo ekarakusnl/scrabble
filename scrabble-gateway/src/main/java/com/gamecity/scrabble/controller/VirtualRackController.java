@@ -48,10 +48,10 @@ public class VirtualRackController extends AbstractController {
      */
     @PostMapping("/tiles/{tileNumber}")
     @ResponseBody
-    public ResponseEntity<VirtualRackDto> exchangeTile(@PathVariable Long gameId, @PathVariable Integer tileNumber) {
-        final VirtualRackDto rack = post(API_RESOURCE_PATH + "/users/{userId}/tiles/{tileNumber}", VirtualRackDto.class,
+    public ResponseEntity<VirtualTileDto> exchangeTile(@PathVariable Long gameId, @PathVariable Integer tileNumber) {
+        final VirtualTileDto virtualTile = post(API_RESOURCE_PATH + "/users/{userId}/tiles/{tileNumber}", VirtualTileDto.class,
                 null, gameId, getUserId(), tileNumber);
-        return new ResponseEntity<>(rack, HttpStatus.OK);
+        return new ResponseEntity<>(virtualTile, HttpStatus.OK);
     }
 
 }

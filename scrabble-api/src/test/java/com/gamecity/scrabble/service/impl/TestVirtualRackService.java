@@ -69,12 +69,12 @@ class TestVirtualRackService extends AbstractServiceTest {
             when(redisRepository.getRack(eq(DEFAULT_GAME_ID), eq(playerNumber), eq(roundNumber)))
                     .thenReturn(virtualRack);
 
-            final VirtualRack updatedVirtualRack =
+            final VirtualTile newTile =
                     virtualRackService.exchangeTile(DEFAULT_GAME_ID, DEFAULT_BAG_ID, playerNumber, roundNumber, 1);
 
-            assertNotNull(updatedVirtualRack);
-            assertNotEquals("B", updatedVirtualRack.getTiles().get(0).getLetter());
-            assertTrue(updatedVirtualRack.getTiles().get(0).isVowel());
+            assertNotNull(newTile);
+            assertNotEquals("B", newTile.getLetter());
+            assertTrue(newTile.isVowel());
         });
     }
 

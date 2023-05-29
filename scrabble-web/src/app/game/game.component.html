@@ -1,6 +1,6 @@
 <div class="row"
      *ngIf="game && board && bag && userId">
-  <div class="col-md-12">
+  <div class="col-md-12 mt-4">
     <div class="card">
       <div class="card-body title-body">
         <!-- game settings -->
@@ -115,6 +115,7 @@
     </div>
   </div>
   <div class="col-md-7">
+    <!-- board -->
     <div class="row"
          *ngIf="virtualBoard">
       <div class="col-md-12">
@@ -138,7 +139,7 @@
                 </div>
                 <div class="cell-div d-flex align-items-center"
                      *ngIf="!getCell(rowIndex, columnIndex).letter">
-                  <span class="container-fluid font-weight-bold"
+                  <span class="cell-multiplier container-fluid font-weight-bold"
                         *ngIf="!getCell(rowIndex, columnIndex).letter">
                     {{ getCell(rowIndex, columnIndex).wordScoreMultiplier > 1 ? getCell(rowIndex, columnIndex).wordScoreMultiplier + 'xW' : '' }}
                     {{ getCell(rowIndex, columnIndex).letterValueMultiplier > 1 ? getCell(rowIndex, columnIndex).letterValueMultiplier + 'xL' : '' }}
@@ -150,9 +151,10 @@
         </table>
       </div>
     </div>
-    <div class="row mt-2 bg-light rack"
+    <!-- player rack -->
+    <div class="row mt-2 mb-4 rack"
          *ngIf="virtualRack">
-      <div class="col-md-2 mt-2">
+      <div class="col-md-2 mt-2 text-center">
         <a class="btn btn-app bg-secondary"
            [ngClass]="playerNumber !== currentPlayerNumber ? 'disabled' : ''"
            (click)="exchange()">
@@ -168,10 +170,7 @@
                   (click)="selectTile(tile)">
                 <div class="tile-div text-center tile"
                      *ngIf="tile"
-                     [ngClass]="{
-                       'sealed-tile': tile.sealed || tile.selected,
-                       'new-tile': tile.roundNumber === currentRoundNumber && tile.roundNumber > 1
-                      }">
+                     [ngClass]="{ 'sealed-tile': tile.sealed || tile.selected }">
                   <span class="tile-letter">{{ tile.letter }}</span>
                   <span class="tile-score">{{ tile.value }}</span>
                 </div>
@@ -180,7 +179,7 @@
           </tbody>
         </table>
       </div>
-      <div class="col-md-2 mt-2">
+      <div class="col-md-2 mt-2 text-center">
         <a class="btn btn-app bg-secondary"
            [ngClass]="playerNumber !== currentPlayerNumber ? 'disabled' : ''"
            (click)="play()">
@@ -190,7 +189,7 @@
     </div>
   </div>
   <div class="col-md-5"
-       *ngIf="'IN_PROGRESS' === currentStatus">
+       *ngIf="'IN_PROGRESS' === currentStatus || 'LAST_ROUND' === currentStatus || 'ENDED' === currentStatus">
     <div class="row">
       <div class="col-md-12">
         <div class="card card-outline card-secondary">
@@ -199,7 +198,7 @@
             <div class="card-tools">
               <span class="info-box-text">
                 <i class="fas fa-bell fa-sm"></i>
-                {{ 'game.round' | translate }}: {{ game.roundNumber }}
+                {{ 'game.round' | translate }}: {{ currentRoundNumber }}
               </span>
               <span class="info-box-text ml-2">
                 <i class="fas fa-font fa-xs"></i>
@@ -243,7 +242,8 @@
               <h5><i class="fas fa-info"></i> {{ 'game.chat.no.message' | translate }}</h5>
             </div>
           </div>
-          <div class="card-footer">
+          <div class="card-footer"
+               *ngIf="'ENDED' !== currentStatus">
             <form action="#" method="post">
               <div class="input-group">
                 <input class="form-control"

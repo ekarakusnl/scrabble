@@ -3,6 +3,7 @@ package com.gamecity.scrabble.model.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -12,9 +13,10 @@ import lombok.experimental.SuperBuilder;
  * @author ekarakus
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
-public class VirtualTileDto {
+public class VirtualTileDto extends AbstractDto {
 
     @JsonProperty("playerNumber")
     private Integer playerNumber;

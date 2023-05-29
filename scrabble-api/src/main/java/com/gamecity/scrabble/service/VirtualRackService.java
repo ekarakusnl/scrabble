@@ -66,6 +66,6 @@ public interface VirtualRackService {
      * @param tileNumber   <code>number</code> of tile to exchange
      * @return the rack
      */
-    VirtualRack exchangeTile(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber, Integer tileNumber);
+    VirtualTile exchangeTile(Long gameId, Long bagId, Integer playerNumber, Integer roundNumber, Integer tileNumber);
 
 }

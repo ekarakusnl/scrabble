@@ -10,7 +10,9 @@ import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.model.Mapper;
 import com.gamecity.scrabble.model.VirtualRack;
+import com.gamecity.scrabble.model.VirtualTile;
 import com.gamecity.scrabble.model.rest.VirtualRackDto;
+import com.gamecity.scrabble.model.rest.VirtualTileDto;
 import com.gamecity.scrabble.resource.VirtualRackResource;
 import com.gamecity.scrabble.service.GameService;
 import com.gamecity.scrabble.service.PlayerService;
@@ -59,11 +61,11 @@ class VirtualRackResourceImpl implements VirtualRackResource {
 
         final Game game = gameService.get(gameId);
         final Player player = playerService.getByUserId(gameId, userId);
-        final VirtualRack virtualRack = virtualRackService.exchangeTile(gameId, game.getBagId(),
+        final VirtualTile virtualTile = virtualRackService.exchangeTile(gameId, game.getBagId(),
                 player.getPlayerNumber(), game.getRoundNumber(), tileNumber);
 
-        final VirtualRackDto virtualRackDto = Mapper.toDto(virtualRack);
-        return Response.ok(virtualRackDto).build();
+        final VirtualTileDto virtualTileDto = Mapper.toDto(virtualTile);
+        return Response.ok(virtualTileDto).build();
     }
 
 }
