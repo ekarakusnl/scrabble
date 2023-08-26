@@ -140,9 +140,9 @@ public class JwtProvider {
                 .map(authority -> new BaseAuthority(authority))
                 .collect(Collectors.toList());
 
-        final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword(), userDto.isEnabled(),
-                userDto.isAccountNonExpired(), userDto.isAccountNonLocked(), userDto.isCredentialsNonExpired(),
-                authorities);
+        final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword(),
+                userDto.getPreferredLanguage(), userDto.isEnabled(), userDto.isAccountNonExpired(),
+                userDto.isAccountNonLocked(), userDto.isCredentialsNonExpired(), authorities);
 
         return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
     }

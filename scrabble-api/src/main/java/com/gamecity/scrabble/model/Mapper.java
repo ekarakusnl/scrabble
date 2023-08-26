@@ -2,6 +2,8 @@ package com.gamecity.scrabble.model;
 
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.gamecity.scrabble.entity.AbstractEntity;
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
@@ -25,8 +27,8 @@ import com.gamecity.scrabble.model.rest.ExceptionDto;
 import com.gamecity.scrabble.model.rest.ExceptionType;
 import com.gamecity.scrabble.model.rest.GameDto;
 import com.gamecity.scrabble.model.rest.PlayerDto;
-import com.gamecity.scrabble.model.rest.VirtualTileDto;
 import com.gamecity.scrabble.model.rest.UserDto;
+import com.gamecity.scrabble.model.rest.VirtualTileDto;
 import com.gamecity.scrabble.model.rest.VirtualBoardDto;
 import com.gamecity.scrabble.model.rest.VirtualRackDto;
 import com.gamecity.scrabble.model.rest.WordDto;
@@ -103,7 +105,7 @@ public class Mapper {
      * @return dto representation of the {@link User}
      */
     public static UserDto toDto(User user) {
-        final UserDto userDto = UserDto.builder()
+        return UserDto.builder()
                 .accountNonExpired(user.isAccountNonExpired())
                 .accountNonLocked(user.isAccountNonLocked())
                 .authorities(user.getAuthorities() == null ? null
@@ -114,10 +116,9 @@ public class Mapper {
                 .id(user.getId())
                 .lastUpdatedDate(user.getLastUpdatedDate())
                 .password(user.getPassword())
+                .preferredLanguage(user.getPreferredLanguage() != null ? user.getPreferredLanguage().name() : null)
                 .username(user.getUsername())
                 .build();
-
-        return userDto;
     }
 
     /**
@@ -135,8 +136,9 @@ public class Mapper {
         user.setEnabled(userDto.isEnabled());
         user.setId(userDto.getId());
         user.setPassword(userDto.getPassword());
+        user.setPreferredLanguage(StringUtils.isEmpty(userDto.getPreferredLanguage()) ? null
+                : Language.valueOf(userDto.getPreferredLanguage()));
         user.setUsername(userDto.getUsername());
-
         return user;
     }
 
@@ -147,7 +149,7 @@ public class Mapper {
      * @return dto representation of the {@link Game}
      */
     public static GameDto toDto(Game game) {
-        final GameDto gameDto = GameDto.builder()
+        return GameDto.builder()
                 .version(game.getVersion())
                 .activePlayerCount(game.getActivePlayerCount())
                 .bagId(game.getBagId())
@@ -162,8 +164,6 @@ public class Mapper {
                 .roundNumber(game.getRoundNumber())
                 .status(game.getStatus().name())
                 .build();
-
-        return gameDto;
     }
 
     /**
@@ -186,7 +186,6 @@ public class Mapper {
         game.setOwnerId(gameDto.getOwnerId());
         game.setRoundNumber(gameDto.getRoundNumber());
         game.setStatus(gameDto.getStatus() == null ? null : GameStatus.valueOf(gameDto.getStatus()));
-
         return game;
     }
 
@@ -197,15 +196,13 @@ public class Mapper {
      * @return dto representation of the {@link Board}
      */
     public static BoardDto toDto(Board board) {
-        final BoardDto boardDto = BoardDto.builder()
+        return BoardDto.builder()
                 .columnSize(board.getColumnSize())
                 .id(board.getId())
                 .lastUpdatedDate(board.getLastUpdatedDate())
                 .name(board.getName())
                 .rowSize(board.getRowSize())
                 .build();
-
-        return boardDto;
     }
 
     /**
@@ -220,7 +217,6 @@ public class Mapper {
         board.setId(boardDto.getId());
         board.setName(boardDto.getName());
         board.setRowSize(boardDto.getRowSize());
-
         return board;
     }
 
@@ -231,15 +227,13 @@ public class Mapper {
      * @return dto representation of the {@link Bag}
      */
     public static BagDto toDto(Bag bag) {
-        final BagDto bagDto = BagDto.builder()
+        return BagDto.builder()
                 .id(bag.getId())
                 .language(bag.getLanguage().name())
                 .lastUpdatedDate(bag.getLastUpdatedDate())
                 .name(bag.getName())
                 .tileCount(bag.getTileCount())
                 .build();
-
-        return bagDto;
     }
 
     /**
@@ -254,7 +248,6 @@ public class Mapper {
         bag.setLanguage(Language.valueOf(bagDto.getLanguage()));
         bag.setName(bagDto.getName());
         bag.setTileCount(bagDto.getTileCount());
-
         return bag;
     }
 
@@ -265,15 +258,13 @@ public class Mapper {
      * @return dto representation of the {@link Player}
      */
     public static PlayerDto toDto(Player player) {
-        final PlayerDto playerDto = PlayerDto.builder()
+        return PlayerDto.builder()
                 .lastUpdatedDate(player.getLastUpdatedDate())
                 .userId(player.getUserId())
                 .playerNumber(player.getPlayerNumber())
                 .score(player.getScore())
                 .username(player.getUsername())
                 .build();
-
-        return playerDto;
     }
 
     /**
@@ -288,7 +279,6 @@ public class Mapper {
         player.setPlayerNumber(playerDto.getPlayerNumber());
         player.setScore(playerDto.getScore());
         player.setUsername(playerDto.getUsername());
-
         return player;
     }
 
@@ -302,7 +292,7 @@ public class Mapper {
         if (tile == null) {
             return null;
         }
-        final VirtualTileDto tileDto = VirtualTileDto.builder()
+        return VirtualTileDto.builder()
                 .columnNumber(tile.getColumnNumber())
                 .letter(tile.getLetter())
                 .number(tile.getNumber())
@@ -313,8 +303,6 @@ public class Mapper {
                 .value(tile.getValue())
                 .vowel(tile.isVowel())
                 .build();
-
-        return tileDto;
     }
 
     /**
@@ -327,7 +315,7 @@ public class Mapper {
         if (tileDto == null) {
             return null;
         }
-        final VirtualTile tile = VirtualTile.builder()
+        return VirtualTile.builder()
                 .columnNumber(tileDto.getColumnNumber())
                 .letter(tileDto.getLetter())
                 .number(tileDto.getNumber())
@@ -338,8 +326,6 @@ public class Mapper {
                 .value(tileDto.getValue())
                 .vowel(tileDto.isVowel())
                 .build();
-
-        return tile;
     }
 
     /**
@@ -349,7 +335,7 @@ public class Mapper {
      * @return dto representation of the {@link VirtualCell}
      */
     public static VirtualCellDto toDto(VirtualCell cell) {
-        final VirtualCellDto cellDto = VirtualCellDto.builder()
+        return VirtualCellDto.builder()
                 .cellNumber(cell.getCellNumber())
                 .center(cell.isCenter())
                 .color(cell.getColor())
@@ -367,8 +353,6 @@ public class Mapper {
                 .value(cell.getValue())
                 .wordScoreMultiplier(cell.getWordScoreMultiplier())
                 .build();
-
-        return cellDto;
     }
 
     /**
@@ -378,7 +362,7 @@ public class Mapper {
      * @return entity representation of the {@link VirtualCellDto}
      */
     public static VirtualCell toEntity(VirtualCellDto cellDto) {
-        final VirtualCell cell = VirtualCell.builder()
+        return VirtualCell.builder()
                 .cellNumber(cellDto.getCellNumber())
                 .center(cellDto.isCenter())
                 .color(cellDto.getColor())
@@ -396,8 +380,6 @@ public class Mapper {
                 .value(cellDto.getValue())
                 .wordScoreMultiplier(cellDto.getWordScoreMultiplier())
                 .build();
-
-        return cell;
     }
 
     /**
@@ -407,15 +389,13 @@ public class Mapper {
      * @return dto representation of the {@link Chat}
      */
     public static ChatDto toDto(Chat chat) {
-        final ChatDto chatDto = ChatDto.builder()
+        return ChatDto.builder()
                 .createdDate(chat.getCreatedDate())
                 .gameId(chat.getGameId())
                 .lastUpdatedDate(chat.getLastUpdatedDate())
                 .message(chat.getMessage())
                 .userId(chat.getUserId())
                 .build();
-
-        return chatDto;
     }
 
     /**
@@ -430,7 +410,6 @@ public class Mapper {
         chat.setGameId(chatDto.getGameId());
         chat.setMessage(chatDto.getMessage());
         chat.setUserId(chatDto.getUserId());
-
         return chat;
     }
 
@@ -441,7 +420,7 @@ public class Mapper {
      * @return dto representation of the {@link Action}
      */
     public static ActionDto toDto(Action action) {
-        final ActionDto actionDto = ActionDto.builder()
+        return ActionDto.builder()
                 .version(action.getVersion())
                 .currentPlayerNumber(action.getCurrentPlayerNumber())
                 .gameId(action.getGameId())
@@ -452,8 +431,6 @@ public class Mapper {
                 .type(action.getType().name())
                 .userId(action.getUserId())
                 .build();
-
-        return actionDto;
     }
 
     /**
@@ -472,7 +449,6 @@ public class Mapper {
         action.setGameStatus(GameStatus.valueOf(actionDto.getGameStatus()));
         action.setType(ActionType.valueOf(actionDto.getType()));
         action.setUserId(actionDto.getUserId());
-
         return action;
     }
 
@@ -483,7 +459,7 @@ public class Mapper {
      * @return dto representation of the {@link Word}
      */
     public static WordDto toDto(Word word) {
-        final WordDto wordDto = WordDto.builder()
+        return WordDto.builder()
                 .actionId(word.getActionId())
                 .gameId(word.getGameId())
                 .lastUpdatedDate(word.getLastUpdatedDate())
@@ -492,8 +468,6 @@ public class Mapper {
                 .score(word.getScore())
                 .word(word.getWord())
                 .build();
-
-        return wordDto;
     }
 
     /**
@@ -510,7 +484,6 @@ public class Mapper {
         word.setRoundNumber(wordDto.getRoundNumber());
         word.setScore(wordDto.getScore());
         word.setWord(wordDto.getWord());
-
         return word;
     }
 
@@ -521,14 +494,12 @@ public class Mapper {
      * @return dto representation of the {@link GameException}
      */
     public static ExceptionDto toDto(GameException gameException) {
-        final ExceptionDto exceptionDto = ExceptionDto.builder()
+        return ExceptionDto.builder()
                 .code(gameException.getCode())
                 .message(gameException.getMessage())
                 .params(gameException.getParams())
                 .type(ExceptionType.GAME)
                 .build();
-
-        return exceptionDto;
     }
 
     /**
@@ -538,14 +509,12 @@ public class Mapper {
      * @return dto representation of the {@link UserException}
      */
     public static ExceptionDto toDto(UserException userException) {
-        final ExceptionDto exceptionDto = ExceptionDto.builder()
+        return ExceptionDto.builder()
                 .code(userException.getCode())
                 .message(userException.getMessage())
                 .params(userException.getParams())
                 .type(ExceptionType.USER)
                 .build();
-
-        return exceptionDto;
     }
 
     /**
@@ -559,7 +528,6 @@ public class Mapper {
         if (virtualRack.getTiles() != null) {
             virtualRackDto.setTiles(virtualRack.getTiles().stream().map(Mapper::toDto).collect(Collectors.toList()));
         }
-
         return virtualRackDto;
     }
 
@@ -574,7 +542,6 @@ public class Mapper {
         if (virtualRackDto.getTiles() != null) {
             virtualRack.setTiles(virtualRackDto.getTiles().stream().map(Mapper::toEntity).collect(Collectors.toList()));
         }
-
         return virtualRack;
     }
 
@@ -587,7 +554,6 @@ public class Mapper {
     public static VirtualBoardDto toDto(VirtualBoard virtualBoard) {
         final VirtualBoardDto virtualBoardDto = new VirtualBoardDto();
         virtualBoardDto.setCells(virtualBoard.getCells().stream().map(Mapper::toDto).collect(Collectors.toList()));
-
         return virtualBoardDto;
     }
 
@@ -600,7 +566,6 @@ public class Mapper {
     public static VirtualBoard toEntity(VirtualBoardDto virtualBoardDto) {
         final VirtualBoard virtualBoard = new VirtualBoard();
         virtualBoard.setCells(virtualBoardDto.getCells().stream().map(Mapper::toEntity).collect(Collectors.toList()));
-
         return virtualBoard;
     }
 

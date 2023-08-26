@@ -1,4 +1,10 @@
 {
+  "language.en": "English",
+  "language.fr": "French",
+  "language.tr": "Turkish",
+  "language.de": "German",
+  "language.nl": "Dutch",
+
   "game": "Game",
 
   "menu.create.game": "Create Game",
@@ -13,11 +19,6 @@
   "game.language": "Language",
   "game.bag.select": "Select Bag",
   "game.board.select": "Select Board",
-  "game.language.en": "English",
-  "game.language.fr": "French",
-  "game.language.tr": "Turkish",
-  "game.language.de": "German",
-  "game.language.nl": "Dutch",
   "game.duration": "Play Duration",
   "game.duration.seconds": "{{0}} seconds per round",
   "game.create": "Create",
@@ -58,6 +59,35 @@
   "game.actions.skip": "<b>{{0}}</b> has skipped the turn",
   "game.actions.timeout": "<b>{{0}}</b>'s turn has been skipped due to duration timeout",
   "game.actions.end": "Game is ended",
+  
+  "user.profile": "Profile",
+  "user.username": "Username",
+  "user.password": "Password",
+  "user.email": "E-mail",
+  "user.preferred.language": "Preferred Language",
+  "user.preferred.language.select": "Select Preferred Language",
+  "user.updated": "User has been updated successfully",
+  "user.profile.picture": "Profile Picture",
+  "user.profile.picture.saved": "Profile picture has been saved successfully",
+
+  "button.save": "Save",
+  "button.cancel": "Cancel",
+  "button.change": "Change",
+
+  "error.1": "Profile picture update operation is failed: {{0}}",
+
+  "error.1001": "User is not found!",
+  "error.1002": "E-mail address is not valid!",
+  "error.1003": "E-mail address is used by another user!",
+  "error.1004": "Username can only contain alphabetic characters!",
+  "error.1005": "Username is used by another user!",
+  "error.1006": "Password must contain at least 1 capital letter, 1 short letter, 1 number and 1 special character!",
+  "error.1007": "User has been disabled!",
+  "error.1008": "User account has been expired!",
+  "error.1009": "User account has been locked!",
+  "error.1010": "User credentials have been expired!",
+  "error.1011": "Username cannot be changed!",
+  "error.1012": "Email cannot be changed!",
 
   "error.2001": "Game is not found!",
   "error.2002": "You are already in the game!",
@@ -75,5 +105,7 @@
   "error.2014": "A letter has already been exchanged in this round!",
   "error.2015": "Single letter words {{0}} are not allowed!",
 
-  "validation.required": "is required"
+  "validation.required": "is required",
+  "validation.file.upload.image.only": "Only image files are supported",
+  "validation.unknown.file.type": "Not a known file type"
 }

@@ -1,6 +1,6 @@
 -- pre-defined users
-insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('user', 'user@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
-insert into users (username, email, password, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 1, 1, 1, 1, now(), now());
+insert into users (username, email, password, preferred_language, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('user', 'user@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 1, 1, 1, now(), now());
+insert into users (username, email, password, preferred_language, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 1, 1, 1, now(), now());
 -- pre-defined user-role assignments
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (1, 'USER', 1, now(), now());
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (2, 'ADMIN', 1, now(), now());
@@ -11,7 +11,7 @@ insert into boards (name, column_size, row_size, enabled, created_date, last_upd
 insert into boards (name, column_size, row_size, enabled, created_date, last_updated_date) values ('10x10', 10, 10, 1, now(), now());
 -- pre-defined bags
 insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('Turkish Tile Bag', 'tr', 98, 1, now(), now());
-insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('English Tile Bag', 'en', 96, 1, now(), now());
+insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('English Tile Bag', 'en', 98, 1, now(), now());
 insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('French Tile Bag', 'fr', 97, 1, now(), now());
 -- pre-defined bag tiles
 -- turkish language

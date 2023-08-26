@@ -1,8 +1,7 @@
 package com.gamecity.scrabble.model.rest;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
- * Represents a authenticated user in the system
+ * Represents a user profile
  * 
  * @author ekarakus
  */
@@ -18,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @SuperBuilder
-public class UserDto extends AbstractDto {
+public class UserProfileDto extends AbstractDto {
 
     @JsonProperty("username")
     private String username;
@@ -26,25 +25,10 @@ public class UserDto extends AbstractDto {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("password")
+    @JsonProperty(value = "password", access = Access.WRITE_ONLY)
     private String password;
-
-    @JsonProperty("enabled")
-    private boolean enabled;
-
-    @JsonProperty("accountNonExpired")
-    private boolean accountNonExpired;
-
-    @JsonProperty("accountNonLocked")
-    private boolean accountNonLocked;
-
-    @JsonProperty("credentialsNonExpired")
-    private boolean credentialsNonExpired;
 
     @JsonProperty("preferredLanguage")
     private String preferredLanguage;
-
-    @JsonProperty("authorities")
-    private List<String> authorities;
 
 }

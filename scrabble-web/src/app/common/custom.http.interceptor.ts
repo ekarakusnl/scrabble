@@ -29,13 +29,17 @@ export class CustomHttpInterceptor implements HttpInterceptor {
           if (response.status === 401) {
             this.authenticationService.logout();
           } else if (response.status === 500) {
-              if (response.error.code === 2012) {
-                  // error 2012 has the language parameter which needs to be translated
-                  this.toastService.error(this.translateService.instant('error.' + response.error.code,
-                      { 0: response.error.params[0], 1: this.translateService.instant('game.language.' + response.error.params[1]) }));
+              if (!response.error) {
+                this.toastService.error(response.status.toString());
+              } else if (response.error && !response.error.code) {
+                this.toastService.error(response.error);
+              } else if (response.error && response.error.code === 2012) {
+                // error 2012 has the language parameter which needs to be translated
+                this.toastService.error(this.translateService.instant('error.' + response.error.code,
+                  { 0: response.error.params[0], 1: this.translateService.instant('language.' + response.error.params[1]) }));
               } else {
-                  this.toastService.error(this.translateService.instant('error.' + response.error.code,
-                      response.error.params));
+                this.toastService.error(this.translateService.instant('error.' + response.error.code,
+                  response.error.params));
               }
           } else {
             this.toastService.error(response.error);

@@ -35,7 +35,7 @@
               <span class="info-box-icon bg-info"><i class="fas fa-flag"></i></span>
               <div class="info-box-content">
                 <span class="info-box-text">{{ 'game.bag.language' | translate }}</span>
-                <span class="info-box-number">{{ 'game.language.' + game.bag.language | translate }}</span>
+                <span class="info-box-number">{{ 'language.' + game.bag.language | translate }}</span>
               </div>
             </div>
           </div>
@@ -75,7 +75,7 @@
               <div class="card-body box-profile">
                 <div class="text-center">
                   <img class="profile-user-img img-fluid img-circle"
-                    src="{{imageResourceURL}}/{{player.userId}}.png"
+                    src="{{ profilePictureURL }}/{{ player.userId }}={{ unixTime }}"
                     alt="User profile picture">
                 </div>
                 <h3 class="profile-username text-center">{{ player.username ? player.username : '?' }}</h3>

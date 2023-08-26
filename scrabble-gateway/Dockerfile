@@ -21,6 +21,8 @@ ARG REDIS_PORT
 ARG REDIS_USERNAME
 ARG REDIS_PASSWORD
 ARG REDIS_USE_SSL
+ARG CDN_UPLOAD_IMAGE_ENDPOINT
+ARG CDN_SECRET
 
 # move deployable to webapps
 COPY --from=build /scrabble/scrabble-gateway/target/scrabble-gateway.war /usr/local/tomcat/webapps/scrabble-gateway.war
@@ -32,9 +34,16 @@ RUN mkdir /tmp/scrabble
 RUN mkdir /tmp/scrabble/logs
 
 # set environment variables
-ENV JAVA_OPTS="-Dapi.endpoint=$API_ENDPOINT -Djwt.secret=$JWT_SECRET -Dlog.path=$LOG_PATH \
-               -Dredis.host=$REDIS_HOST -Dredis.port=$REDIS_PORT -Dredis.username=$REDIS_USERNAME \
-               -Dredis.password=$REDIS_PASSWORD -Dredis.use.ssl=$REDIS_USE_SSL"
+ENV JAVA_OPTS="-Dapi.endpoint=$API_ENDPOINT \
+               -Djwt.secret=$JWT_SECRET \
+               -Dlog.path=$LOG_PATH \
+               -Dredis.host=$REDIS_HOST \
+               -Dredis.port=$REDIS_PORT \
+               -Dredis.username=$REDIS_USERNAME \
+               -Dredis.password=$REDIS_PASSWORD \
+               -Dredis.use.ssl=$REDIS_USE_SSL \
+               -Dcdn.upload.image.endpoint=$CDN_UPLOAD_IMAGE_ENDPOINT \
+               -Dcdn.secret=$CDN_SECRET"
 
 # run tomcat
 EXPOSE 8080

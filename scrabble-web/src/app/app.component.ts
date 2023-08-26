@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
+import { AuthenticationService } from './service/authentication.service';
 
 @Component({
   selector: 'app-root',
@@ -12,10 +13,15 @@ export class AppComponent {
 
   constructor(
     private translateService: TranslateService,
+    private authenticationService: AuthenticationService
   ) {
-    const language = localStorage.getItem('locale') || 'en';
-    translateService.setDefaultLang('en');
-    translateService.use(language);
+    const preferredLanguage = this.authenticationService.getPreferredLanguage();
+    if (preferredLanguage !== null) {
+      this.translateService.use(preferredLanguage);
+    } else {
+      translateService.setDefaultLang('en');
+      translateService.use('en');
+    }
   }
 
 }

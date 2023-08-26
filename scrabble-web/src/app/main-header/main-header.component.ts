@@ -31,7 +31,6 @@ export class MainHeaderComponent implements OnInit {
 
   setLanguage(language: string) {
     this.translateService.use(language);
-    localStorage.setItem('locale', language);
   }
 
 }

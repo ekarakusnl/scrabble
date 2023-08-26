@@ -60,12 +60,15 @@ class UserResourceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void test_update_user() {
+    void test_update_user_password() {
         final Response response = target("/users/by/user").request().get();
 
         final String etag = response.getHeaderString(HttpHeaders.ETAG);
         final UserDto responseDto = response.readEntity(UserDto.class);
-        responseDto.setPassword("$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVz");
+        final String actualPassword = responseDto.getPassword();
+
+        final String newPassword = "Test!123";
+        responseDto.setPassword(newPassword);
 
         final Response updatedResponse = target("/users/1").request()
                 .header(HttpHeaders.IF_MATCH, etag)
@@ -79,7 +82,8 @@ class UserResourceIT extends AbstractIntegrationTest {
 
         final UserDto updatedResponseDto = updatedResponse.readEntity(UserDto.class);
 
-        assertEquals("$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVz", updatedResponseDto.getPassword());
+        assertNotEquals(actualPassword, updatedResponseDto.getPassword());
+        assertNotEquals(newPassword, updatedResponseDto.getPassword());
 
         updatedResponse.close();
         response.close();

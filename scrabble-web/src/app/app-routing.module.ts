@@ -7,6 +7,7 @@ import { CreateGameComponent } from './create-game/create-game.component';
 import { LobbyComponent } from './lobby/lobby.component';
 import { LoungeComponent } from './lounge/lounge.component';
 import { GameComponent } from './game/game.component';
+import { UserProfileComponent } from './user-profile/user-profile.component';
 
 const routes: Routes = [
   { path: '', component: LobbyComponent },
@@ -34,6 +35,13 @@ const routes: Routes = [
   },
   {
     path: 'games/:id', component: GameComponent,
+    canActivate: [AuthGuard],
+    data: {
+      role: 'ROLE_USER'
+    },
+  },
+  {
+    path: 'user-profile', component: UserProfileComponent,
     canActivate: [AuthGuard],
     data: {
       role: 'ROLE_USER'

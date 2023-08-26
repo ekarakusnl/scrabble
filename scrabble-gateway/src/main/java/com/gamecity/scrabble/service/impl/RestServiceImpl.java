@@ -13,6 +13,7 @@ import java.util.Scanner;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -27,10 +28,8 @@ import com.google.common.net.HttpHeaders;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Slf4j
 @SuppressWarnings("unchecked")
 class RestServiceImpl implements RestService {
 
@@ -208,24 +207,12 @@ class RestServiceImpl implements RestService {
                 scanner.useDelimiter("\\Z");
                 response = scanner.next();
             }
-            closeStream(stream);
             return response;
         } catch (IOException e) {
-            closeStream(stream);
             closeHttpConnection(httpURLConnection);
             throw new RuntimeException(e);
-        }
-    }
-
-    private void closeStream(InputStream stream) {
-        if (stream == null) {
-            return;
-        }
-
-        try {
-            stream.close();
-        } catch (IOException e) {
-            log.error("An error occured while closing the stream", e);
+        } finally {
+            IOUtils.closeQuietly(stream);
         }
     }
 

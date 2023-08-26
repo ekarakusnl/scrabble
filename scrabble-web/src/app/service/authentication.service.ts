@@ -22,6 +22,7 @@ export class AuthenticationService {
       sessionStorage.setItem('userId', String(userToken.id));
       sessionStorage.setItem('token', 'HTTP_TOKEN ' + userToken.token);
       sessionStorage.setItem('roles', JSON.stringify(userToken.roles));
+      sessionStorage.setItem('preferredLanguage', userToken.preferredLanguage);
 
       this.router.navigate(['lobby']).then(() => {
         window.location.reload();
@@ -34,6 +35,7 @@ export class AuthenticationService {
     sessionStorage.removeItem('userId');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('roles');
+    sessionStorage.removeItem('preferredLanguage');
     this.router.navigate(['login']).then(() => {
       window.location.reload();
     });
@@ -59,6 +61,10 @@ export class AuthenticationService {
 
   getToken(): string {
     return sessionStorage.getItem('token') as string;
+  }
+
+  getPreferredLanguage(): string {
+    return sessionStorage.getItem('preferredLanguage') as string;
   }
 
 }

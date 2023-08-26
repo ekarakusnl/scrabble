@@ -15,6 +15,11 @@ public enum ExceptionType {
     /**
      * User exceptions
      */
-    USER
+    USER,
+
+    /**
+     * System exceptions
+     */
+    SYSTEM
 
 }

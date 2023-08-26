@@ -131,6 +131,7 @@ CREATE TABLE users (
   enabled tinyint default 1 not null,
   password varchar(255) not null,
   username varchar(255) not null,
+  preferred_language varchar(2) not null,
   primary key (id)
 );
 CREATE TABLE words (

@@ -2,6 +2,7 @@
   "username": "friedrich",
   "email": "friedrich@gamecity.com",
   "password": "$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm",
+  "preferredLanguage": "en",
   "enabled": true,
   "accountNonExpired": true,
   "accountNonLocked": true,

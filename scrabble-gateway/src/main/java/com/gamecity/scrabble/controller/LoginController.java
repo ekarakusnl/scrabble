@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gamecity.scrabble.api.model.User;
-import com.gamecity.scrabble.model.rest.UserDto;
+import com.gamecity.scrabble.model.rest.UserProfileDto;
 import com.gamecity.scrabble.model.rest.UserTokenDto;
 import com.gamecity.scrabble.service.impl.JwtProvider;
 
@@ -34,13 +34,13 @@ public class LoginController extends AbstractController {
     private JwtProvider jwtProvider;
 
     /**
-     * Logs a {@link UserDto user} in
+     * Logs a {@link UserProfileDto user} in
      * 
      * @param userDto user to login
      * @return the created user token
      */
     @PostMapping("/login")
-    public ResponseEntity<UserTokenDto> login(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserTokenDto> login(@RequestBody UserProfileDto userDto) {
         final Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
 
@@ -56,6 +56,7 @@ public class LoginController extends AbstractController {
         userTokenDto.setId(user.getId());
         userTokenDto.setToken(jwtToken);
         userTokenDto.setRoles(roles);
+        userTokenDto.setPreferredLanguage(user.getPreferredLanguage());
 
         return new ResponseEntity<>(userTokenDto, HttpStatus.OK);
     }

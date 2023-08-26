@@ -10,6 +10,7 @@
   <properties>
     <aspectj.version>1.9.9.1</aspectj.version>
     <commons.codec.version>1.15</commons.codec.version>
+    <commons.fileupload.version>1.5</commons.fileupload.version>
     <commons.lang3.version>3.12.0</commons.lang3.version>
     <embedded-redis.version>0.6</embedded-redis.version>
     <guava.version>23.0</guava.version>
@@ -80,6 +81,11 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>${commons.lang3.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>${commons.fileupload.version}</version>
       </dependency>
       <!-- utilities -->
       <dependency>

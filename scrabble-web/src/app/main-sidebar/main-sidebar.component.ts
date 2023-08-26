@@ -11,7 +11,8 @@ import { environment } from '../../environments/environment';
 })
 export class MainSidebarComponent implements OnInit {
 
-  imageResourceURL: string = environment.USER_IMAGE_URL;
+  profilePictureURL: string = environment.USER_IMAGE_URL;
+  unixTime: number = Math.floor(Date.now() / 1000);
 
   userId: number;
   username: string;

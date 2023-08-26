@@ -57,9 +57,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .map(authority -> new BaseAuthority(authority))
                     .collect(Collectors.toList());
 
-            return new User(userDto.getId(), userDto.getUsername(), userDto.getPassword(), userDto.isEnabled(),
-                    userDto.isAccountNonExpired(), userDto.isAccountNonLocked(), userDto.isCredentialsNonExpired(),
-                    authorities);
+            return new User(userDto.getId(), userDto.getUsername(), userDto.getPassword(),
+                    userDto.getPreferredLanguage(), userDto.isEnabled(), userDto.isAccountNonExpired(),
+                    userDto.isAccountNonLocked(), userDto.isCredentialsNonExpired(), authorities);
         });
     }
 

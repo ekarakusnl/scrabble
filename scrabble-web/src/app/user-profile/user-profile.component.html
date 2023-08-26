@@ -1,0 +1,116 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title">{{ 'user.profile' | translate }}</h3>
+      </div>
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <div class="card-body">
+          <div class="form-group">
+            <label for="username">{{ 'user.username' | translate }}</label>
+            <input id="username" 
+                   type="text"
+                   class="form-control"
+                   placeholder="{{ 'user.username' | translate }}"
+                   formControlName="username">
+          </div>
+          <div class="form-group">
+            <label for="password">{{ 'user.password' | translate }}</label>
+            <input id="password"
+                   type="password"
+                   class="form-control"
+                   [ngClass]="password.invalid && password.touched ? 'is-invalid' : ''"
+                   placeholder="{{ 'user.password' | translate }}"
+                   formControlName="password">
+            <div class="error invalid-feedback"
+                 *ngIf="password.errors && (password.dirty || password.touched)">
+              <p *ngIf="password.errors?.required">{{ 'user.password' | translate }} {{ 'validation.required' | translate }}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">{{ 'user.email' | translate }}</label>
+            <input id="email"
+                   type="text"
+                   class="form-control"
+                   placeholder="{{ 'user.email' | translate }}"
+                   formControlName="email">
+          </div>
+          <div class="form-group">
+            <label>{{ 'user.preferred.language' | translate }}</label>
+            <select class="form-control" formControlName="preferredLanguage">
+              <option value="">{{ 'user.preferred.language.select' | translate }}</option>
+              <option *ngFor="let language of languages" [ngValue]="language">
+                {{ 'language.' + language | translate }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'user.profile.picture' | translate }}</label>
+            <div class="image">
+              <img src="{{ profilePictureURL }}/{{ userId }}?{{ unixTime }}" class="img-circle elevation-2" alt="User Image">
+            </div>
+          </div>
+          <div class="form-group">
+            <button #showProfilePictureDialogButton
+                    id="show-profile-picture-dialog-button"
+                    type="button"
+                    data-toggle="modal"
+                    data-target="#profile-picture-dialog"
+                    hidden="true">
+            </button>
+            <button #hideProfilePictureDialogButton
+                    id="hide-profile-picture-dialog-button"
+                    type="button"
+                    data-dismiss="modal"
+                    hidden="true">
+            </button>
+            <label for="file" class="btn btn-secondary"><i class="fa fa-file-image"></i> {{ 'button.change' | translate }}</label>
+            <input type="file"
+                   id="file"
+                   hidden="true"
+                   (change)="onImageUpload($event)">
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="submit"
+                  class="btn btn-primary"
+                  [disabled]="!userForm.valid">
+            {{ 'button.save' | translate }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal fade"
+       aria-hidden="true"
+       id="profile-picture-dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{ 'user.profile.picture' | translate }}</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="image new-profile-picture">
+            <img src="{{ this.profilePicturePreview }}"
+                 class="img-circle elevation-2 *"
+                 alt="User Image"
+                 width="150px"
+                 height="150px">
+          </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" 
+                  class="btn btn-default"
+                  data-dismiss="modal"
+                  [disabled]="uploadInProgress">{{ 'button.cancel' | translate }}</button>
+          <button type="button"
+                  class="btn btn-primary"
+                  (click)="saveProfilePicture()"
+                  [disabled]="uploadInProgress">{{ 'button.save' | translate }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

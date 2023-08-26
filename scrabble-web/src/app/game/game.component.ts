@@ -39,7 +39,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollMessages') private messageContainer: ElementRef
   @ViewChild('scrollActions') private actionContainer: ElementRef
 
-  imageResourceURL: string = environment.USER_IMAGE_URL;
+  profilePictureURL: string = environment.USER_IMAGE_URL;
+  unixTime: number = Math.floor(Date.now() / 1000);
 
   id: number;
   userId: number;

@@ -26,6 +26,17 @@ public interface UserResource extends BaseResource<UserDto> {
     @GET
     @Path("/by/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-    Response findUserByUsername(@PathParam("username") String username);
+    Response findByUsername(@PathParam("username") String username);
+
+    /**
+     * Gets a {@link UserDto user} by <code>id</code>
+     * 
+     * @param id <code>id</code> of the user
+     * @return the user
+     */
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Response getUser(@PathParam("id") Long id);
 
 }

@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -64,6 +66,10 @@ public class User extends AbstractEntity implements UserDetails {
     @Type(type = "org.hibernate.type.NumericBooleanType")
     @Column(name = "credentials_non_expired", nullable = false)
     private boolean credentialsNonExpired = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preferred_language")
+    private Language preferredLanguage;
 
     @Transient
     private Collection<? extends BaseAuthority> authorities;

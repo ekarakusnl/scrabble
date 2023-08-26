@@ -12,7 +12,6 @@ public interface Constants {
      */
     interface CacheKey {
         String ACTION = "ACTION";
-        String PLAYERS = "PLAYERS";
         String CHATS = "CHATS";
         String BOARD = "BOARD";
         String RACK = "RACK";

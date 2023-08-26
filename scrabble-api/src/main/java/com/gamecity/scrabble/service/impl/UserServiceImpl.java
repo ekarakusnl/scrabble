@@ -5,9 +5,11 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.dao.UserDao;
@@ -55,6 +57,10 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
     @Override
     @Transactional
     public User save(User user) {
+        if (user.getId() != null) {
+            return update(user);
+        }
+
         if (!new EmailValidator().isValid(user.getEmail())) {
             throw new UserException(UserError.EMAIL_ADDRESS_NOT_VALID);
         }
@@ -65,10 +71,6 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
 
         if (!new AlphabeticNameValidator().isValid(user.getUsername())) {
             throw new UserException(UserError.USERNAME_NOT_VALID);
-        }
-
-        if (user.getId() != null) {
-            return update(user);
         }
 
         final User userByUsername = baseDao.getByUsername(user.getUsername());
@@ -91,8 +93,14 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
     // TOD this method can be replaced with patch operation since it only updates the password
     private User update(User user) {
         final User existingUser = baseDao.get(user.getId());
-        existingUser.setPassword(user.getPassword());
 
+        if (StringUtils.isNotEmpty(user.getPassword())) {
+            if (!new PasswordValidator().isValid(user.getPassword())) {
+                throw new UserException(UserError.PASSWORD_NOT_STRONG);
+            }
+            existingUser.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        }
+        existingUser.setPreferredLanguage(user.getPreferredLanguage());
         return baseDao.save(existingUser);
     }
 

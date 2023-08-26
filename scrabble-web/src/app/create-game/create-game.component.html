@@ -32,7 +32,7 @@
               [ngClass]="bagId.invalid && bagId.touched ? 'is-invalid' : ''">
               <option value="">{{ 'game.bag.select' | translate }}</option>
               <option *ngFor="let bag of bags" [ngValue]="bag.id">
-                {{ 'game.language.' + bag.language | translate }}
+                {{ 'language.' + bag.language | translate }}
               </option>
             </select>
             <div class="error invalid-feedback" *ngIf="bagId.errors && (bagId.dirty || bagId.touched)">

@@ -1,6 +1,9 @@
 package com.gamecity.scrabble.rest.exception;
 
+import java.util.List;
+
 import com.gamecity.scrabble.model.rest.ExceptionDto;
+import com.gamecity.scrabble.model.rest.ExceptionType;
 
 /**
  * Exception for uncategorized errors
@@ -20,6 +23,18 @@ public class GenericException extends RuntimeException {
      */
     public GenericException(String message) {
         super(message);
+    }
+
+    /**
+     * Creates a generic error message
+     * 
+     * @param errorCode <code> of the error
+     * @param message the error message
+     * @param params message parameters
+     */
+    public GenericException(int errorCode, String message, List<String> params) {
+        super(message);
+        this.exceptionDto = new ExceptionDto(errorCode, message, params, ExceptionType.SYSTEM);
     }
 
     /**

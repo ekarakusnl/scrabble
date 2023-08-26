@@ -26,4 +26,7 @@ public class UserTokenDto extends AbstractDto {
     @JsonProperty("roles")
     private Set<String> roles;
 
+    @JsonProperty("preferredLanguage")
+    private String preferredLanguage;
+
 }

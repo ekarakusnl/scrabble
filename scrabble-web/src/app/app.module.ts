@@ -23,6 +23,7 @@ import { MainFooterComponent } from './main-footer/main-footer.component';
 import { LoginComponent } from './login/login.component';
 import { CreateGameComponent } from './create-game/create-game.component';
 import { GameComponent } from './game/game.component';
+import { UserProfileComponent } from './user-profile/user-profile.component';
 import { ToastService } from './service/toast.service';
 
 @NgModule({
@@ -38,6 +39,7 @@ import { ToastService } from './service/toast.service';
     LoginComponent,
     CreateGameComponent,
     GameComponent,
+    UserProfileComponent,
   ],
   imports: [
     BrowserModule,

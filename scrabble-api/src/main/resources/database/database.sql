@@ -334,7 +334,8 @@ CREATE TABLE public.users (
     email character varying(255) NOT NULL,
     enabled integer NOT NULL,
     password character varying(255) NOT NULL,
-    username character varying(255) NOT NULL
+    username character varying(255) NOT NULL,
+    preferred_language character varying(2)
 );
 
 
