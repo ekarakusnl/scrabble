@@ -1,7 +1,6 @@
 package com.gamecity.scrabble.dao.impl;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,13 +14,13 @@ import com.gamecity.scrabble.entity.Game;
 class GameDaoImpl extends AbstractDaoImpl<Game> implements GameDao {
 
     @Override
-    public List<Game> getLastGames(int count) {
-        return listByNamedQuery(Constants.NamedQuery.getLastGames, Collections.emptyList(), count);
-    }
+    public List<Game> search(Long userId, boolean includeUser) {
+        final List<Pair<String, Object>> parameters = Arrays.asList(Pair.of("userId", userId));
+        if (includeUser) {
+            return listByNamedQuery(Constants.NamedQuery.searchByUser, parameters);
+        }
 
-    @Override
-    public List<Game> getByUser(Long userId) {
-        return listByNamedQuery(Constants.NamedQuery.getByUser, Arrays.asList(Pair.of("userId", userId)));
+        return listByNamedQuery(Constants.NamedQuery.searchGames, parameters);
     }
 
 }

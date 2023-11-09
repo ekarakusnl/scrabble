@@ -21,8 +21,8 @@ public class GameDto extends AbstractDto {
     @JsonProperty("ownerId")
     private Long ownerId;
 
-    @JsonProperty("bagId")
-    private Long bagId;
+    @JsonProperty("language")
+    private String language;
 
     @JsonProperty("boardId")
     private Long boardId;
@@ -47,6 +47,9 @@ public class GameDto extends AbstractDto {
 
     @JsonProperty("roundNumber")
     private Integer roundNumber;
+
+    @JsonProperty("remainingTileCount")
+    private Integer remainingTileCount;
 
     @JsonProperty("version")
     private Integer version;

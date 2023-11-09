@@ -90,7 +90,7 @@ class UserResourceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void test_update_user_without_etag() {
+    void test_update_user_fails_without_etag() {
         final Response response = target("/users/by/user").request().get();
 
         final UserDto responseDto = response.readEntity(UserDto.class);

@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.resource.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ class WordResourceImpl extends AbstractResourceImpl<Word, WordDto, WordService> 
     public Response list(Long gameId) {
         final List<Word> words = baseService.getWords(gameId);
         if (CollectionUtils.isEmpty(words)) {
-            return Response.ok().build();
+            return Response.ok(Collections.emptyList()).build();
         }
 
         final List<WordDto> wordDtos = words.stream().map(Mapper::toDto).collect(Collectors.toList());

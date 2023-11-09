@@ -45,7 +45,8 @@ public interface GameResource extends BaseResource<GameDto> {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response list(@QueryParam("userId") @DefaultValue("") Long userId);
+    public Response search(@QueryParam("userId") @DefaultValue("") Long userId,
+            @QueryParam("includeUser") @DefaultValue("false") Boolean includeUser);
 
     /**
      * Joins the {@link GameDto game}

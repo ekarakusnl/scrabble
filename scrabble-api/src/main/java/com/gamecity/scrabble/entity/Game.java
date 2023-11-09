@@ -32,10 +32,21 @@ import lombok.Setter;
 @Entity(name = "Game")
 @Table(name = "games")
 @NamedQueries({
-        @NamedQuery(name = Constants.NamedQuery.getLastGames,
-                query = "Select g from Game g where g.status = 'WAITING' order by g.createdDate asc"),
-        @NamedQuery(name = Constants.NamedQuery.getByUser,
-                query = "Select g from Game g, Player p where p.gameId = g.id and p.userId = :userId and p.leftDate is null and g.status in ('WAITING', 'IN_PROGRESS', 'LAST_ROUND') order by g.createdDate asc") })
+        @NamedQuery(name = Constants.NamedQuery.searchByUser, query =
+                "Select g from Game g, Player p " +
+                " where p.gameId = g.id " + 
+                "   and p.userId = :userId " +
+                "   and p.leftDate is null " +
+                "   and g.status in ('WAITING', 'IN_PROGRESS', 'LAST_ROUND', 'ENDED') " +
+                " order by g.createdDate asc"),
+        @NamedQuery(name = Constants.NamedQuery.searchGames, query =
+                "Select g from Game g " +
+                " where g.status = 'WAITING' " + 
+                "   and not exists (select userId from Player p " +
+                "                    where p.gameId = g.id " +
+                "                      and p.leftDate is null " +
+                "                      and p.userId = :userId) " +
+                " order by g.createdDate asc") })
 public class Game extends AbstractEntity {
 
     // @JoinColumn(name = "owner_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
@@ -48,10 +59,11 @@ public class Game extends AbstractEntity {
     // "FK_BOARD_RULE"))
     private Long boardId;
 
-    @Column(name = "bag_id", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "language", nullable = false)
     // @JoinColumn(name = "rule_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
     // "FK_BOARD_RULE"))
-    private Long bagId;
+    private Language language;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -77,6 +89,9 @@ public class Game extends AbstractEntity {
 
     @Column(name = "round_number")
     private Integer roundNumber;
+
+    @Column(name = "remaining_tile_count")
+    private Integer remainingTileCount;
 
     @Version
     @Column(name = "version", nullable = false)

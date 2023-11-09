@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -46,10 +47,10 @@ public class GameController extends AbstractController {
      * @return the game list
      */
     @GetMapping
-    public ResponseEntity<List<GameDto>> list() {
-        final List<GameDto> list = list(API_RESOURCE_PATH, GameDto.class);
+    public ResponseEntity<List<GameDto>> search() {
+        final List<GameDto> list = list(API_RESOURCE_PATH + "?userId={userId}", GameDto.class, getUserId());
         if (list.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
         }
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
@@ -65,7 +66,6 @@ public class GameController extends AbstractController {
         gameDto.setOwnerId(getUserId());
 
         final GameDto responseGameDto = put(API_RESOURCE_PATH, GameDto.class, gameDto);
-
         return new ResponseEntity<>(responseGameDto, HttpStatus.OK);
     }
 
@@ -73,22 +73,26 @@ public class GameController extends AbstractController {
      * Joins the {@link GameDto game}
      * 
      * @param id <code>id</code> of the game
+     * @return the updated dto
      */
     @PostMapping("/{id}/join")
     @ResponseBody
-    public void join(@PathVariable Long id) {
+    public ResponseEntity<?> join(@PathVariable Long id) {
         put(API_RESOURCE_PATH + "/{id}/users/{userId}", GameDto.class, null, id, getUserId());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
      * Leaves the {@link GameDto game}
      * 
      * @param id <code>id</code> of the game
+     * @return success
      */
     @PostMapping("/{id}/leave")
     @ResponseBody
-    public void leave(@PathVariable Long id) {
+    public ResponseEntity<?> leave(@PathVariable Long id) {
         delete(API_RESOURCE_PATH + "/{id}/users/{userId}", null, id, getUserId());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -96,11 +100,13 @@ public class GameController extends AbstractController {
      * 
      * @param id   <code>id</code> of the game
      * @param rack rack of the user
+     * @return success
      */
     @PostMapping("/{id}/play")
     @ResponseBody
-    public void play(@PathVariable Long id, @RequestBody VirtualRackDto rack) {
+    public ResponseEntity<?> play(@PathVariable Long id, @RequestBody VirtualRackDto rack) {
         post(API_RESOURCE_PATH + "/{id}/users/{userId}/rack", VirtualRackDto.class, rack, id, getUserId());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -108,11 +114,11 @@ public class GameController extends AbstractController {
      * 
      * @return the game list
      */
-    @GetMapping("/my")
-    public ResponseEntity<List<GameDto>> getMyGames() {
-        final List<GameDto> list = list(API_RESOURCE_PATH + "?userId={userId}", GameDto.class, getUserId());
+    @GetMapping("/by/user")
+    public ResponseEntity<List<GameDto>> searchByUser() {
+        final List<GameDto> list = list(API_RESOURCE_PATH + "?userId={userId}&includeUser=true", GameDto.class, getUserId());
         if (list.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
         }
         return new ResponseEntity<>(list, HttpStatus.OK);
     }

@@ -7,5 +7,6 @@ export interface Action {
   gameStatus: string;
   roundNumber: number;
   currentPlayerNumber: number;
+  remainingTileCount: number;
   lastUpdatedDate: Date;
 }

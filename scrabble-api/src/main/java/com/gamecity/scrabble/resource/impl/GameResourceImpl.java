@@ -125,12 +125,12 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     }
 
     @Override
-    public Response list(Long userId) {
+    public Response search(Long userId, Boolean includeUser) {
         if (userId == null) {
             return super.list();
         }
 
-        final List<Game> games = baseService.listByUser(userId);
+        final List<Game> games = getBaseService().search(userId, includeUser);
         return Response.ok(games.stream().map(Mapper::toDto).collect(Collectors.toList())).build();
     }
 

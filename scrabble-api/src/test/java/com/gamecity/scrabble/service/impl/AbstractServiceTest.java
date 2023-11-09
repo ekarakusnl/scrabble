@@ -4,7 +4,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.gamecity.scrabble.entity.Action;
-import com.gamecity.scrabble.entity.Bag;
 import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
@@ -16,7 +15,7 @@ abstract class AbstractServiceTest {
 
     protected static final Long DEFAULT_ACTION_ID = 1L;
     protected static final Long DEFAULT_BOARD_ID = 1L;
-    protected static final Long DEFAULT_BAG_ID = 1L;
+    protected static final String DEFAULT_BAG_LANGUAGE = "en";
     protected static final Long DEFAULT_GAME_ID = 1L;
     protected static final Long DEFAULT_USER_ID = 1L;
 
@@ -32,13 +31,14 @@ abstract class AbstractServiceTest {
         final Game game = new Game();
         game.setName("My game");
         game.setOwnerId(userId);
-        game.setBagId(DEFAULT_BAG_ID);
+        game.setLanguage(Language.valueOf(DEFAULT_BAG_LANGUAGE));
         game.setBoardId(DEFAULT_BOARD_ID);
         game.setExpectedPlayerCount(playerCount);
         game.setDuration(2);
         game.setStatus(GameStatus.WAITING);
         game.setVersion(1);
         game.setActivePlayerCount(1);
+        game.setRemainingTileCount(98);
         return game;
     }
 
@@ -48,14 +48,6 @@ abstract class AbstractServiceTest {
         board.setColumnSize(15);
         board.setRowSize(15);
         return board;
-    }
-
-    protected Bag createSampleBag() {
-        final Bag bag = new Bag();
-        bag.setId(DEFAULT_BAG_ID);
-        bag.setLanguage(Language.en);
-        bag.setTileCount(96);
-        return bag;
     }
 
     protected Action createSampleAction() {

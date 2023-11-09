@@ -8,7 +8,7 @@ insert into user_roles (user_id, role, enabled) values (2, 'USER', 1);
 -- pre-defined boards
 insert into boards (name, column_size, row_size) values ('15x15', 15, 15);
 -- pre-defined bags
-insert into bags (name, language, tile_count) values ('English Tile Bag', 'en', 96);
+insert into bags (name, language, tile_count) values ('English Tile Bag', 'en', 98);
 -- pre-defined bag tiles
 -- english language
 insert into tiles (bag_id, letter, count, "value", vowel) values (1, 'A', 9, 1, 1);
@@ -150,7 +150,7 @@ insert into cells (board_id, cell_number, row_number, column_number, color, lett
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 110, 8, 5, 'white', 1, 1, 1, 1, 1, 1);
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 111, 8, 6, 'white', 1, 1, 1, 1, 1, 1);
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 112, 8, 7, 'white', 1, 1, 1, 1, 1, 1);
-insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center) values (1, 113, 8, 8, 'star', 1, 1, 1, 1, 1, 1, 1);
+insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center) values (1, 113, 8, 8, 'orange', 1, 1, 1, 1, 1, 1, 1);
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 114, 8, 9, 'white', 1, 1, 1, 1, 1, 1);
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 115, 8, 10, 'white', 1, 1, 1, 1, 1, 1);
 insert into cells (board_id, cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 116, 8, 11, 'white', 1, 1, 1, 1, 1, 1);

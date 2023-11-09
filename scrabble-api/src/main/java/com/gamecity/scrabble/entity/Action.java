@@ -68,4 +68,7 @@ public class Action extends AbstractEntity implements Serializable {
     @Column(name = "game_status")
     private GameStatus gameStatus;
 
+    @Column(name = "remaining_tile_count")
+    private Integer remainingTileCount;
+
 }

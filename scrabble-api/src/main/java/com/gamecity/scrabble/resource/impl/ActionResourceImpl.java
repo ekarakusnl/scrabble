@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.resource.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ class ActionResourceImpl extends AbstractResourceImpl<Action, ActionDto, ActionS
     public Response list(Long gameId) {
         final List<Action> actions = baseService.getActions(gameId);
         if (CollectionUtils.isEmpty(actions)) {
-            return Response.ok().build();
+            return Response.ok(Collections.emptyList()).build();
         }
 
         final List<ActionDto> actionDtos = actions.stream().map(Mapper::toDto).collect(Collectors.toList());

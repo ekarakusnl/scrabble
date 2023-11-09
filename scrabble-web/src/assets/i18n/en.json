@@ -20,7 +20,7 @@
   "game.bag.select": "Select Bag",
   "game.board.select": "Select Board",
   "game.duration": "Play Duration",
-  "game.duration.seconds": "{{0}} seconds per round",
+  "game.duration.minutes": "{{0}} minutes per round",
   "game.create": "Create",
 
   "game.owner": "Owner",

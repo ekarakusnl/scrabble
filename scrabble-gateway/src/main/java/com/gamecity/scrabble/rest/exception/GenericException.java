@@ -43,6 +43,7 @@ public class GenericException extends RuntimeException {
      * @param exceptionDto the exception dto
      */
     public GenericException(ExceptionDto exceptionDto) {
+        super(exceptionDto.getMessage());
         this.exceptionDto = exceptionDto;
     }
 

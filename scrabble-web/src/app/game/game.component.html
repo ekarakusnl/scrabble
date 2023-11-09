@@ -1,5 +1,5 @@
 <div class="row"
-     *ngIf="game && board && bag && userId">
+     *ngIf="game && board && userId">
   <div class="col-md-12 mt-4">
     <div class="card">
       <div class="card-body title-body">
@@ -12,7 +12,7 @@
               <span class="info-box-icon bg-info"><i class="fas fa-flag"></i></span>
               <div class="info-box-content">
                 <span class="info-box-text">{{ 'game.bag.language' | translate }}</span>
-                <span class="info-box-number">{{ 'language.' + bag.language | translate }}</span>
+                <span class="info-box-number">{{ 'language.' + game.language | translate }}</span>
               </div>
             </div>
           </div>
@@ -32,7 +32,7 @@
               <span class="info-box-icon bg-info"><i class="far fa-hourglass"></i></span>
               <div class="info-box-content">
                 <span class="info-box-text">{{ 'game.duration' | translate }}</span>
-                <span class="info-box-number">{{ 'game.duration.seconds' | translate: { '0': game.duration } }}</span>
+                <span class="info-box-number">{{ 'game.duration.minutes' | translate: { '0': game.duration } }}</span>
               </div>
             </div>
           </div>
@@ -202,7 +202,7 @@
               </span>
               <span class="info-box-text ml-2">
                 <i class="fas fa-font fa-xs"></i>
-                {{ 'game.tile.count' | translate }}: {{ remainingTileCount + '/' + this.bag.tileCount }}
+                {{ 'game.tile.count' | translate }}: {{ remainingTileCount }}
               </span>
             </div>
           </div>

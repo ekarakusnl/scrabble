@@ -14,7 +14,6 @@ import { VirtualRackService } from '../service/virtual-rack.service';
 import { BoardService } from '../service/board.service';
 import { ToastService } from '../service/toast.service';
 import { TranslateService } from '@ngx-translate/core';
-import { BagService } from '../service/bag.service';
 
 import { Action } from '../model/action';
 import { Cell } from '../model/cell';
@@ -24,7 +23,6 @@ import { Player } from '../model/player';
 import { Tile } from '../model/tile';
 import { Board } from '../model/board';
 import { Word } from '../model/word';
-import { Bag } from '../model/bag';
 import { VirtualRack } from '../model/virtual-rack';
 import { VirtualBoard } from '../model/virtual-board';
 
@@ -47,7 +45,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
   playerNumber: number;
   game: Game;
   board: Board;
-  bag: Bag;
 
   virtualBoard: VirtualBoard;
   virtualRack: VirtualRack;
@@ -84,7 +81,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
     private router: Router,
     private gameService: GameService,
     private boardService: BoardService,
-    private bagService: BagService,
     private authenticationService: AuthenticationService,
     private virtualBoardService: VirtualBoardService,
     private playerService: PlayerService,
@@ -134,7 +130,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
 
       this.version = game.version - 1;
       this.getBoard();
-      this.getBag();
       this.getChats();
       this.getLastAction();
     });
@@ -143,13 +138,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
   getBoard(): void {
     this.boardService.getBoard(this.game.boardId).subscribe((board: Board) => {
       this.board = board;
-    });
-  }
-
-  getBag(): void {
-    this.bagService.getBag(this.game.bagId).subscribe((bag: Bag) => {
-      this.bag = bag;
-      this.remainingTileCount = bag.tileCount;
     });
   }
 
@@ -178,6 +166,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
         } else if (this.currentStatus === 'LAST_ROUND') {
           this.toastService.info(this.translateService.instant('game.last.round'));
         }
+        this.remainingTileCount = action.remainingTileCount;
 
         this.resetTimer(action.lastUpdatedDate);
         this.loadCells();
@@ -314,10 +303,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
     const boardVersion = this.version - this.game.expectedPlayerCount;
     this.virtualBoardService.getBoard(this.game.id, boardVersion).subscribe((virtualBoard: VirtualBoard) => {
       this.virtualBoard = virtualBoard;
-      if (virtualBoard) {
-        const usedCellCount = virtualBoard.cells.reduce((sum, current) => sum + (current.letter ? 1 : 0), 0);
-        this.remainingTileCount = this.bag.tileCount - usedCellCount;
-      }
     });
   };
 

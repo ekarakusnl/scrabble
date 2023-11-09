@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.resource.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,21 +40,27 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
     @Override
     public Response list(Long gameId, Integer version) {
         if (version < 1) {
-            return Response.ok().build();
+            return Response.ok(Collections.emptyList()).build();
         }
 
         boolean hasNewAction = actionService.hasNewAction(gameId, version);
         if (!hasNewAction) {
-            return Response.ok().build();
+            return Response.ok(Collections.emptyList()).build();
         }
 
         final List<Player> players = baseService.getPlayers(gameId);
         if (CollectionUtils.isEmpty(players)) {
-            return Response.ok().build();
+            return Response.ok(Collections.emptyList()).build();
         }
 
         final List<PlayerDto> playerDtos = players.stream().map(Mapper::toDto).collect(Collectors.toList());
         return Response.ok(playerDtos).build();
+    }
+
+    @Override
+    public Response get(Long gameId, Long userId) {
+        final Player player = baseService.getByUserId(gameId, userId);
+        return Response.ok(player).build();
     }
 
 }

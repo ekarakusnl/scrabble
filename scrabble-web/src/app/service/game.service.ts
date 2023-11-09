@@ -29,7 +29,7 @@ export class GameService {
   }
 
   getMyGames(): Observable<Game[]> {
-    return this.http.get<Game[]>(environment.GATEWAY_URL + '/rest/games/my');
+    return this.http.get<Game[]>(environment.GATEWAY_URL + '/rest/games/by/user');
   }
 
   joinGame(id: number): Observable<void> {

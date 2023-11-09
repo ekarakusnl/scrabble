@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.gamecity.scrabble.entity.Bag;
 import com.gamecity.scrabble.entity.Game;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.model.VirtualRack;
@@ -20,10 +21,10 @@ public interface VirtualBagService {
      * the {@link Game game} to the created game
      * 
      * @param gameId <code>id</code> of the game
-     * @param bagId  <code>id</code> of the bag used in the game
+     * @param language <code>language</code> of the bag used in the game
      * @return the loaded tiles
      */
-    List<Tile> getTiles(Long gameId, Long bagId);
+    List<Tile> getTiles(Long gameId, Language language);
 
     /**
      * Updates the {@link List list} of {@link Tile tiles} in a {@link Bag bag} after a {@link Word word} is

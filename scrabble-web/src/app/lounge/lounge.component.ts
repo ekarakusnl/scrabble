@@ -5,12 +5,10 @@ import { GameService } from '../service/game.service';
 import { PlayerService } from '../service/player.service';
 import { AuthenticationService } from '../service/authentication.service';
 import { BoardService } from '../service/board.service';
-import { BagService } from '../service/bag.service';
 
 import { Game } from '../model/game';
 import { Player } from '../model/player';
 import { Board } from '../model/board';
-import { Bag } from '../model/bag';
 
 import { environment } from '../../environments/environment';
 
@@ -32,7 +30,6 @@ export class LoungeComponent implements OnInit {
     private gameService: GameService,
     private playerService: PlayerService,
     private boardService: BoardService,
-    private bagService: BagService,
     private authenticationService: AuthenticationService,
     private router: Router,
   ) { }
@@ -50,7 +47,6 @@ export class LoungeComponent implements OnInit {
         for (var game of games) {
           game.players = [];
           this.loadBoard(game);
-          this.loadBag(game);
           this.loadPlayers(game);
         }
       }
@@ -60,12 +56,6 @@ export class LoungeComponent implements OnInit {
   loadBoard(game: Game): void {
     this.boardService.getBoard(game.boardId).subscribe((board: Board) => {
       game.board = board;
-    });
-  }
-
-  loadBag(game: Game): void {
-    this.bagService.getBag(game.bagId).subscribe((bag: Bag) => {
-      game.bag = bag;
     });
   }
 

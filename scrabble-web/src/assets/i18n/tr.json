@@ -20,7 +20,7 @@
   "game.bag.select": "Dil Seçiniz",
   "game.board.select": "Tahta Seçiniz",
   "game.duration": "Oynama Süresi",
-  "game.duration.seconds": "Round başına {{0}} saniye",
+  "game.duration.minutes": "Round başına {{0}} dakika",
   "game.create": "Oluştur",
 
   "game.owner": "Oyun Sahibi",

@@ -8,14 +8,15 @@ import org.springframework.stereotype.Repository;
 
 import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.TileDao;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 
 @Repository(value = "tileDao")
 class TileDaoImpl extends AbstractDaoImpl<Tile> implements TileDao {
 
     @Override
-    public List<Tile> getTiles(Long bagId) {
-        return listByNamedQuery(Constants.NamedQuery.getTiles, Arrays.asList(Pair.of("bagId", bagId)));
+    public List<Tile> getTiles(Language language) {
+        return listByNamedQuery(Constants.NamedQuery.getTiles, Arrays.asList(Pair.of("language", language)));
     }
 
 }

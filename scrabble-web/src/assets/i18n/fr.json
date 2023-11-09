@@ -20,7 +20,7 @@
   "game.bag.select": "Sélectionner un Sac",
   "game.board.select": "Sélectionner un Plateau",
   "game.duration": "Durée de Lecture",
-  "game.duration.seconds": "{{0}} seconds par tour",
+  "game.duration.minutes": "{{0}} minutes par tour",
   "game.create": "Créer",
 
   "game.owner": "Propriétaire",

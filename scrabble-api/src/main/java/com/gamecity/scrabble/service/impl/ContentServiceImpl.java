@@ -35,15 +35,15 @@ class ContentServiceImpl implements ContentService {
 
         // create the racks of the players
         IntStream.range(1, game.getExpectedPlayerCount() + 1).forEach(playerNumber -> {
-            virtualRackService.createRack(game.getId(), game.getBagId(), playerNumber);
+            virtualRackService.createRack(game.getId(), game.getLanguage(), playerNumber);
         });
     }
 
     @Override
     public void update(Game game, VirtualRack updatedRack, VirtualBoard updatedBoard, Integer playerNumber,
             Integer roundNumber) {
-        virtualRackService.updateRack(game.getId(), game.getBagId(), playerNumber, roundNumber, updatedRack);
-        virtualRackService.fillRack(game.getId(), game.getBagId(), playerNumber, roundNumber + 1, updatedRack);
+        virtualRackService.updateRack(game.getId(), playerNumber, roundNumber, updatedRack);
+        virtualRackService.fillRack(game.getId(), game.getLanguage(), playerNumber, roundNumber + 1, updatedRack);
         virtualBoardService.updateBoard(game.getId(), updatedBoard);
     }
 

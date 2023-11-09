@@ -33,16 +33,16 @@ public abstract class AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long id;
+    protected Long id;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private Date createdDate;
+    protected Date createdDate;
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_updated_date", nullable = false)
-    private Date lastUpdatedDate;
+    protected Date lastUpdatedDate;
 
 }

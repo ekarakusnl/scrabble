@@ -3,6 +3,7 @@ package com.gamecity.scrabble.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
+import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.GameDao;
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
-import com.gamecity.scrabble.entity.Bag;
 import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
@@ -33,7 +34,6 @@ import com.gamecity.scrabble.model.VirtualCell;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
 import com.gamecity.scrabble.service.ActionService;
-import com.gamecity.scrabble.service.BagService;
 import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
 import com.gamecity.scrabble.service.PlayerService;
@@ -55,7 +55,6 @@ import lombok.extern.slf4j.Slf4j;
 class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements GameService {
 
     private UserService userService;
-    private BagService bagService;
     private BoardService boardService;
     private PlayerService playerService;
     private VirtualBoardService virtualBoardService;
@@ -104,11 +103,6 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     @Autowired
     void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    @Autowired
-    void setBagService(BagService bagService) {
-        this.bagService = bagService;
     }
 
     @Autowired
@@ -299,6 +293,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setRoundNumber(1);
         game.setVersion(game.getVersion() + 1);
 
+        final Integer remainingTileCount =
+                virtualBagService.getTiles(game.getId(), game.getLanguage()).stream().mapToInt(Tile::getCount).sum();
+        game.setRemainingTileCount(remainingTileCount - (game.getExpectedPlayerCount() * Constants.RACK_SIZE));
+
         log.info("Game {} is started", game.getId());
 
         final Game updatedGame = baseDao.save(game);
@@ -335,12 +333,19 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Integer boardVersion = game.getVersion() - game.getExpectedPlayerCount();
         final VirtualBoard virtualBoard = virtualBoardService.getBoard(game.getId(), boardVersion);
-        final List<BoardWord> playedWords = findWords(game, virtualRack, virtualBoard);
+        final List<BoardWord> newWords = findNewWords(game, virtualRack, virtualBoard);
 
+        playWords(game, newWords);
         assignNextPlayer(game);
+
+        // increase the version number
         game.setVersion(game.getVersion() + 1);
 
-        // if the next user is the owner, then a new round starts
+        // update the remaining tile count
+        final Long usedRackTileCount = virtualRack.getTiles().stream().filter(VirtualTile::isSealed).count();
+        game.setRemainingTileCount(Math.max(game.getRemainingTileCount() - usedRackTileCount.intValue(), 0));
+
+        // if the next player is the first player, then a new round starts
         if (game.getVersion() % game.getExpectedPlayerCount() == 1) {
             game.setRoundNumber(currentRoundNumber + 1);
         }
@@ -351,12 +356,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 log.info("The last round has been played, game {} is ready to end", game.getId());
                 game.setStatus(GameStatus.READY_TO_END);
             } else {
-                final List<Tile> tiles = virtualBagService.getTiles(game.getId(), game.getBagId())
-                        .stream()
-                        .filter(tile -> tile.getCount() > 0)
-                        .collect(Collectors.toList());
                 // the bag is empty, set the last round
-                if (tiles.isEmpty()) {
+                if (game.getRemainingTileCount().equals(0)) {
                     log.info("No tiles left in the bag, the last round is going to be played on game {}", game.getId());
                     game.setStatus(GameStatus.LAST_ROUND);
                 }
@@ -366,7 +367,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final Game updatedGame = baseDao.save(game);
 
         final Action action = actionService.add(updatedGame, userId, actionType);
-        logWords(id, userId, action.getId(), currentRoundNumber, playedWords);
+        logWords(id, userId, action.getId(), currentRoundNumber, newWords);
         contentService.update(updatedGame, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
 
         return updatedGame;
@@ -386,11 +387,6 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     @Override
-    public List<Game> list() {
-        return baseDao.getLastGames(3);
-    }
-
-    @Override
     @Transactional
     public Game end(Long id) {
         Assert.notNull(id, "id cannot be null");
@@ -401,11 +397,16 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setStatus(GameStatus.ENDED);
         game.setVersion(game.getVersion() + 1);
 
+        // find the winning player, currentPlayerNumber shows the winner player at the end of the game
+        final List<Player> players = playerService.getPlayers(id);
+        final Player winningPlayer = players.stream().max(Comparator.comparing(Player::getScore)).orElse(null);
+        game.setCurrentPlayerNumber(winningPlayer.getPlayerNumber());
+
         log.info("Game {} is ended", game.getId());
 
         final Game updatedGame = baseDao.save(game);
 
-        actionService.add(updatedGame, game.getOwnerId(), ActionType.END);
+        actionService.add(updatedGame, winningPlayer.getUserId(), ActionType.END);
 
         return updatedGame;
     }
@@ -435,8 +436,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     @Override
-    public List<Game> listByUser(Long userId) {
-        return baseDao.getByUser(userId);
+    public List<Game> search(Long userId, boolean includeUser) {
+        return baseDao.search(userId, includeUser);
     }
 
     private Game getAndLock(Long gameId) {
@@ -487,16 +488,24 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         log.info("Current player is set as player {} on game {}", nextPlayerNumber, game.getId());
     }
 
+    private void playWords(final Game game, final List<BoardWord> newWords) {
+        final Integer newWordsScore = calculateNewWordsScore(newWords);
+        updatePlayerScore(game.getId(), game.getCurrentPlayerNumber(), newWordsScore);
+
+        newWords.stream().forEach(word -> {
+            word.getBoard().getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
+        });
+    }
+
     /**
      * Does the validations and finds the words
      */
-    private List<BoardWord> findWords(Game game, VirtualRack updatedRack, VirtualBoard virtualBoard) {
+    private List<BoardWord> findNewWords(Game game, VirtualRack updatedRack, VirtualBoard virtualBoard) {
         boolean hasNewMove = updatedRack.getTiles().stream().anyMatch(VirtualTile::isSealed);
         if (!hasNewMove) {
             return Collections.emptyList();
         }
 
-        final Bag bag = bagService.get(game.getBagId());
         final Board board = boardService.get(game.getBoardId());
 
         final VirtualCell[][] boardMatrix = new VirtualCell[board.getRowSize()][board.getColumnSize()];
@@ -511,16 +520,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final List<BoardWord> newWords = findWordsOnBoard(game.getId(), game.getCurrentPlayerNumber(),
                 game.getRoundNumber(), board, boardMatrix);
 
-        hasInvalidWords(newWords, bag.getLanguage());
+        hasInvalidWords(newWords, game.getLanguage());
         hasValidLinks(newWords, boardMatrix);
         hasSingleLetterWords(virtualBoard);
 
-        final Integer newWordsScore = calculateNewWordsScore(newWords);
-        updatePlayerScore(game.getId(), game.getCurrentPlayerNumber(), newWordsScore);
-
-        newWords.stream().forEach(word -> {
-            word.getBoard().getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
-        });
         return newWords;
     }
 

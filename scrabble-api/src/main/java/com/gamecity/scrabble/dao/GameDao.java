@@ -3,7 +3,6 @@ package com.gamecity.scrabble.dao;
 import java.util.List;
 
 import com.gamecity.scrabble.entity.Game;
-import com.gamecity.scrabble.entity.User;
 
 /**
  * Provides dao operations for {@link Game} entity
@@ -13,20 +12,13 @@ import com.gamecity.scrabble.entity.User;
 public interface GameDao extends BaseDao<Game> {
 
     /**
-     * Gets the {@link List list} of {@link Game games} by maximum count ordered by <code>createdDate</code>
-     * in descending mode
-     * 
-     * @param count number of games to fetch
-     * @return the last games
-     */
-    List<Game> getLastGames(int count);
-
-    /**
-     * Gets the {@link List list} of {@link Game games} where the {@link User user} is playing
+     * Gets the {@link List list} of {@link Game games} by the given criterias ordered by <code>createdDate</code>
+     * in ascending mode
      * 
      * @param userId <code>id</code> of the user
+     * @param includeUser whether or not to include the given user 
      * @return the games
      */
-    List<Game> getByUser(Long userId);
+    List<Game> search(Long userId, boolean includeUser);
 
 }

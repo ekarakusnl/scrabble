@@ -39,4 +39,17 @@ public class PlayerController extends AbstractController {
         return new ResponseEntity<>(players, HttpStatus.OK);
     }
 
+    /**
+     * Gets the {@link PlayerDto player} by <code>userId</code>
+     * 
+     * @param gameId <code>id</code> of the game
+     * @return the player list
+     */
+    @GetMapping("/by/user")
+    @ResponseBody
+    public ResponseEntity<PlayerDto> getPlayer(@PathVariable Long gameId) {
+        final PlayerDto player = get(API_RESOURCE_PATH + "/{userId}", PlayerDto.class, gameId, getUserId());
+        return new ResponseEntity<>(player, HttpStatus.OK);
+    }
+
 }

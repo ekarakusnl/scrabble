@@ -8,6 +8,11 @@ package com.gamecity.scrabble;
 public interface Constants {
 
     /**
+     * Number of tiles in a rack
+     */
+    Integer RACK_SIZE = 7;
+
+    /**
      * Cache keys used by Redis
      */
     interface CacheKey {
@@ -36,8 +41,8 @@ public interface Constants {
         String getChats = "getChats";
 
         // Game
-        String getLastGames = "getLastGames";
-        String getByUser = "getByUser";
+        String searchByUser = "searchByUser";
+        String searchGames = "searchGames";
 
         // Player
         String getPlayersByUserId = "getPlayersByUserId";

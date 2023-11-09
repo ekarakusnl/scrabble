@@ -18,6 +18,8 @@ public abstract class AbstractDto {
 
     protected Long id;
 
+    protected Date createdDate;
+
     protected Date lastUpdatedDate;
 
 }

@@ -27,21 +27,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class SchedulerServiceImpl implements SchedulerService {
 
-    public static final String SKIP_TURN_JOB_IDENTITY = "skipTurnJob_%s_%s";
-    public static final String SKIP_TURN_JOB_GROUP = "skipTurn";
-    public static final String SKIP_TURN_TRIGGER_IDENTITY = "skipTurnTrigger_%s_%s";
+	private static final int TERMINATE_GAME_DURATION_MINUTES = 10;
 
-    public static final String START_GAME_JOB_IDENTITY = "startGameJob_%s";
-    public static final String START_GAME_JOB_GROUP = "startGame";
-    public static final String START_GAME_TRIGGER_IDENTITY = "startGameTrigger_%s";
+    private static final String SKIP_TURN_JOB_IDENTITY = "skipTurnJob_%s_%s";
+    private static final String SKIP_TURN_JOB_GROUP = "skipTurn";
+    private static final String SKIP_TURN_TRIGGER_IDENTITY = "skipTurnTrigger_%s_%s";
 
-    public static final String END_GAME_JOB_IDENTITY = "endGameJob_%s";
-    public static final String END_GAME_JOB_GROUP = "endGame";
-    public static final String END_GAME_TRIGGER_IDENTITY = "endGameTrigger_%s";
+    private static final String START_GAME_JOB_IDENTITY = "startGameJob_%s";
+    private static final String START_GAME_JOB_GROUP = "startGame";
+    private static final String START_GAME_TRIGGER_IDENTITY = "startGameTrigger_%s";
 
-    public static final String TERMINATE_GAME_JOB_IDENTITY = "terminateGameJob_%s";
-    public static final String TERMINATE_GAME_JOB_GROUP = "terminateGame";
-    public static final String TERMINATE_GAME_TRIGGER_IDENTITY = "terminateGameTrigger_%s";
+    private static final String END_GAME_JOB_IDENTITY = "endGameJob_%s";
+    private static final String END_GAME_JOB_GROUP = "endGame";
+    private static final String END_GAME_TRIGGER_IDENTITY = "endGameTrigger_%s";
+
+    private static final String TERMINATE_GAME_JOB_IDENTITY = "terminateGameJob_%s";
+    private static final String TERMINATE_GAME_JOB_GROUP = "terminateGame";
+    private static final String TERMINATE_GAME_TRIGGER_IDENTITY = "terminateGameTrigger_%s";
 
     private SchedulerFactoryBean schedulerFactory;
 
@@ -155,7 +157,7 @@ class SchedulerServiceImpl implements SchedulerService {
             // terminate the game if it doesn't start in 10 minutes
             final Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
-            calendar.add(Calendar.MINUTE, 10);
+            calendar.add(Calendar.MINUTE, TERMINATE_GAME_DURATION_MINUTES);
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
                     .withIdentity(String.format(TERMINATE_GAME_TRIGGER_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP)

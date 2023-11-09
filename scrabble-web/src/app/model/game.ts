@@ -1,11 +1,10 @@
-import { Bag } from './bag';
 import { Board } from './board';
 import { Player } from './player';
 
 export interface Game {
   id?: number;
   ownerId?: number;
-  bagId?: number;
+  language?: string;
   boardId?: number;
   name?: string;
   expectedPlayerCount?: number;
@@ -14,8 +13,8 @@ export interface Game {
   status?: string;
   currentPlayerNumber?: number;
   roundNumber?: number;
+  remainingTileCount?: number;
   version?: number;
   board?: Board;
-  bag?: Bag;
   players?: Player[];
 }

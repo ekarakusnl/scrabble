@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.resource.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ class ChatResourceImpl extends AbstractResourceImpl<Chat, ChatDto, ChatService> 
     public Response list(Long gameId) {
         final List<Chat> chats = baseService.getChats(gameId);
         if (CollectionUtils.isEmpty(chats)) {
-            return Response.ok().build();
+            return Response.ok(Collections.emptyList()).build();
         }
 
         final List<ChatDto> newChatDtos = chats.stream().map(Mapper::toDto).collect(Collectors.toList());

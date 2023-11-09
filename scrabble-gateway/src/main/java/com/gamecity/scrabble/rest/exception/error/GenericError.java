@@ -8,9 +8,14 @@ package com.gamecity.scrabble.rest.exception.error;
 public enum GenericError {
 
     /**
-     * Profile picture update operation is failed
+     * User authentication failed
      */
-    PROFILE_PICTURE_UPDATE_FAILED(0001, "Profile picture update operation is failed: {0}");
+    AUTHENTICATION_FAILED(0, "Incorrect username or password"),
+
+    /**
+     * Profile picture update operation failed
+     */
+    PROFILE_PICTURE_UPDATE_FAILED(1, "Profile picture update operation is failed: {0}");
 
     private int code;
     private String message;

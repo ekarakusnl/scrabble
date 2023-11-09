@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.Constants;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.service.BagService;
 import com.gamecity.scrabble.service.VirtualBagService;
@@ -24,8 +25,8 @@ class VirtualBagServiceImpl implements VirtualBagService {
 
     @Cacheable(value = Constants.CacheKey.TILES, key = "#gameId")
     @Override
-    public List<Tile> getTiles(Long gameId, Long bagId) {
-        return bagService.getTiles(bagId);
+    public List<Tile> getTiles(Long gameId, Language language) {
+        return bagService.getTiles(language);
     }
 
     @Override

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import com.gamecity.scrabble.model.VirtualCell;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
 import com.gamecity.scrabble.service.ActionService;
-import com.gamecity.scrabble.service.BagService;
 import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
 import com.gamecity.scrabble.service.PlayerService;
@@ -38,6 +38,7 @@ import com.gamecity.scrabble.service.GameService;
 import com.gamecity.scrabble.service.ContentService;
 import com.gamecity.scrabble.service.VirtualRackService;
 import com.gamecity.scrabble.service.UserService;
+import com.gamecity.scrabble.service.VirtualBagService;
 import com.gamecity.scrabble.service.VirtualBoardService;
 import com.gamecity.scrabble.service.WordService;
 import com.gamecity.scrabble.service.exception.GameException;
@@ -60,9 +61,6 @@ class TestGameService extends AbstractServiceTest {
     private BoardService boardService;
 
     @Mock
-    private BagService bagService;
-
-    @Mock
     private PlayerService playerService;
 
     @Mock
@@ -73,6 +71,9 @@ class TestGameService extends AbstractServiceTest {
 
     @Mock
     private VirtualRackService virtualRackService;
+
+    @Mock
+    private VirtualBagService virtualBagService;
 
     @Mock
     private WordService wordService;
@@ -356,6 +357,7 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_start_game() {
         final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
+        sampleGame.setId(DEFAULT_GAME_ID);
         sampleGame.setStatus(GameStatus.READY_TO_START);
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
@@ -363,6 +365,8 @@ class TestGameService extends AbstractServiceTest {
         when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
+        when(virtualBagService.getTiles(eq(DEFAULT_GAME_ID), eq(Language.valueOf(DEFAULT_BAG_LANGUAGE))))
+                .thenReturn(Collections.emptyList());
 
         final Game game = gameService.start(DEFAULT_GAME_ID);
 
@@ -849,7 +853,6 @@ class TestGameService extends AbstractServiceTest {
 
         when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(game);
         when(boardService.get(eq(DEFAULT_BOARD_ID))).thenReturn(createSampleBoard());
-        when(bagService.get(eq(DEFAULT_BAG_ID))).thenReturn(createSampleBag());
 
         when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
             final Player player = new Player();

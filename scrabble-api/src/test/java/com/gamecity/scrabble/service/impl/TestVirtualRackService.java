@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import com.gamecity.scrabble.dao.RedisRepository;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
@@ -45,7 +46,7 @@ class TestVirtualRackService extends AbstractServiceTest {
         tiles.add(Tile.builder().count(25).letter("G").vowel(false).build());
         tiles.add(Tile.builder().count(25).letter("H").vowel(false).build());
 
-        when(virtualBagService.getTiles(eq(DEFAULT_GAME_ID), eq(DEFAULT_BAG_ID))).thenReturn(tiles);
+        when(virtualBagService.getTiles(eq(DEFAULT_GAME_ID), eq(Language.valueOf(DEFAULT_BAG_LANGUAGE)))).thenReturn(tiles);
     }
 
     @Test
@@ -70,7 +71,7 @@ class TestVirtualRackService extends AbstractServiceTest {
                     .thenReturn(virtualRack);
 
             final VirtualTile newTile =
-                    virtualRackService.exchangeTile(DEFAULT_GAME_ID, DEFAULT_BAG_ID, playerNumber, roundNumber, 1);
+                    virtualRackService.exchangeTile(DEFAULT_GAME_ID, Language.valueOf(DEFAULT_BAG_LANGUAGE), playerNumber, roundNumber, 1);
 
             assertNotNull(newTile);
             assertNotEquals("B", newTile.getLetter());

@@ -3,9 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router';
 
 import { Game } from '../model/game';
-import { Bag } from '../model/bag';
 import { Board } from '../model/board';
-import { BagService } from '../service/bag.service';
 import { BoardService } from '../service/board.service';
 import { GameService } from '../service/game.service';
 
@@ -16,18 +14,17 @@ import { GameService } from '../service/game.service';
 })
 export class CreateGameComponent implements OnInit {
 
-  bags: Bag[] = [];
   boards: Board[] = [];
+  languageCodes: string[] = ['en', 'fr', 'de', 'nl', 'tr'];
 
   name = new FormControl(null, Validators.required);
-  playerCount = new FormControl(null, Validators.required);
-  bagId = new FormControl(2, Validators.required);
+  playerCount = new FormControl(2, Validators.required);
+  language = new FormControl('en', Validators.required);
   boardId = new FormControl(1, Validators.required);
-  duration = new FormControl(null, Validators.required);
+  duration = new FormControl(3, Validators.required);
   createGameForm!: FormGroup;
 
   constructor(
-    private bagService: BagService,
     private boardService: BoardService,
     private gameService: GameService,
     private formBuilder: FormBuilder,
@@ -36,12 +33,11 @@ export class CreateGameComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBoards();
-    this.loadBags();
 
     this.createGameForm = this.formBuilder.group({
       name: this.name,
       playerCount: this.playerCount,
-      bagId: this.bagId,
+      language: this.language,
       boardId: this.boardId,
       duration: this.duration
     });
@@ -55,21 +51,13 @@ export class CreateGameComponent implements OnInit {
     });
   }
 
-  loadBags(): void {
-    this.bagService.getBags().subscribe((bags: Bag[]) => {
-      for (var bag of bags) {
-        this.bags.push(bag);
-      }
-    });
-  }
-
   onSubmit(): void {
     const game: Game = {
       name: this.createGameForm.value.name,
       expectedPlayerCount: this.createGameForm.value.playerCount,
-      bagId: this.createGameForm.value.bagId,
+      language: this.createGameForm.value.language,
       boardId: this.createGameForm.value.boardId,
-      duration: this.createGameForm.value.duration
+      duration: this.createGameForm.value.duration * 60
     };
     this.gameService.createGame(game).subscribe((game: Game) => {
       this.router.navigate(['games', game.id]);

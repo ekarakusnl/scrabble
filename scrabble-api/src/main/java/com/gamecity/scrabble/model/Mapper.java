@@ -1,8 +1,10 @@
 package com.gamecity.scrabble.model;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.gamecity.scrabble.entity.AbstractEntity;
 import com.gamecity.scrabble.entity.Action;
@@ -152,15 +154,17 @@ public class Mapper {
         return GameDto.builder()
                 .version(game.getVersion())
                 .activePlayerCount(game.getActivePlayerCount())
-                .bagId(game.getBagId())
                 .boardId(game.getBoardId())
                 .currentPlayerNumber(game.getCurrentPlayerNumber())
                 .duration(game.getDuration())
                 .expectedPlayerCount(game.getExpectedPlayerCount())
                 .id(game.getId())
+                .language(game.getLanguage().name())
+                .createdDate(game.getCreatedDate())
                 .lastUpdatedDate(game.getLastUpdatedDate())
                 .name(game.getName())
                 .ownerId(game.getOwnerId())
+                .remainingTileCount(game.getRemainingTileCount())
                 .roundNumber(game.getRoundNumber())
                 .status(game.getStatus().name())
                 .build();
@@ -176,14 +180,15 @@ public class Mapper {
         final Game game = new Game();
         game.setVersion(gameDto.getVersion());
         game.setActivePlayerCount(gameDto.getActivePlayerCount());
-        game.setBagId(gameDto.getBagId());
         game.setBoardId(gameDto.getBoardId());
         game.setCurrentPlayerNumber(gameDto.getCurrentPlayerNumber());
         game.setDuration(gameDto.getDuration());
         game.setExpectedPlayerCount(gameDto.getExpectedPlayerCount());
         game.setId(gameDto.getId());
+        game.setLanguage(Language.valueOf(gameDto.getLanguage()));
         game.setName(gameDto.getName());
         game.setOwnerId(gameDto.getOwnerId());
+        game.setRemainingTileCount(gameDto.getRemainingTileCount());
         game.setRoundNumber(gameDto.getRoundNumber());
         game.setStatus(gameDto.getStatus() == null ? null : GameStatus.valueOf(gameDto.getStatus()));
         return game;
@@ -391,10 +396,12 @@ public class Mapper {
     public static ChatDto toDto(Chat chat) {
         return ChatDto.builder()
                 .createdDate(chat.getCreatedDate())
+                .id(chat.getId())
                 .gameId(chat.getGameId())
                 .lastUpdatedDate(chat.getLastUpdatedDate())
                 .message(chat.getMessage())
                 .userId(chat.getUserId())
+                .username(chat.getUsername())
                 .build();
     }
 
@@ -428,6 +435,7 @@ public class Mapper {
                 .lastUpdatedDate(action.getLastUpdatedDate())
                 .roundNumber(action.getRoundNumber())
                 .gameStatus(action.getGameStatus().name())
+                .remainingTileCount(action.getRemainingTileCount())
                 .type(action.getType().name())
                 .userId(action.getUserId())
                 .build();
@@ -444,9 +452,10 @@ public class Mapper {
         action.setVersion(actionDto.getVersion());
         action.setCurrentPlayerNumber(actionDto.getCurrentPlayerNumber());
         action.setGameId(actionDto.getGameId());
-        action.setLastUpdatedDate(actionDto.getLastUpdatedDate());
-        action.setRoundNumber(actionDto.getRoundNumber());
         action.setGameStatus(GameStatus.valueOf(actionDto.getGameStatus()));
+        action.setLastUpdatedDate(actionDto.getLastUpdatedDate());
+        action.setRemainingTileCount(actionDto.getRemainingTileCount());
+        action.setRoundNumber(actionDto.getRoundNumber());
         action.setType(ActionType.valueOf(actionDto.getType()));
         action.setUserId(actionDto.getUserId());
         return action;
@@ -525,8 +534,10 @@ public class Mapper {
      */
     public static VirtualRackDto toDto(VirtualRack virtualRack) {
         final VirtualRackDto virtualRackDto = new VirtualRackDto();
-        if (virtualRack.getTiles() != null) {
+        if (!CollectionUtils.isEmpty(virtualRack.getTiles())) {
             virtualRackDto.setTiles(virtualRack.getTiles().stream().map(Mapper::toDto).collect(Collectors.toList()));
+        } else {
+            virtualRackDto.setTiles(Collections.emptyList());
         }
         return virtualRackDto;
     }

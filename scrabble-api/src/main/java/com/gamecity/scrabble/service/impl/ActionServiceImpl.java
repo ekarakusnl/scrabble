@@ -28,6 +28,7 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
         action.setType(actionType);
         action.setCurrentPlayerNumber(game.getCurrentPlayerNumber());
         action.setRoundNumber(game.getRoundNumber());
+        action.setRemainingTileCount(game.getRemainingTileCount());
         action.setCreatedDate(game.getLastUpdatedDate());
         action.setLastUpdatedDate(game.getLastUpdatedDate());
         return baseDao.save(action);

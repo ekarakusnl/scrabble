@@ -43,4 +43,7 @@ public class ActionDto extends AbstractDto implements Serializable {
     @JsonProperty("gameStatus")
     private String gameStatus;
 
+    @JsonProperty("remainingTileCount")
+    private Integer remainingTileCount;
+
 }

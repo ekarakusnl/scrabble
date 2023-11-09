@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.gamecity.scrabble.dao.BagDao;
 import com.gamecity.scrabble.dao.TileDao;
 import com.gamecity.scrabble.entity.Bag;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.service.BagService;
 
@@ -22,8 +23,8 @@ class BagServiceImpl extends AbstractServiceImpl<Bag, BagDao> implements BagServ
     }
 
     @Override
-    public List<Tile> getTiles(Long bagId) {
-        return tileDao.getTiles(bagId);
+    public List<Tile> getTiles(Language language) {
+        return tileDao.getTiles(language);
     }
 
 }

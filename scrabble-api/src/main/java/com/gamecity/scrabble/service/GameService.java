@@ -5,7 +5,6 @@ import java.util.List;
 import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Player;
-import com.gamecity.scrabble.entity.User;
 import com.gamecity.scrabble.model.VirtualRack;
 
 /**
@@ -61,12 +60,13 @@ public interface GameService extends BaseService<Game> {
     Game end(Long id);
 
     /**
-     * Gets the {@link List list} of {@link Game games} where the {@link User user} plays
-     * 
+     * Gets the {@link List list} of {@link Game games} by the given criterias
+     *
      * @param userId <code>id</code> of the user
+     * @param includeUser whether or not to include the given user 
      * @return the games
      */
-    List<Game> listByUser(Long userId);
+    List<Game> search(Long userId, boolean includeUser);
 
     /**
      * Terminates the {@link Game game}

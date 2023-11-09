@@ -3,6 +3,7 @@ package com.gamecity.scrabble.service;
 import java.util.List;
 
 import com.gamecity.scrabble.entity.Bag;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 
 /**
@@ -15,9 +16,9 @@ public interface BagService extends BaseService<Bag> {
     /**
      * Gets the {@link List list} of {@link Tile tiles} for the selected {@link Bag bag}
      * 
-     * @param bagId <code>id</code> of the bag
+     * @param language <code>language</code> of the bag
      * @return the tiles
      */
-    List<Tile> getTiles(Long bagId);
+    List<Tile> getTiles(Language language);
 
 }

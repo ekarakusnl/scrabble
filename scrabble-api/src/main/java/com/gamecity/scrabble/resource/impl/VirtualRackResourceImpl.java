@@ -61,7 +61,7 @@ class VirtualRackResourceImpl implements VirtualRackResource {
 
         final Game game = gameService.get(gameId);
         final Player player = playerService.getByUserId(gameId, userId);
-        final VirtualTile virtualTile = virtualRackService.exchangeTile(gameId, game.getBagId(),
+        final VirtualTile virtualTile = virtualRackService.exchangeTile(gameId, game.getLanguage(),
                 player.getPlayerNumber(), game.getRoundNumber(), tileNumber);
 
         final VirtualTileDto virtualTileDto = Mapper.toDto(virtualTile);

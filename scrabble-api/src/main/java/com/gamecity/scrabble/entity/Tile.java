@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity(name = "Tile")
 @Table(name = "tiles")
-@NamedQuery(name = Constants.NamedQuery.getTiles, query = "Select t from Tile t where t.bagId = :bagId")
+@NamedQuery(name = Constants.NamedQuery.getTiles, query = "Select t from Tile t, Bag b where t.bagId = b.id and b.language = :language")
 public class Tile extends AbstractEntity implements Serializable {
 
     private static final long serialVersionUID = 3264219155692673115L;
