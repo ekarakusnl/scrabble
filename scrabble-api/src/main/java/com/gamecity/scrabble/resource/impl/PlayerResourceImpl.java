@@ -23,6 +23,7 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
     private PlayerService baseService;
     private ActionService actionService;
 
+    @Override
     PlayerService getBaseService() {
         return baseService;
     }

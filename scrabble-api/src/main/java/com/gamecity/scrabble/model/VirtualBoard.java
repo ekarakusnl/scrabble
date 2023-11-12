@@ -3,7 +3,6 @@ package com.gamecity.scrabble.model;
 import java.io.Serializable;
 import java.util.List;
 
-import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Game;
 
 import lombok.AllArgsConstructor;

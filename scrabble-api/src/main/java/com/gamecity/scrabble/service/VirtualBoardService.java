@@ -16,7 +16,7 @@ public interface VirtualBoardService {
      * @param gameId  <code>id</code> of the game
      * @param boardId <code>id</code> of the board used in the game
      */
-    void createBoard(Long gameId, Long boardId);
+    void createBoard(Long gameId);
 
     /**
      * Updates the {@link VirtualBoard board} for the given {@link Game game}

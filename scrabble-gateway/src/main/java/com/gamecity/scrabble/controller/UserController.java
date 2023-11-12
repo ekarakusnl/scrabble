@@ -18,7 +18,7 @@ import com.gamecity.scrabble.model.rest.UserProfileDto;
  */
 @RestController
 @RequestMapping(value = "/rest/users")
-public class UserProfileController extends AbstractController {
+public class UserController extends AbstractController {
 
     private static final String API_RESOURCE_PATH = "/users";
 
@@ -27,31 +27,29 @@ public class UserProfileController extends AbstractController {
      * 
      * @return the user
      */
-    @GetMapping("/current")
-    public ResponseEntity<UserProfileDto> get() {
-        final UserProfileDto userDto = get(API_RESOURCE_PATH + "/{userId}", UserProfileDto.class, getUserId());
-        // do not return the actual password
-        userDto.setPassword(null);
-        return new ResponseEntity<>(userDto, HttpStatus.OK);
+    @GetMapping("/authenticated")
+    public ResponseEntity<UserDto> getUser() {
+        final UserDto userDto = get(API_RESOURCE_PATH + "/{userId}", UserDto.class, getUserId());
+        final UserDto updateableUserDto = UserDto.builder()
+                .id(userDto.getId())
+                .username(userDto.getUsername())
+                .email(userDto.getEmail())
+                .preferredLanguage(userDto.getPreferredLanguage())
+                .build();
+        return new ResponseEntity<>(updateableUserDto, HttpStatus.OK);
     }
 
     /**
      * Save a {@link UserProfileDto user}
      * 
-     * @param userProfileDto dto to save
+     * @param userDto dto to save
      * @return the saved dto
      */
     @PutMapping
-    public ResponseEntity<UserProfileDto> save(@RequestBody UserProfileDto userProfileDto) {
-        final UserDto userDto = new UserDto();
+    public ResponseEntity<?> updateUser(@RequestBody UserDto userDto) {
         userDto.setId(getUserId());
-        userDto.setEmail(userProfileDto.getEmail());
-        userDto.setPassword(userProfileDto.getPassword());
-        userDto.setPreferredLanguage(userProfileDto.getPreferredLanguage());
-        userDto.setUsername(userProfileDto.getUsername());
-
         put(API_RESOURCE_PATH, UserDto.class, userDto);
-        return get();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

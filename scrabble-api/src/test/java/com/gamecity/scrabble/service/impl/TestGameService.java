@@ -26,12 +26,12 @@ import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.entity.GameStatus;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.entity.User;
+import com.gamecity.scrabble.model.DictionaryWord;
 import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualCell;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
 import com.gamecity.scrabble.service.ActionService;
-import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
 import com.gamecity.scrabble.service.PlayerService;
 import com.gamecity.scrabble.service.GameService;
@@ -56,9 +56,6 @@ class TestGameService extends AbstractServiceTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private BoardService boardService;
 
     @Mock
     private PlayerService playerService;
@@ -187,8 +184,6 @@ class TestGameService extends AbstractServiceTest {
             return user;
         });
 
-        when(boardService.get(eq(DEFAULT_BOARD_ID))).thenReturn(createSampleBoard());
-
         when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
             final Game game = invocation.getArgument(0);
             game.setId(DEFAULT_GAME_ID);
@@ -203,7 +198,6 @@ class TestGameService extends AbstractServiceTest {
         assertNotNull(game.getId());
         assertEquals(GameStatus.WAITING, game.getStatus());
         assertEquals(DEFAULT_USER_ID, game.getOwnerId());
-        assertEquals(DEFAULT_BOARD_ID, game.getBoardId());
         assertEquals(1, game.getVersion());
         assertEquals(1, game.getActivePlayerCount());
     }
@@ -496,7 +490,8 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the word is valid
-        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
+        when(dictionaryService.getWord(any(String.class), any(Language.class))).thenReturn(weakWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
         when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
@@ -504,7 +499,7 @@ class TestGameService extends AbstractServiceTest {
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the word HEAL is found in the dictionary
-        verify(dictionaryService, times(1)).hasWord("WEAK", Language.en);
+        verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
 
         final Player updatedPlayer = new Player();
         updatedPlayer.setPlayerNumber(1);
@@ -533,7 +528,7 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the word is not valid
-        when(dictionaryService.hasWord(eq("WEAK"), any(Language.class))).thenReturn(false);
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(null);
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
@@ -553,7 +548,8 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the words are valid
-        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+        final DictionaryWord healWord = DictionaryWord.builder().word("HEAL").build();
+        when(dictionaryService.getWord(eq("HEAL"), any(Language.class))).thenReturn(healWord);
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
@@ -579,7 +575,12 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the words are valid
-        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+        final DictionaryWord rawWord = DictionaryWord.builder().word("RAW").build();
+        when(dictionaryService.getWord(eq("RAW"), any(Language.class))).thenReturn(rawWord);
+        final DictionaryWord roleWord = DictionaryWord.builder().word("ROLE").build();
+        when(dictionaryService.getWord(eq("ROLE"), any(Language.class))).thenReturn(roleWord);
+        final DictionaryWord weWord = DictionaryWord.builder().word("WE").build();
+        when(dictionaryService.getWord(eq("WE"), any(Language.class))).thenReturn(weWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
         when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
@@ -587,9 +588,9 @@ class TestGameService extends AbstractServiceTest {
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the words are found in the dictionary
-        verify(dictionaryService, times(1)).hasWord("RAW", Language.en);
-        verify(dictionaryService, times(1)).hasWord("ROLE", Language.en);
-        verify(dictionaryService, times(1)).hasWord("WE", Language.en);
+        verify(dictionaryService, times(1)).getWord("RAW", Language.en);
+        verify(dictionaryService, times(1)).getWord("ROLE", Language.en);
+        verify(dictionaryService, times(1)).getWord("WE", Language.en);
 
         final Player updatedPlayer = new Player();
         updatedPlayer.setPlayerNumber(1);
@@ -641,8 +642,8 @@ class TestGameService extends AbstractServiceTest {
         prepareUsedRackByRow(9, 1, "G");
         prepareRepository();
 
-        // the words are valid
-        when(dictionaryService.hasWord(eq("WEAKENIN"), any(Language.class))).thenReturn(false);
+        // the words are not valid
+        when(dictionaryService.getWord(eq("WEAKENIN"), any(Language.class))).thenReturn(null);
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
@@ -661,8 +662,8 @@ class TestGameService extends AbstractServiceTest {
         prepareUsedRackByColumn(1, 9, "G");
         prepareRepository();
 
-        // the words are valid
-        when(dictionaryService.hasWord(eq("WEAKENIN"), any(Language.class))).thenReturn(false);
+        // the words are not valid
+        when(dictionaryService.getWord(eq("WEAKENIN"), any(Language.class))).thenReturn(null);
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
@@ -684,7 +685,8 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the words are valid
-        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+        final DictionaryWord weakeningWord = DictionaryWord.builder().word("WEAKENING").build();
+        when(dictionaryService.getWord(eq("WEAKENING"), any(Language.class))).thenReturn(weakeningWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
         when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
@@ -692,7 +694,7 @@ class TestGameService extends AbstractServiceTest {
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the words are found in the dictionary
-        verify(dictionaryService, times(1)).hasWord("WEAKENING", Language.en);
+        verify(dictionaryService, times(1)).getWord("WEAKENING", Language.en);
 
         final Player updatedPlayer = new Player();
         updatedPlayer.setPlayerNumber(1);
@@ -727,7 +729,10 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the words are valid
-        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+        final DictionaryWord weakeningWord = DictionaryWord.builder().word("WEAKENING").build();
+        when(dictionaryService.getWord(eq("WEAKENING"), any(Language.class))).thenReturn(weakeningWord);
+        final DictionaryWord goalWord = DictionaryWord.builder().word("GOAL").build();
+        when(dictionaryService.getWord(eq("GOAL"), any(Language.class))).thenReturn(goalWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
         when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
@@ -735,8 +740,8 @@ class TestGameService extends AbstractServiceTest {
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the words are found in the dictionary
-        verify(dictionaryService, times(1)).hasWord("WEAKENING", Language.en);
-        verify(dictionaryService, times(1)).hasWord("GOAL", Language.en);
+        verify(dictionaryService, times(1)).getWord("WEAKENING", Language.en);
+        verify(dictionaryService, times(1)).getWord("GOAL", Language.en);
 
         final Player updatedPlayer = new Player();
         updatedPlayer.setPlayerNumber(1);
@@ -780,7 +785,8 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the words are valid
-        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
         when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
@@ -788,7 +794,7 @@ class TestGameService extends AbstractServiceTest {
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the word is found in the dictionary
-        verify(dictionaryService, times(1)).hasWord("WEAK", Language.en);
+        verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
 
         final Player updatedPlayer = new Player();
         updatedPlayer.setPlayerNumber(1);
@@ -833,7 +839,8 @@ class TestGameService extends AbstractServiceTest {
         prepareRepository();
 
         // the words are valid
-        when(dictionaryService.hasWord(any(String.class), any(Language.class))).thenReturn(true);
+        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
@@ -852,7 +859,6 @@ class TestGameService extends AbstractServiceTest {
         game.setRoundNumber(1);
 
         when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(game);
-        when(boardService.get(eq(DEFAULT_BOARD_ID))).thenReturn(createSampleBoard());
 
         when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
             final Player player = new Player();

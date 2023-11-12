@@ -31,6 +31,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     private SchedulerService schedulerService;
     private RedisRepository redisRepository;
 
+    @Override
     GameService getBaseService() {
         return baseService;
     }
@@ -98,8 +99,8 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
     public Response play(Long id, Long userId, VirtualRackDto rackDto) {
         final VirtualRack rack = Mapper.toEntity(rackDto);
 
-        final ActionType actionType =
-                rackDto.getTiles().stream().noneMatch(VirtualTileDto::isSealed) ? ActionType.SKIP : ActionType.PLAY;
+        final ActionType actionType = rackDto.getTiles().stream().noneMatch(VirtualTileDto::isSealed) ? ActionType.SKIP
+                : ActionType.PLAY;
         final Game game = baseService.play(id, userId, rack, actionType);
 
         publishLastAction(game);
@@ -110,8 +111,8 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
             // the last round has been played, schedule the end game job
             schedulerService.scheduleEndGameJob(id);
         } else {
-            final boolean isMaximumSkipCountReached =
-                    actionService.isMaximumSkipCountReached(id, game.getExpectedPlayerCount());
+            final boolean isMaximumSkipCountReached = actionService.isMaximumSkipCountReached(id,
+                    game.getExpectedPlayerCount());
             if (isMaximumSkipCountReached) {
                 // maximum skip count in a row has been reached, schedule the end game job
                 schedulerService.scheduleEndGameJob(id);

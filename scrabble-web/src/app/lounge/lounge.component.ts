@@ -4,11 +4,9 @@ import { Router } from '@angular/router';
 import { GameService } from '../service/game.service';
 import { PlayerService } from '../service/player.service';
 import { AuthenticationService } from '../service/authentication.service';
-import { BoardService } from '../service/board.service';
 
 import { Game } from '../model/game';
 import { Player } from '../model/player';
-import { Board } from '../model/board';
 
 import { environment } from '../../environments/environment';
 
@@ -29,7 +27,6 @@ export class LoungeComponent implements OnInit {
   constructor(
     private gameService: GameService,
     private playerService: PlayerService,
-    private boardService: BoardService,
     private authenticationService: AuthenticationService,
     private router: Router,
   ) { }
@@ -46,16 +43,9 @@ export class LoungeComponent implements OnInit {
       if (games != null) {
         for (var game of games) {
           game.players = [];
-          this.loadBoard(game);
           this.loadPlayers(game);
         }
       }
-    });
-  }
-
-  loadBoard(game: Game): void {
-    this.boardService.getBoard(game.boardId).subscribe((board: Board) => {
-      game.board = board;
     });
   }
 

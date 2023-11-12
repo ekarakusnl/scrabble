@@ -4,19 +4,16 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
-
-import com.gamecity.scrabble.Constants;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * A cell represents the properties of a cell in a {@link Board board}
+ * A cell represents the properties of a cell in a board
  * 
  * @author ekarakus
  */
@@ -25,16 +22,9 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 @Entity(name = "Cell")
 @Table(name = "cells")
-@NamedQuery(name = Constants.NamedQuery.getCells, query = "Select c from Cell c where c.boardId = :boardId")
 public class Cell extends AbstractEntity implements Serializable {
 
     private static final long serialVersionUID = -5527872035417594800L;
-
-    // TODO fix foreign keys
-    // @JoinColumn(name = "rule_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
-    // "FK_CELL_RULE"))
-    @Column(name = "board_id", nullable = false)
-    private Long boardId;
 
     @Column(name = "cell_number")
     private Integer cellNumber;

@@ -4,6 +4,7 @@ import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.model.Dictionary;
+import com.gamecity.scrabble.model.DictionaryWord;
 
 /**
  * Provides services for {@link Dictionary dictionaries} for the played {@link Word words} in a
@@ -14,12 +15,12 @@ import com.gamecity.scrabble.model.Dictionary;
 public interface DictionaryService {
 
     /**
-     * Whether the selected {@link Dictionary dictionary} has the word
+     * Gets the selected word from the {@link Dictionary dictionary}
      * 
      * @param word     <code>word</code> to search in the dictionary
      * @param language <code>language</code> of the dictionary
      * @return true if the words exists
      */
-    boolean hasWord(String word, Language language);
+    DictionaryWord getWord(String word, Language language);
 
 }

@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.GameDao;
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
-import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Player;
@@ -29,12 +28,12 @@ import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.entity.GameStatus;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.entity.User;
+import com.gamecity.scrabble.model.DictionaryWord;
 import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualCell;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
 import com.gamecity.scrabble.service.ActionService;
-import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.DictionaryService;
 import com.gamecity.scrabble.service.PlayerService;
 import com.gamecity.scrabble.service.ContentService;
@@ -50,12 +49,15 @@ import com.gamecity.scrabble.service.exception.error.GameError;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.gamecity.scrabble.Constants.Game.BOARD_ROW_SIZE;
+import static com.gamecity.scrabble.Constants.Game.BOARD_COLUMN_SIZE;
+import static com.gamecity.scrabble.Constants.Game.RACK_SIZE;
+
 @Service(value = "gameService")
 @Slf4j
 class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements GameService {
 
     private UserService userService;
-    private BoardService boardService;
     private PlayerService playerService;
     private VirtualBoardService virtualBoardService;
     private VirtualRackService virtualRackService;
@@ -71,13 +73,15 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
     @Data
     private class BoardWord {
-
         // cells used by the letters
         private VirtualBoard board;
 
         // word definition created by the tiles
         // TODO find a better name
         private StringBuilder wordDefinition;
+
+        // the word stored in the dictionary
+        private DictionaryWord dictionaryWord;
 
         // direction of the word
         private Direction direction;
@@ -98,16 +102,15 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             this.direction = direction;
             this.linked = linked;
         }
+
+        public void setDictionaryWord(final DictionaryWord dictionaryWord) {
+            this.dictionaryWord = dictionaryWord;
+        }
     }
 
     @Autowired
     void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    @Autowired
-    void setBoardService(BoardService boardService) {
-        this.boardService = boardService;
     }
 
     @Autowired
@@ -168,7 +171,6 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             return update(game);
         }
 
-        boardService.get(game.getBoardId());
         final User user = userService.get(game.getOwnerId());
 
         game.setOwnerId(user.getId());
@@ -195,7 +197,6 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         }
 
         existingGame.setName(game.getName());
-        existingGame.setBoardId(game.getBoardId());
         existingGame.setExpectedPlayerCount(game.getExpectedPlayerCount());
         existingGame.setDuration(game.getDuration());
 
@@ -293,9 +294,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setRoundNumber(1);
         game.setVersion(game.getVersion() + 1);
 
-        final Integer remainingTileCount =
-                virtualBagService.getTiles(game.getId(), game.getLanguage()).stream().mapToInt(Tile::getCount).sum();
-        game.setRemainingTileCount(remainingTileCount - (game.getExpectedPlayerCount() * Constants.RACK_SIZE));
+        final Integer remainingTileCount = virtualBagService.getTiles(game.getId(), game.getLanguage())
+                .stream()
+                .mapToInt(Tile::getCount)
+                .sum();
+        game.setRemainingTileCount(remainingTileCount - (game.getExpectedPlayerCount() * RACK_SIZE));
 
         log.info("Game {} is started", game.getId());
 
@@ -470,8 +473,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 .stream()
                 .collect(Collectors.toMap(VirtualTile::getNumber, VirtualTile::getLetter));
 
-        final Predicate<VirtualTile> filter =
-                tile -> tileMap.containsKey(tile.getNumber()) && tileMap.get(tile.getNumber()).equals(tile.getLetter());
+        final Predicate<VirtualTile> filter = tile -> tileMap.containsKey(tile.getNumber())
+                && tileMap.get(tile.getNumber()).equals(tile.getLetter());
 
         long rackMatchCount = virtualRack.getTiles().stream().filter(filter).count();
         if (rackMatchCount != virtualRack.getTiles().size()) {
@@ -506,9 +509,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             return Collections.emptyList();
         }
 
-        final Board board = boardService.get(game.getBoardId());
-
-        final VirtualCell[][] boardMatrix = new VirtualCell[board.getRowSize()][board.getColumnSize()];
+        final VirtualCell[][] boardMatrix = new VirtualCell[BOARD_ROW_SIZE][BOARD_COLUMN_SIZE];
         virtualBoard.getCells().stream().forEach(cell -> {
             boardMatrix[cell.getRowNumber() - 1][cell.getColumnNumber() - 1] = cell;
             cell.setLastPlayed(false);
@@ -518,9 +519,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         hasNonEmptyCenter(boardMatrix);
 
         final List<BoardWord> newWords = findWordsOnBoard(game.getId(), game.getCurrentPlayerNumber(),
-                game.getRoundNumber(), board, boardMatrix);
+                game.getRoundNumber(), boardMatrix);
 
-        hasInvalidWords(newWords, game.getLanguage());
+        addWordDefinitions(newWords, game.getLanguage());
+        validateWordDefinitions(newWords, game.getLanguage());
         hasValidLinks(newWords, boardMatrix);
         hasSingleLetterWords(virtualBoard);
 
@@ -566,16 +568,16 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Finds and returns the words on the board
      */
-    private List<BoardWord> findWordsOnBoard(Long gameId, Integer playerNumber, Integer roundNumber, Board board,
+    private List<BoardWord> findWordsOnBoard(Long gameId, Integer playerNumber, Integer roundNumber,
             VirtualCell[][] boardMatrix) {
         final List<BoardWord> words = new ArrayList<>();
 
         // horizontal words
-        IntStream.range(1, board.getRowSize() + 1).forEach(rowNumber -> {
+        IntStream.range(1, BOARD_ROW_SIZE + 1).forEach(rowNumber -> {
             final BoardWord boardWord = new BoardWord(Direction.HORIZONTAL);
-            IntStream.range(1, board.getColumnSize() + 1).forEach(columnNumber -> {
+            IntStream.range(1, BOARD_COLUMN_SIZE + 1).forEach(columnNumber -> {
                 final VirtualCell cell = boardMatrix[rowNumber - 1][columnNumber - 1];
-                final BoardWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, board, cell,
+                final BoardWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, cell,
                         Direction.HORIZONTAL, boardWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
@@ -586,11 +588,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         });
 
         // vertical words
-        IntStream.range(1, board.getColumnSize() + 1).forEach(columnNumber -> {
+        IntStream.range(1, BOARD_COLUMN_SIZE + 1).forEach(columnNumber -> {
             final BoardWord boardWord = new BoardWord(Direction.VERTICAL);
-            IntStream.range(1, board.getRowSize() + 1).forEach(rowNumber -> {
+            IntStream.range(1, BOARD_ROW_SIZE + 1).forEach(rowNumber -> {
                 final VirtualCell cell = boardMatrix[rowNumber - 1][columnNumber - 1];
-                final BoardWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, board, cell,
+                final BoardWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, cell,
                         Direction.VERTICAL, boardWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
@@ -606,8 +608,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Finds the words on the board by direction
      */
-    private BoardWord findWordsByDirection(Long gameId, Integer playerNumber, Integer roundNumber, Board board,
-            VirtualCell cell, Direction direction, BoardWord boardWord) {
+    private BoardWord findWordsByDirection(Long gameId, Integer playerNumber, Integer roundNumber, VirtualCell cell,
+            Direction direction, BoardWord boardWord) {
 
         if (cell.getLetter() != null) {
             boardWord.getWordDefinition().append(cell.getLetter());
@@ -623,8 +625,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         }
 
         boolean emptyCell = cell.getLetter() == null;
-        boolean horizontalLast = Direction.HORIZONTAL == direction && cell.getColumnNumber() == board.getColumnSize();
-        boolean verticalLast = Direction.VERTICAL == direction && cell.getRowNumber() == board.getRowSize();
+        boolean horizontalLast = Direction.HORIZONTAL == direction && cell.getColumnNumber() == BOARD_COLUMN_SIZE;
+        boolean verticalLast = Direction.VERTICAL == direction && cell.getRowNumber() == BOARD_ROW_SIZE;
 
         // if the cell is not in the last row/column or not empty, then keep detecting the word
         if (!emptyCell && !horizontalLast && !verticalLast) {
@@ -666,16 +668,18 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         boardWord.setDirection(null);
     }
 
-    /**
-     * Whether the word exists in a dictionary
-     */
-    private boolean isValidWord(String word, Language language) {
-        return dictionaryService.hasWord(word, language);
+    private void addWordDefinitions(List<BoardWord> newWords, Language language) {
+        newWords.stream().map(boardWord -> {
+            final DictionaryWord dictionaryWord = dictionaryService.getWord(boardWord.getWordDefinition().toString(),
+                    language);
+            boardWord.setDictionaryWord(dictionaryWord);
+            return boardWord;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private void hasInvalidWords(List<BoardWord> newWords, Language language) {
+    private void validateWordDefinitions(List<BoardWord> newWords, Language language) {
         final List<BoardWord> invalidWords = newWords.stream()
-                .filter(word -> !isValidWord(word.getWordDefinition().toString(), language))
+                .filter(word -> word.getDictionaryWord() == null)
                 .collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(invalidWords)) {
@@ -691,8 +695,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
      * Whether the words are linked to existing words
      */
     private void hasValidLinks(List<BoardWord> newWords, VirtualCell[][] boardMatrix) {
-        final List<BoardWord> unlinkedWords =
-                newWords.stream().filter(word -> !word.isLinked()).collect(Collectors.toList());
+        final List<BoardWord> unlinkedWords = newWords.stream()
+                .filter(word -> !word.isLinked())
+                .collect(Collectors.toList());
 
         if (unlinkedWords.isEmpty()) {
             return;
@@ -787,7 +792,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         word.setUserId(userId);
         word.setRoundNumber(roundNumber);
         word.setScore(boardWord.getScore());
-        word.setWord(boardWord.getWordDefinition().toString());
+        word.setWord(boardWord.getDictionaryWord().getWord());
+        word.setDefinition(boardWord.getDictionaryWord().getDefinition());
         wordService.save(word);
     }
 

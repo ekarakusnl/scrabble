@@ -41,20 +41,6 @@
             </div>
           </div>
           <div class="form-group">
-            <label>{{ 'game.board.size' | translate }}</label>
-            <select class="form-control" formControlName="boardId"
-              [ngClass]="boardId.invalid && boardId.touched ? 'is-invalid' : ''">
-              <option value="">{{ 'game.board.select' | translate }}</option>
-              <option *ngFor="let board of boards" [ngValue]="board.id">
-                {{ board.name }}
-              </option>
-            </select>
-            <div class="error invalid-feedback" *ngIf="boardId.errors && (boardId.dirty || boardId.touched)">
-              <p *ngIf="boardId.errors?.required">{{ 'game.board.size'  | translate }} {{ 'validation.required' | translate
-                }}</p>
-            </div>
-          </div>
-          <div class="form-group">
             <label for="duration">{{ 'game.duration' | translate }} ({{ 'game.duration.minutes' | translate: { '0': 'x' } }})</label>
             <input id="duration" type="number" class="form-control"
               [ngClass]="duration.invalid && duration.touched ? 'is-invalid' : ''"

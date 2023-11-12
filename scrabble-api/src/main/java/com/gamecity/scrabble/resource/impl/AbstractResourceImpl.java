@@ -27,18 +27,21 @@ abstract class AbstractResourceImpl<T extends AbstractEntity, D extends Abstract
 
     abstract S getBaseService();
 
+    @Override
     public Response get(Long id) {
         final T entity = getBaseService().get(id);
         final D dto = (D) Mapper.toDto(entity);
         return Response.ok(dto).tag(createETag(dto)).build();
     }
 
+    @Override
     public Response create(D dto) {
         final T entity = getBaseService().save((T) Mapper.toEntity(dto));
         final D responseDto = (D) Mapper.toDto(entity);
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
     }
 
+    @Override
     public Response update(Long id, D dto, String ifMatch, Request request) {
         Assert.notNull(dto.getId(), "id cannot be null");
 
@@ -51,8 +54,8 @@ abstract class AbstractResourceImpl<T extends AbstractEntity, D extends Abstract
         }
 
         final D existingEntityDto = (D) Mapper.toDto(getBaseService().get(id));
-        final ResponseBuilder failedETagValidationResponse =
-                request.evaluatePreconditions(createETag(existingEntityDto));
+        final ResponseBuilder failedETagValidationResponse = request
+                .evaluatePreconditions(createETag(existingEntityDto));
         if (failedETagValidationResponse != null) {
             return failedETagValidationResponse.build();
         }
@@ -62,11 +65,13 @@ abstract class AbstractResourceImpl<T extends AbstractEntity, D extends Abstract
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
     }
 
+    @Override
     public Response delete(Long id) {
         getBaseService().delete(id);
         return Response.ok().build();
     }
 
+    @Override
     public Response list() {
         final List<T> list = getBaseService().list();
         return Response.ok(list.stream().map(Mapper::toDto).collect(Collectors.toList())).build();

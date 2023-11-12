@@ -4,7 +4,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.gamecity.scrabble.entity.Action;
-import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.GameStatus;
@@ -32,7 +31,6 @@ abstract class AbstractServiceTest {
         game.setName("My game");
         game.setOwnerId(userId);
         game.setLanguage(Language.valueOf(DEFAULT_BAG_LANGUAGE));
-        game.setBoardId(DEFAULT_BOARD_ID);
         game.setExpectedPlayerCount(playerCount);
         game.setDuration(2);
         game.setStatus(GameStatus.WAITING);
@@ -40,14 +38,6 @@ abstract class AbstractServiceTest {
         game.setActivePlayerCount(1);
         game.setRemainingTileCount(98);
         return game;
-    }
-
-    protected Board createSampleBoard() {
-        final Board board = new Board();
-        board.setId(DEFAULT_BOARD_ID);
-        board.setColumnSize(15);
-        board.setRowSize(15);
-        return board;
     }
 
     protected Action createSampleAction() {

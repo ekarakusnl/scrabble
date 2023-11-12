@@ -8,8 +8,7 @@
 </div>
 <div class="row"
      *ngFor="let game of games">
-  <div class="col-md-12"
-       *ngIf="game.board">
+  <div class="col-md-12">
     <div class="card">
       <div class="card-header">
         <div class="card-title">
@@ -54,15 +53,6 @@
               <div class="info-box-content">
                 <span class="info-box-text">{{ 'game.duration' | translate }}</span>
                 <span class="info-box-number">{{ 'game.duration.minutes' | translate: { '0': game.duration / 60 } }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3 col-sm-6 col-12">
-            <div class="info-box">
-              <span class="info-box-icon bg-info"><i class="fas fa-chess-board fa-fw"></i></span>
-              <div class="info-box-content">
-                <span class="info-box-text">{{ 'game.board.size' | translate }}</span>
-                <span class="info-box-number">{{ game.board.rowSize + 'X' + game.board.columnSize }}</span>
               </div>
             </div>
           </div>

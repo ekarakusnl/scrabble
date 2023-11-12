@@ -37,6 +37,7 @@ public class CorsFilter implements Filter {
             HttpHeaders.X_REQUESTED_WITH //
     };
 
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         final HttpServletResponse response = (HttpServletResponse) res;
@@ -48,10 +49,12 @@ public class CorsFilter implements Filter {
         chain.doFilter(req, response);
     }
 
+    @Override
     public void init(FilterConfig filterConfig) {
         // nothing to do
     }
 
+    @Override
     public void destroy() {
         // nothing to do
     }

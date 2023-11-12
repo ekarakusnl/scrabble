@@ -2,7 +2,6 @@ package com.gamecity.scrabble.model;
 
 import java.io.Serializable;
 
-import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Cell;
 import com.gamecity.scrabble.entity.Game;
 

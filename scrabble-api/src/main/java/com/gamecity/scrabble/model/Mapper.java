@@ -9,9 +9,7 @@ import org.springframework.util.CollectionUtils;
 import com.gamecity.scrabble.entity.AbstractEntity;
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
-import com.gamecity.scrabble.entity.Bag;
 import com.gamecity.scrabble.entity.BaseAuthority;
-import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Chat;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
@@ -21,8 +19,6 @@ import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.entity.User;
 import com.gamecity.scrabble.model.rest.AbstractDto;
 import com.gamecity.scrabble.model.rest.ActionDto;
-import com.gamecity.scrabble.model.rest.BagDto;
-import com.gamecity.scrabble.model.rest.BoardDto;
 import com.gamecity.scrabble.model.rest.VirtualCellDto;
 import com.gamecity.scrabble.model.rest.ChatDto;
 import com.gamecity.scrabble.model.rest.ExceptionDto;
@@ -53,10 +49,6 @@ public class Mapper {
     public static AbstractDto toDto(AbstractEntity entity) {
         if (entity instanceof Action) {
             return toDto((Action) entity);
-        } else if (entity instanceof Bag) {
-            return toDto((Bag) entity);
-        } else if (entity instanceof Board) {
-            return toDto((Board) entity);
         } else if (entity instanceof Chat) {
             return toDto((Chat) entity);
         } else if (entity instanceof Game) {
@@ -81,10 +73,6 @@ public class Mapper {
     public static AbstractEntity toEntity(AbstractDto dto) {
         if (dto instanceof ActionDto) {
             return toEntity((ActionDto) dto);
-        } else if (dto instanceof BagDto) {
-            return toEntity((BagDto) dto);
-        } else if (dto instanceof BoardDto) {
-            return toEntity((BoardDto) dto);
         } else if (dto instanceof ChatDto) {
             return toEntity((ChatDto) dto);
         } else if (dto instanceof GameDto) {
@@ -154,7 +142,6 @@ public class Mapper {
         return GameDto.builder()
                 .version(game.getVersion())
                 .activePlayerCount(game.getActivePlayerCount())
-                .boardId(game.getBoardId())
                 .currentPlayerNumber(game.getCurrentPlayerNumber())
                 .duration(game.getDuration())
                 .expectedPlayerCount(game.getExpectedPlayerCount())
@@ -180,7 +167,6 @@ public class Mapper {
         final Game game = new Game();
         game.setVersion(gameDto.getVersion());
         game.setActivePlayerCount(gameDto.getActivePlayerCount());
-        game.setBoardId(gameDto.getBoardId());
         game.setCurrentPlayerNumber(gameDto.getCurrentPlayerNumber());
         game.setDuration(gameDto.getDuration());
         game.setExpectedPlayerCount(gameDto.getExpectedPlayerCount());
@@ -192,68 +178,6 @@ public class Mapper {
         game.setRoundNumber(gameDto.getRoundNumber());
         game.setStatus(gameDto.getStatus() == null ? null : GameStatus.valueOf(gameDto.getStatus()));
         return game;
-    }
-
-    /**
-     * Converts a {@link Board} to a {@link BoardDto}
-     * 
-     * @param board
-     * @return dto representation of the {@link Board}
-     */
-    public static BoardDto toDto(Board board) {
-        return BoardDto.builder()
-                .columnSize(board.getColumnSize())
-                .id(board.getId())
-                .lastUpdatedDate(board.getLastUpdatedDate())
-                .name(board.getName())
-                .rowSize(board.getRowSize())
-                .build();
-    }
-
-    /**
-     * Converts a {@link BoardDto} to a {@link Board}
-     * 
-     * @param boardDto
-     * @return entity representation of the {@link BoardDto}
-     */
-    public static Board toEntity(BoardDto boardDto) {
-        final Board board = new Board();
-        board.setColumnSize(boardDto.getColumnSize());
-        board.setId(boardDto.getId());
-        board.setName(boardDto.getName());
-        board.setRowSize(boardDto.getRowSize());
-        return board;
-    }
-
-    /**
-     * Converts a {@link Bag} to a {@link BagDto}
-     * 
-     * @param bag
-     * @return dto representation of the {@link Bag}
-     */
-    public static BagDto toDto(Bag bag) {
-        return BagDto.builder()
-                .id(bag.getId())
-                .language(bag.getLanguage().name())
-                .lastUpdatedDate(bag.getLastUpdatedDate())
-                .name(bag.getName())
-                .tileCount(bag.getTileCount())
-                .build();
-    }
-
-    /**
-     * Converts a {@link BagDto} to a {@link Bag}
-     * 
-     * @param bagDto
-     * @return entity representation of the {@link BagDto}
-     */
-    public static Bag toEntity(BagDto bagDto) {
-        final Bag bag = new Bag();
-        bag.setId(bagDto.getId());
-        bag.setLanguage(Language.valueOf(bagDto.getLanguage()));
-        bag.setName(bagDto.getName());
-        bag.setTileCount(bagDto.getTileCount());
-        return bag;
     }
 
     /**
@@ -469,6 +393,7 @@ public class Mapper {
      */
     public static WordDto toDto(Word word) {
         return WordDto.builder()
+                .id(word.getId())
                 .actionId(word.getActionId())
                 .gameId(word.getGameId())
                 .lastUpdatedDate(word.getLastUpdatedDate())
@@ -476,6 +401,7 @@ public class Mapper {
                 .roundNumber(word.getRoundNumber())
                 .score(word.getScore())
                 .word(word.getWord())
+                .definition(word.getDefinition())
                 .build();
     }
 
@@ -493,6 +419,7 @@ public class Mapper {
         word.setRoundNumber(wordDto.getRoundNumber());
         word.setScore(wordDto.getScore());
         word.setWord(wordDto.getWord());
+        word.setDefinition(wordDto.getDefinition());
         return word;
     }
 

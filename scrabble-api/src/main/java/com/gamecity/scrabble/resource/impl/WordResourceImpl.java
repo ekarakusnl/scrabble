@@ -21,6 +21,7 @@ class WordResourceImpl extends AbstractResourceImpl<Word, WordDto, WordService> 
 
     private WordService baseService;
 
+    @Override
     WordService getBaseService() {
         return baseService;
     }

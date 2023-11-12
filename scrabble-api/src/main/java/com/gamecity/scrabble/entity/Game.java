@@ -54,11 +54,6 @@ public class Game extends AbstractEntity {
     @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 
-    @Column(name = "board_id", nullable = false)
-    // @JoinColumn(name = "rule_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =
-    // "FK_BOARD_RULE"))
-    private Long boardId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "language", nullable = false)
     // @JoinColumn(name = "rule_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =

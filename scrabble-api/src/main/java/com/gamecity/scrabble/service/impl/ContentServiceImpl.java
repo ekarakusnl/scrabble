@@ -31,7 +31,7 @@ class ContentServiceImpl implements ContentService {
     @Override
     public void create(Game game) {
         // create the board
-        virtualBoardService.createBoard(game.getId(), game.getBoardId());
+        virtualBoardService.createBoard(game.getId());
 
         // create the racks of the players
         IntStream.range(1, game.getExpectedPlayerCount() + 1).forEach(playerNumber -> {

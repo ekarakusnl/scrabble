@@ -57,11 +57,13 @@ abstract class AbstractIntegrationTest extends JerseyTest {
     }
 
     @BeforeEach
+    @Override
     public void setUp() throws Exception {
         super.setUp();
     }
 
     @AfterEach
+    @Override
     public void tearDown() throws Exception {
         super.tearDown();
     }
@@ -77,8 +79,6 @@ abstract class AbstractIntegrationTest extends JerseyTest {
 
         resourceConfig = new ResourceConfig();
         resourceConfig.property("contextConfig", applicationContext);
-        resourceConfig.register(applicationContext.getBean("bagResource"));
-        resourceConfig.register(applicationContext.getBean("boardResource"));
         resourceConfig.register(applicationContext.getBean("chatResource"));
         resourceConfig.register(applicationContext.getBean("gameResource"));
         resourceConfig.register(applicationContext.getBean("playerResource"));

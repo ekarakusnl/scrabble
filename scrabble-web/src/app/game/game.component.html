@@ -1,5 +1,5 @@
 <div class="row"
-     *ngIf="game && board && userId">
+     *ngIf="game && userId">
   <div class="col-md-12 mt-4">
     <div class="card">
       <div class="card-body title-body">
@@ -32,17 +32,7 @@
               <span class="info-box-icon bg-info"><i class="far fa-hourglass"></i></span>
               <div class="info-box-content">
                 <span class="info-box-text">{{ 'game.duration' | translate }}</span>
-                <span class="info-box-number">{{ 'game.duration.minutes' | translate: { '0': game.duration } }}</span>
-              </div>
-            </div>
-          </div>
-          <!-- board size -->
-          <div class="col-md-3 col-sm-6 col-12">
-            <div class="info-box">
-              <span class="info-box-icon bg-info"><i class="fas fa-chess-board fa-fw"></i></span>
-              <div class="info-box-content">
-                <span class="info-box-text">{{ 'game.board.size' | translate }}</span>
-                <span class="info-box-number">{{ board.rowSize + 'X' + board.columnSize }}</span>
+                <span class="info-box-number">{{ 'game.duration.minutes' | translate: { '0': game.duration / 60 } }}</span>
               </div>
             </div>
           </div>
@@ -123,9 +113,9 @@
                *ngIf="virtualBoard.cells && virtualBoard.cells.length > 0">
           <tbody>
             <tr class="d-flex"
-                *ngFor="let r of [].constructor(board.rowSize); index as rowIndex">
+                *ngFor="let r of [].constructor(boardRowSize); index as rowIndex">
               <td class="border p-0"
-                  *ngFor="let c of [].constructor(board.columnSize); index as columnIndex"
+                  *ngFor="let c of [].constructor(boardColumnSize); index as columnIndex"
                   (click)="putTile(getCell(rowIndex, columnIndex))"
                   [style.background-color]="getCell(rowIndex, columnIndex).letter ? '' : getCell(rowIndex, columnIndex).color">
                 <div class="cell-div text-center cell"

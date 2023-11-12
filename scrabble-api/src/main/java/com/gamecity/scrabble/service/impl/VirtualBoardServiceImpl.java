@@ -8,26 +8,28 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.gamecity.scrabble.dao.CellDao;
 import com.gamecity.scrabble.dao.RedisRepository;
-import com.gamecity.scrabble.entity.Board;
 import com.gamecity.scrabble.entity.Cell;
 import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualCell;
-import com.gamecity.scrabble.service.BoardService;
 import com.gamecity.scrabble.service.VirtualBoardService;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static com.gamecity.scrabble.Constants.Game.BOARD_ROW_SIZE;
+import static com.gamecity.scrabble.Constants.Game.BOARD_COLUMN_SIZE;
 
 @Service(value = "virtualBoardService")
 @Slf4j
 class VirtualBoardServiceImpl implements VirtualBoardService {
 
-    private BoardService boardService;
+    private CellDao cellDao;
     private RedisRepository redisRepository;
 
     @Autowired
-    void setBoardService(BoardService boardService) {
-        this.boardService = boardService;
+    public void setCellDao(CellDao cellDao) {
+        this.cellDao = cellDao;
     }
 
     @Autowired
@@ -36,16 +38,16 @@ class VirtualBoardServiceImpl implements VirtualBoardService {
     }
 
     @Override
-    public void createBoard(Long gameId, Long boardId) {
-        final Board board = boardService.get(boardId);
-        final VirtualCell[] virtualCells = new VirtualCell[board.getRowSize() * board.getColumnSize()];
+    public void createBoard(Long gameId) {
+        final VirtualCell[] virtualCells = new VirtualCell[BOARD_ROW_SIZE * BOARD_COLUMN_SIZE];
 
-        final Map<Integer, Cell> cells =
-                boardService.getCells(boardId).stream().collect(Collectors.toMap(Cell::getCellNumber, cell -> cell));
+        final Map<Integer, Cell> cells = cellDao.list()
+                .stream()
+                .collect(Collectors.toMap(Cell::getCellNumber, cell -> cell));
 
-        IntStream.range(1, board.getRowSize() + 1).forEach(rowNumber -> {
-            IntStream.range(1, board.getColumnSize() + 1).forEach(columnNumber -> {
-                final Cell cell = cells.get((rowNumber - 1) * board.getColumnSize() + columnNumber);
+        IntStream.range(1, BOARD_ROW_SIZE + 1).forEach(rowNumber -> {
+            IntStream.range(1, BOARD_COLUMN_SIZE + 1).forEach(columnNumber -> {
+                final Cell cell = cells.get((rowNumber - 1) * BOARD_COLUMN_SIZE + columnNumber);
                 if (cell == null) {
                     throw new IllegalStateException("Cell [{" + rowNumber + "},{" + columnNumber + "}] is not found!");
                 }
@@ -70,7 +72,7 @@ class VirtualBoardServiceImpl implements VirtualBoardService {
 
         final VirtualBoard virtualBoard = new VirtualBoard(Arrays.asList(virtualCells));
         redisRepository.updateBoard(gameId, virtualBoard);
-        log.info("Board has been created for game {} with the size {}", gameId, board.getName());
+        log.info("Board has been created for game {}", gameId);
     }
 
     @Override

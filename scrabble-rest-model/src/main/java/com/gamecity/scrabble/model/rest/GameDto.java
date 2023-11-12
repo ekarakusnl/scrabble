@@ -24,9 +24,6 @@ public class GameDto extends AbstractDto {
     @JsonProperty("language")
     private String language;
 
-    @JsonProperty("boardId")
-    private Long boardId;
-
     @JsonProperty("name")
     private String name;
 

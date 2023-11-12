@@ -35,12 +35,14 @@ public interface GameResource extends BaseResource<GameDto> {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Override
     Response get(@PathParam("id") Long id);
 
     /**
      * Gets the {@link List list} of {@link GameDto games}
      * 
      * @param userId <code>id</code> of the user to filter games by owner and player
+     * @param includeUser whether the games of user should be searched
      * @return the list of games
      */
     @GET

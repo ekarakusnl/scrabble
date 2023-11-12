@@ -21,6 +21,7 @@ class ChatResourceImpl extends AbstractResourceImpl<Chat, ChatDto, ChatService> 
 
     private ChatService baseService;
 
+    @Override
     ChatService getBaseService() {
         return baseService;
     }

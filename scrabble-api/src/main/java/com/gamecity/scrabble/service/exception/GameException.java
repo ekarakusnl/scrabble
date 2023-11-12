@@ -57,6 +57,7 @@ public class GameException extends RuntimeException {
      * 
      * @return the error message
      */
+    @Override
     public String getMessage() {
         return message;
     }

@@ -8,9 +8,24 @@ package com.gamecity.scrabble;
 public interface Constants {
 
     /**
-     * Number of tiles in a rack
+     * Game properties
      */
-    Integer RACK_SIZE = 7;
+    interface Game {
+        /**
+         * Number of tiles in a rack
+         */
+        Integer RACK_SIZE = 7;
+
+        /**
+         * Number of rows in a board
+         */
+        Integer BOARD_ROW_SIZE = 15;
+
+        /**
+         * Number of columns in a board
+         */
+        Integer BOARD_COLUMN_SIZE = 15;
+    }
 
     /**
      * Cache keys used by Redis

@@ -11,7 +11,6 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.RedisRepository;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
@@ -24,6 +23,8 @@ import com.gamecity.scrabble.service.exception.GameException;
 import com.gamecity.scrabble.service.exception.error.GameError;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static com.gamecity.scrabble.Constants.Game.RACK_SIZE;
 
 @Service(value = "virtualRackService")
 @Slf4j
@@ -44,9 +45,9 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
     @Override
     public void createRack(Long gameId, Language language, Integer playerNumber) {
-        final VirtualTile[] tiles = new VirtualTile[Constants.RACK_SIZE];
+        final VirtualTile[] tiles = new VirtualTile[RACK_SIZE];
 
-        IntStream.range(1, Constants.RACK_SIZE + 1).forEach(tileNumber -> {
+        IntStream.range(1, RACK_SIZE + 1).forEach(tileNumber -> {
             final VirtualTile tile = createTile(gameId, language, playerNumber, tileNumber, 1, null);
             tiles[tile.getNumber() - 1] = tile;
         });
@@ -70,8 +71,9 @@ class VirtualRackServiceImpl implements VirtualRackService {
     private VirtualTile createTile(Long gameId, Language language, Integer playerNumber, int tileNumber,
             int roundNumber, Boolean vowel) {
         final List<Tile> tiles = virtualBagService.getTiles(gameId, language);
-        final List<Tile> availableTiles =
-                tiles.stream().filter(tile -> tile.getCount() > 0).collect(Collectors.toList());;
+        final List<Tile> availableTiles = tiles.stream()
+                .filter(tile -> tile.getCount() > 0)
+                .collect(Collectors.toList());
 
         VirtualTile virtualTile = null;
         int index = 0;

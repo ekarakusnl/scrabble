@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,8 +48,8 @@ class ImageServiceImpl implements ImageService {
     @Value("${cdn.upload.image.endpoint}")
     private String cdnUploadImageEndpoint;
 
-    @Value("${cdn.secret}")
-    private String cdnSecret;
+    @Value("${cdn.private.key}")
+    private String cdnPrivateKey;
 
     @Override
     public void saveProfilePicture(Long userId, MultipartFile profilePicture) {
@@ -96,7 +97,8 @@ class ImageServiceImpl implements ImageService {
             // set the file value
             formBody.add(("\"file\"; filename=\"" + fileName + "\"" + LINE_SEPERATOR).getBytes(StandardCharsets.UTF_8));
             // set the content type
-            formBody.add(("Content-Type: image/png" + LINE_SEPERATOR + LINE_SEPERATOR).getBytes(StandardCharsets.UTF_8));
+            formBody.add(
+                    ("Content-Type: image/png" + LINE_SEPERATOR + LINE_SEPERATOR).getBytes(StandardCharsets.UTF_8));
             // add the file
             formBody.add(Files.readAllBytes(compressedFile.toPath()));
             // add new line
@@ -108,7 +110,8 @@ class ImageServiceImpl implements ImageService {
             final HttpRequest uploadPictureRequest = HttpRequest.newBuilder()
                     .uri(URI.create(cdnUploadImageEndpoint))
                     .POST(BodyPublishers.ofByteArrays(formBody))
-                    .header(HttpHeaders.AUTHORIZATION, "Basic " + cdnSecret)
+                    .header(HttpHeaders.AUTHORIZATION,
+                            "Basic " + Base64.getEncoder().encodeToString((cdnPrivateKey).getBytes()))
                     .header(HttpHeaders.CONTENT_TYPE, "multipart/form-data; boundary=" + boundary)
                     .timeout(CDN_REQUEST_TIMEOUT)
                     .build();
@@ -132,8 +135,8 @@ class ImageServiceImpl implements ImageService {
 
     private void compressProfilePicture(final File imageFile, final File compressedFile) throws IOException {
         final BufferedImage inputImage = ImageIO.read(imageFile);
-        final Iterator<ImageWriter> writers =
-                ImageIO.getImageWritersByMIMEType(Files.probeContentType(imageFile.toPath()));
+        final Iterator<ImageWriter> writers = ImageIO
+                .getImageWritersByMIMEType(Files.probeContentType(imageFile.toPath()));
         final ImageWriter writer = writers.next();
 
         final ImageOutputStream outputStream = ImageIO.createImageOutputStream(compressedFile);

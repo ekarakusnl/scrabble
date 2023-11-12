@@ -71,25 +71,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/rest/**")
+            .antMatchers("/rest/**")
                 .authenticated()
-                .antMatchers("/login/**")
+            .antMatchers("/login/**")
                 .permitAll()
-                .and()
+            .antMatchers("/signup/**")
+                .permitAll()
+            .and()
                 .formLogin()
-                .disable()
+                    .disable()
                 .httpBasic()
-                .disable()
+                    .disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
-                .and()
+            .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
                 .cors()
-                .and()
+            .and()
                 .csrf()
-                .disable();
+                    .disable();
 
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }

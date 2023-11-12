@@ -21,6 +21,7 @@ class ActionResourceImpl extends AbstractResourceImpl<Action, ActionDto, ActionS
 
     private ActionService baseService;
 
+    @Override
     ActionService getBaseService() {
         return baseService;
     }

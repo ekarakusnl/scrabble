@@ -16,6 +16,7 @@ class UserResourceImpl extends AbstractResourceImpl<User, UserDto, UserService> 
 
     private UserService baseService;
 
+    @Override
     UserService getBaseService() {
         return baseService;
     }

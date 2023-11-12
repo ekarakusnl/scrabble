@@ -1,7 +1,5 @@
 package com.gamecity.scrabble.controller;
 
-import java.util.Arrays;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +27,7 @@ public class ResourceExceptionHandler extends ResponseEntityExceptionHandler {
         if (e instanceof BadCredentialsException || e instanceof InternalAuthenticationServiceException) {
             final GenericException failedAuthenticationException = new GenericException(
                     GenericError.AUTHENTICATION_FAILED.getCode(), GenericError.AUTHENTICATION_FAILED.getMessage(),
-                    Arrays.asList(e.getMessage()));
+                    null);
 
             return handleExceptionInternal(failedAuthenticationException,
                     failedAuthenticationException.getExceptionDto(), new HttpHeaders(),

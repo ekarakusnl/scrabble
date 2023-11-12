@@ -29,11 +29,19 @@ import lombok.Setter;
                 + " where c.gameId = :gameId and c.userId = u.id order by c.id asc") })
 public class Chat extends AbstractEntity {
 
-    // the default constructor
+    /**
+     * Default constructor
+     */
     public Chat() {
         super();
     }
 
+    /**
+     * Named query constructor
+     * 
+     * @param chat
+     * @param username
+     */
     public Chat(Chat chat, String username) {
         super();
         this.id = chat.id;

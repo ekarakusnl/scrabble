@@ -83,6 +83,12 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
             throw new UserException(UserError.EMAIL_ADDRESS_IN_USE);
         }
 
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
+
         final User savedUser = baseDao.save(user);
 
         userRoleService.add(savedUser.getId(), Role.USER);

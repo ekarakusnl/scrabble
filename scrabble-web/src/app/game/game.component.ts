@@ -11,7 +11,6 @@ import { ChatService } from '../service/chat.service';
 import { GameService } from '../service/game.service';
 import { PlayerService } from '../service/player.service';
 import { VirtualRackService } from '../service/virtual-rack.service';
-import { BoardService } from '../service/board.service';
 import { ToastService } from '../service/toast.service';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -21,7 +20,6 @@ import { Chat } from '../model/chat';
 import { Game } from '../model/game';
 import { Player } from '../model/player';
 import { Tile } from '../model/tile';
-import { Board } from '../model/board';
 import { Word } from '../model/word';
 import { VirtualRack } from '../model/virtual-rack';
 import { VirtualBoard } from '../model/virtual-board';
@@ -44,7 +42,6 @@ export class GameComponent implements OnInit, AfterViewChecked {
   userId: number;
   playerNumber: number;
   game: Game;
-  board: Board;
 
   virtualBoard: VirtualBoard;
   virtualRack: VirtualRack;
@@ -75,12 +72,15 @@ export class GameComponent implements OnInit, AfterViewChecked {
   newAction: boolean = false;
   newMessage: boolean = false;
 
+  boardRowSize = 15;
+  boardColumnSize = 15;
+  rackSize = 7;
+
   constructor(
     @Inject(LOCALE_ID) private locale: string,
     private route: ActivatedRoute,
     private router: Router,
     private gameService: GameService,
-    private boardService: BoardService,
     private authenticationService: AuthenticationService,
     private virtualBoardService: VirtualBoardService,
     private playerService: PlayerService,
@@ -129,15 +129,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
       }
 
       this.version = game.version - 1;
-      this.getBoard();
       this.getChats();
       this.getLastAction();
-    });
-  }
-
-  getBoard(): void {
-    this.boardService.getBoard(this.game.boardId).subscribe((board: Board) => {
-      this.board = board;
     });
   }
 
@@ -338,7 +331,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   };
 
   getCell(rowIndex: number, columnIndex: number): Cell {
-    return this.virtualBoard.cells[rowIndex * this.board.columnSize + columnIndex];
+    return this.virtualBoard.cells[rowIndex * this.boardColumnSize + columnIndex];
   }
 
   chatKeyPress(event: KeyboardEvent): void {

@@ -37,6 +37,9 @@ public class WordDto extends AbstractDto implements Serializable {
     @JsonProperty("word")
     private String word;
 
+    @JsonProperty("definition")
+    private String definition;
+
     @JsonProperty("score")
     private Integer score;
 

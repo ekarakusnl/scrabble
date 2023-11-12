@@ -43,6 +43,9 @@ public class Word extends AbstractEntity {
     @Column(name = "word", nullable = false)
     private String word;
 
+    @Column(name = "definition", nullable = false)
+    private String definition;
+
     @Column(name = "score", nullable = false)
     private Integer score;
 
