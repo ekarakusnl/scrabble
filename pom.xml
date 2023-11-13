@@ -367,6 +367,7 @@
   <modules>
     <module>scrabble-api</module>
     <module>scrabble-gateway</module>
+    <module>scrabble-mobile</module>
     <module>scrabble-rest-model</module>
     <module>scrabble-web</module>
   </modules>
