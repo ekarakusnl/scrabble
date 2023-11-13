@@ -1,0 +1,6 @@
+/target/
+/.expo/
+/node_modules/
+/.settings/
+.project
+.classpath
