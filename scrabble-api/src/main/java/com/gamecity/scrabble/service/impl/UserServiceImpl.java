@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.dao.UserDao;
 import com.gamecity.scrabble.entity.BaseAuthority;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Role;
 import com.gamecity.scrabble.entity.User;
 import com.gamecity.scrabble.service.UserRoleService;
@@ -83,12 +84,15 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
             throw new UserException(UserError.EMAIL_ADDRESS_IN_USE);
         }
 
+        // enable the user
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         user.setAccountNonExpired(true);
         user.setAccountNonLocked(true);
         user.setCredentialsNonExpired(true);
         user.setEnabled(true);
 
+        // set the default preferred language
+        user.setPreferredLanguage(Language.en);
         final User savedUser = baseDao.save(user);
 
         userRoleService.add(savedUser.getId(), Role.USER);
