@@ -51,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import static com.gamecity.scrabble.Constants.Game.BOARD_ROW_SIZE;
 import static com.gamecity.scrabble.Constants.Game.BOARD_COLUMN_SIZE;
+import static com.gamecity.scrabble.Constants.Game.BONUS_SCORE;
 import static com.gamecity.scrabble.Constants.Game.RACK_SIZE;
 
 @Service(value = "gameService")
@@ -338,7 +339,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final VirtualBoard virtualBoard = virtualBoardService.getBoard(game.getId(), boardVersion);
         final List<BoardWord> newWords = findNewWords(game, virtualRack, virtualBoard);
 
-        playWords(game, newWords);
+        final Integer newWordsScore = calculateNewWordsScore(newWords);
+        updatePlayerScore(game.getId(), game.getCurrentPlayerNumber(),
+                newWordsScore + calculateBonusScore(virtualRack));
+
+        markNewWordsAsPlayed(newWords);
         assignNextPlayer(game);
 
         // increase the version number
@@ -483,22 +488,22 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     /**
+     * Mark the new words as last played
+     */
+    private void markNewWordsAsPlayed(final List<BoardWord> newWords) {
+        // mark new word cells as last played
+        newWords.stream().forEach(word -> {
+            word.getBoard().getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
+        });
+    }
+
+    /**
      * Assigns the turn to the next player in the game
      */
     private void assignNextPlayer(Game game) {
         int nextPlayerNumber = (game.getVersion() % game.getExpectedPlayerCount()) + 1;
         game.setCurrentPlayerNumber(nextPlayerNumber);
         log.info("Current player is set as player {} on game {}", nextPlayerNumber, game.getId());
-    }
-
-    private void playWords(final Game game, final List<BoardWord> newWords) {
-        final Integer newWordsScore = calculateNewWordsScore(newWords);
-        updatePlayerScore(game.getId(), game.getCurrentPlayerNumber(), newWordsScore);
-
-        // mark new word cells as last played
-        newWords.stream().forEach(word -> {
-            word.getBoard().getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
-        });
     }
 
     /**
@@ -770,6 +775,19 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             }
         });
         return word;
+    }
+
+    /**
+     * Calculate if there is a bonus score
+     */
+    private Integer calculateBonusScore(final VirtualRack virtualRack) {
+        final boolean allTilesSealed = virtualRack.getTiles().stream().allMatch(VirtualTile::isSealed);
+        // the player used all the tiles when the rack is full
+        if (allTilesSealed && virtualRack.getTiles().size() == RACK_SIZE) {
+            return BONUS_SCORE;
+        }
+
+        return 0;
     }
 
     private Integer calculateNewWordsScore(List<BoardWord> words) {

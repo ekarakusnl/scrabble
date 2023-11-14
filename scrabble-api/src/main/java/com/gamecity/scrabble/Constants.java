@@ -25,6 +25,11 @@ public interface Constants {
          * Number of columns in a board
          */
         Integer BOARD_COLUMN_SIZE = 15;
+
+        /**
+         * Bonus score for using all tiles (7) in the rack
+         */
+        Integer BONUS_SCORE = 50;
     }
 
     /**

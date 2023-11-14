@@ -568,7 +568,7 @@ class TestGameService extends AbstractServiceTest {
         // create the word WEAK
         prepareUsedRackByRow(8, 7, "WEAK");
         // create the word WAR
-        prepareUsedRackByColumn(8, 7, "WAR");
+        prepareUsedRackByColumn(9, 7, "AR");
         prepareRepository();
 
         // the words are valid
@@ -917,14 +917,14 @@ class TestGameService extends AbstractServiceTest {
         // extend the word WEAK(ER)
         prepareUsedRackByRow(8, 11, "ER");
         // create the word WAR
-        prepareUsedRackByColumn(9, 8, "RRATA");
+        prepareUsedRackByColumn(9, 8, "RRAT");
         prepareRepository();
 
         // the words are valid
         final DictionaryWord weakerWord = DictionaryWord.builder().word("WEAKER").build();
         when(dictionaryService.getWord(eq("WEAKER"), any(Language.class))).thenReturn(weakerWord);
-        final DictionaryWord errataWord = DictionaryWord.builder().word("ERRATA").build();
-        when(dictionaryService.getWord(eq("ERRATA"), any(Language.class))).thenReturn(errataWord);
+        final DictionaryWord erratWord = DictionaryWord.builder().word("ERRAT").build();
+        when(dictionaryService.getWord(eq("ERRAT"), any(Language.class))).thenReturn(erratWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
         when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
@@ -933,11 +933,11 @@ class TestGameService extends AbstractServiceTest {
 
         // the words are found in the dictionary
         verify(dictionaryService, times(1)).getWord("WEAKER", Language.en);
-        verify(dictionaryService, times(1)).getWord("ERRATA", Language.en);
+        verify(dictionaryService, times(1)).getWord("ERRAT", Language.en);
 
         final Player updatedPlayer = new Player();
         updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(43);
+        updatedPlayer.setScore(42);
 
         // the word score is added to the player score
         verify(playerService, times(1)).save(updatedPlayer);
@@ -958,10 +958,50 @@ class TestGameService extends AbstractServiceTest {
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
-        word.setScore(7);
-        word.setWord("ERRATA");
+        word.setScore(6);
+        word.setWord("ERRAT");
 
-        // the word ERRATA is logged in the words
+        // the word ERRAT is logged in the words
+        verify(wordService, times(1)).save(word);
+    }
+
+    @Test
+    void test_play_all_tiles_to_get_bonus_score() {
+        prepareGame();
+        preparePlayer(0);
+        prepareBoard();
+        // create the word PREPARE
+        prepareUsedRackByRow(8, 7, "PREPARE");
+        prepareRepository();
+
+        // the word is valid
+        final DictionaryWord prepareWord = DictionaryWord.builder().word("PREPARE").build();
+        when(dictionaryService.getWord(eq("PREPARE"), any(Language.class))).thenReturn(prepareWord);
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
+
+        // the word is found in the dictionary
+        verify(dictionaryService, times(1)).getWord("PREPARE", Language.en);
+
+        final Player updatedPlayer = new Player();
+        updatedPlayer.setPlayerNumber(1);
+        updatedPlayer.setScore(74);
+
+        // the word score is added to the player score
+        verify(playerService, times(1)).save(updatedPlayer);
+
+        Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
+        word.setGameId(DEFAULT_GAME_ID);
+        word.setUserId(DEFAULT_USER_ID);
+        word.setRoundNumber(1);
+        word.setScore(24);
+        word.setWord("PREPARE");
+
+        // the word PREPARE is logged in the words
         verify(wordService, times(1)).save(word);
     }
 
