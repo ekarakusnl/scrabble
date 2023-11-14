@@ -1,3 +1,4 @@
+import { AVPlaybackStatus, Audio } from 'expo-av';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -8,10 +9,13 @@ export function RemainingTime({ totalDurationInSeconds, lastUpdatedDate }) {
   const { t } = useTranslation();
 
   const [remainingTime, setRemainingTime] = useState<string>();
+
   const remainingTimeRef = useRef<string>();
   const remainingTimeActiveRef = useRef<boolean>(false);
   const remainingTimeIntervalRef = useRef<any>();
   const remainingTimeInSecondsRef = useRef<number>();
+  const timerSoundRef = useRef<Audio.Sound>();
+  const timerCountdownRef = useRef<boolean>();
 
   useEffect(() => {
     startTimer();
@@ -22,9 +26,12 @@ export function RemainingTime({ totalDurationInSeconds, lastUpdatedDate }) {
     }
 
     activateTimer();
+    loadTimerSound();
 
     return () => {
       stopTimer();
+      stopTimerSound();
+      unloadTimerSound();
     };
   }, [lastUpdatedDate]);
 
@@ -53,6 +60,9 @@ export function RemainingTime({ totalDurationInSeconds, lastUpdatedDate }) {
       const remainingMinutesString = (remainingMinutes < 10 ? '0' : '') + remainingMinutes.toString();
 
       remainingTimeRef.current = remainingMinutesString + ':' + remainingSecondsString;
+      if (remainingMinutes === 0 && remainingSeconds <= 15 && !timerCountdownRef.current) {
+        playTimerSound();
+      }
       setRemainingTime(remainingTimeRef.current);
     }, 1000);
   }
@@ -69,6 +79,29 @@ export function RemainingTime({ totalDurationInSeconds, lastUpdatedDate }) {
       remainingTimeRef.current = null;
       clearInterval(remainingTimeIntervalRef.current);
       remainingTimeIntervalRef.current = null;
+    }
+  }
+
+  async function loadTimerSound(): Promise<void> {
+    const { sound } = await Audio.Sound.createAsync(require('../../../assets/sounds/timer-15-seconds.mp3'));
+    timerSoundRef.current = sound;
+  }
+
+  async function playTimerSound(): Promise<AVPlaybackStatus> {
+    timerCountdownRef.current = true;
+    return await timerSoundRef.current.playAsync();
+  }
+
+  async function stopTimerSound(): Promise<AVPlaybackStatus> {
+    if (timerSoundRef.current) {
+      timerCountdownRef.current = false;
+      return await timerSoundRef.current.stopAsync();
+    }
+  }
+
+  async function unloadTimerSound(): Promise<void> {
+    if (timerSoundRef.current) {
+      await timerSoundRef.current.unloadAsync();
     }
   }
 

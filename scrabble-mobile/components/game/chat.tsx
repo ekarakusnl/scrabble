@@ -20,7 +20,6 @@ export function GameChat({ game, viewingPlayer, chatRef, notificationRef, footer
   const [chatMessages, setChatMessages] = useState<ReactElement[]>();
   const [message, setMessage] = useState<string>();
   const [messagesSynced, setMessagesSynced] = useState<boolean>(false);
-  const [notificationSound, setNotificationSound] = useState<Audio.Sound>();
   const [sending, setSending] = useState<boolean>(false);
 
   const chatsRef = useRef<Chat[]>([]);
@@ -31,6 +30,7 @@ export function GameChat({ game, viewingPlayer, chatRef, notificationRef, footer
   const messageTextHeightRef = useRef<number>(0);
   const scrollViewRef = useRef<ScrollView>();
   const visibleRef = useRef<boolean>(false);
+  const newMessageSoundRef = useRef<Audio.Sound>();
 
   useEffect(() => {
     if (!game || !viewingPlayer || !footerRef) {
@@ -42,7 +42,7 @@ export function GameChat({ game, viewingPlayer, chatRef, notificationRef, footer
 
     return () => {
       unsubscribeChats();
-      unsyncNotificationSound();
+      unloadNewMessageSound();
     };
   }, []);
 
@@ -77,12 +77,6 @@ export function GameChat({ game, viewingPlayer, chatRef, notificationRef, footer
     }
   }
 
-  function unsyncNotificationSound(): void {
-    if (notificationSound) {
-      notificationSound.unloadAsync();
-    }
-  }
-
   function loadChats(): void {
     if (!syncChatsRef.current) {
       return;
@@ -93,7 +87,7 @@ export function GameChat({ game, viewingPlayer, chatRef, notificationRef, footer
       if (chats && chats.length > chatsRef.current.length) {
         // play a sound for new messages
         if (chats.length > chatsRef.current.length) {
-          playNotificationSound();
+          playNewMessageSound();
         }
 
         if (!visibleRef.current) {
@@ -111,10 +105,16 @@ export function GameChat({ game, viewingPlayer, chatRef, notificationRef, footer
     });
   }
 
-  async function playNotificationSound(): Promise<AVPlaybackStatus> {
-    const { sound } = await Audio.Sound.createAsync(require('../../assets/sounds/notification.mp3'));
-    setNotificationSound(sound);
+  async function playNewMessageSound(): Promise<AVPlaybackStatus> {
+    const { sound } = await Audio.Sound.createAsync(require('../../assets/sounds/new-message.mp3'));
+    newMessageSoundRef.current = sound;
     return await sound.playAsync();
+  }
+
+  async function unloadNewMessageSound(): Promise<void> {
+    if (newMessageSoundRef.current) {
+      await newMessageSoundRef.current.unloadAsync();
+    }
   }
 
   function createChatMessages(): ReactElement[] {
