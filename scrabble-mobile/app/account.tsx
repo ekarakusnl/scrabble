@@ -89,7 +89,7 @@ export default function UserScreen() {
 
   async function onPressImageUpload(): Promise<void> {
     if (uploadInProgressRef.current) {
-      notificationRef.current.error(t('user.account.profile.picture.upload.in.progress'));
+      notificationRef.current.warning(t('user.account.profile.picture.upload.in.progress'));
       return;
     }
 
@@ -113,7 +113,7 @@ export default function UserScreen() {
 
   function onHideProfilePictureDialog(): void {
     if (uploadInProgressRef.current) {
-      notificationRef.current.error(t('user.account.profile.picture.upload.in.progress'));
+      notificationRef.current.warning(t('user.account.profile.picture.upload.in.progress'));
       return;
     }
 
@@ -123,14 +123,14 @@ export default function UserScreen() {
 
   function onPressUpdateProfilePicture(): void {
     if (uploadInProgressRef.current) {
-      notificationRef.current.error(t('user.account.profile.picture.upload.in.progress'));
+      notificationRef.current.warning(t('user.account.profile.picture.upload.in.progress'));
       return;
     }
 
     uploadInProgressRef.current = true;
     setSaveInProgress(true);
     UserService.updateProfilePicture(selectedProfilePictureRef.current.uri).then(() => {
-      notificationRef.current.error(t('user.account.profile.picture.updated'));
+      notificationRef.current.success(t('user.account.profile.picture.updated'));
       uploadInProgressRef.current = false;
 
       // close the dialog
@@ -165,7 +165,7 @@ export default function UserScreen() {
       userRef.current.preferredLanguage = preferredLanguage;
 
       // show information
-      notificationRef.current.error(t('user.account.message.updated'));
+      notificationRef.current.success(t('user.account.message.updated'));
 
       // update the header
       createHeader();
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   userInput: {
     width: "100%",
     alignItems: 'center',
-    marginTop: 40,
+    marginTop: 30,
   },
   label: {
     flexDirection: 'row',
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   footer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 40,
   },
   updateButton: {
     width: "60%",

@@ -104,7 +104,7 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
         // update the rack
         rackRef.current.update();
       } else if (cell.letter) {
-        notificationRef.current.error(t('error.2010', { 0: cell.rowNumber, 1: cell.columnNumber }));
+        notificationRef.current.warning(t('error.2010', { 0: cell.rowNumber, 1: cell.columnNumber }));
         selectedTileRef.current.sealed = false;
         selectedTileRef.current.selected = false;
 

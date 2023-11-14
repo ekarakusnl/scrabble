@@ -130,7 +130,7 @@
   "error.2009": "Het midden van het bord mag niet leeg zijn",
   "error.2010": "Cell [{{0}},{{1}}] is niet leeg",
   "error.2011": "Woorden {{0}} zijn niet gekoppeld aan bestaande woorden",
-  "error.2012": "WWoorden {{0}} zijn niet gedefinieerd in de taal {{1}}",
+  "error.2012": "Woorden {{0}} zijn niet gedefinieerd in de taal {{1}}",
   "error.2013": "Het spel wacht op spelers",
   "error.2014": "Er is deze ronde al een brief uitgewisseld",
   "error.2015": "Woorden van één letter {{0}} zijn niet toegestaan",

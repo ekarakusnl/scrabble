@@ -30,7 +30,7 @@ export function ScoreBoard({ game, lastAction, viewingPlayer, notificationRef })
       setRemainingTile(<RemainingTile remainingTileCount={lastAction.remainingTileCount} />);
     } else if (lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND') {
       if (lastAction.remainingTileCount === 0) {
-        notificationRef.current.error(t('game.turn.last.round'));
+        notificationRef.current.info(t('game.turn.last.round'));
       }
       setTimer(
         <RemainingTime
@@ -69,18 +69,18 @@ export function ScoreBoard({ game, lastAction, viewingPlayer, notificationRef })
           return previous.score > current.score ? previous : current;
         });
         if (winnerPlayerRef.current.playerNumber === viewingPlayer.playerNumber) {
-          notificationRef.current.error(t('game.turn.viewing.player.won'));
+          notificationRef.current.success(t('game.turn.viewing.player.won'));
         } else {
-          notificationRef.current.error(t('game.turn.another.player.won', { 0: winnerPlayerRef.current.username }));
+          notificationRef.current.info(t('game.turn.another.player.won', { 0: winnerPlayerRef.current.username }));
         }
       } else if (lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND') {
         if (lastAction.currentPlayerNumber === viewingPlayer.playerNumber) {
-          notificationRef.current.error(t('game.turn.viewing.player'));
+          notificationRef.current.info(t('game.turn.viewing.player'));
         } else {
           const currentPlayer = players.find((player) => {
             return player.playerNumber === lastAction.currentPlayerNumber;
           });
-          notificationRef.current.error(t('game.turn.another.player', { 0: currentPlayer.username }));
+          notificationRef.current.info(t('game.turn.another.player', { 0: currentPlayer.username }));
         }
       }
       setPlayerCards(createPlayerCards(players));

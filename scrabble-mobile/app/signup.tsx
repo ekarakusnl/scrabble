@@ -54,7 +54,7 @@ export default function SignupScreen() {
     }
 
     UserService.create(username, email, password).then(() => {
-      router.push('login');
+      router.push('/login');
     }).catch((error) => {
       notificationRef.current.error(error.toString());
     });

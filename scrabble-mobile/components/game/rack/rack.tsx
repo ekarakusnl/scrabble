@@ -81,18 +81,18 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
 
   function play(): void {
     if (actionInProgress.current) {
-      notificationRef.current.error(t('game.user.action.in.progress'));
+      notificationRef.current.warning(t('game.user.action.in.progress'));
       return;
     }
 
     if (viewingPlayer.playerNumber !== lastAction.currentPlayerNumber) {
-      notificationRef.current.error(t('error.2007', { 0: lastAction.currentPlayerNumber }));
+      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
       return;
     }
 
     const anyTileSelected = virtualRackRef.current.tiles.some(tile => tile.sealed);
     if (!anyTileSelected) {
-      notificationRef.current.error(t('game.board.tile.locate'));
+      notificationRef.current.warning(t('game.board.tile.locate'));
       return;
     }
 
@@ -107,12 +107,12 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
 
   function skip(): void {
     if (actionInProgress.current) {
-      notificationRef.current.error(t('game.user.action.in.progress'));
+      notificationRef.current.warning(t('game.user.action.in.progress'));
       return;
     }
 
     if (viewingPlayer.playerNumber !== lastAction.currentPlayerNumber) {
-      notificationRef.current.error(t('error.2007', { 0: lastAction.currentPlayerNumber }));
+      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
       return;
     }
 
@@ -131,18 +131,18 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
 
   function exchange(): void {
     if (actionInProgress.current) {
-      notificationRef.current.error(t('game.user.action.in.progress'));
+      notificationRef.current.warning(t('game.user.action.in.progress'));
       return;
     }
 
     if (viewingPlayer.playerNumber !== lastAction.currentPlayerNumber) {
-      notificationRef.current.error(t('error.2007', { 0: lastAction.currentPlayerNumber }));
+      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
       return;
     } else if (!selectedTileRef.current) {
-      notificationRef.current.error(t('game.rack.tile.select'));
+      notificationRef.current.warning(t('game.rack.tile.select'));
       return;
     } else if (virtualRackRef.current.exchanged) {
-      notificationRef.current.error(t('error.2014'));
+      notificationRef.current.warning(t('error.2014'));
       return;
     }
 
@@ -160,7 +160,7 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
 
   function onSelectTile(tile: Tile): void {
     if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
-      notificationRef.current.error(t('error.2007', { 0: lastAction.currentPlayerNumber }));
+      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
       return;
     }
 
