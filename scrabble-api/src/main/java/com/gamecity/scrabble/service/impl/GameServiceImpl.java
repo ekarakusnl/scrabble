@@ -495,6 +495,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final Integer newWordsScore = calculateNewWordsScore(newWords);
         updatePlayerScore(game.getId(), game.getCurrentPlayerNumber(), newWordsScore);
 
+        // mark new word cells as last played
         newWords.stream().forEach(word -> {
             word.getBoard().getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
         });
@@ -616,6 +617,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             boardWord.getBoard().getCells().add(cell);
             boardWord.setLinked(boardWord.isLinked() || cell.isCenter());
             if (!cell.isSealed()) {
+                // letter is placed in the last round
+                cell.setLastPlayed(true);
                 cell.setRoundNumber(roundNumber);
             }
 
@@ -772,11 +775,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private Integer calculateNewWordsScore(List<BoardWord> words) {
         return words.stream().mapToInt(word -> {
             final Integer wordScore = word.getBoard().getCells().stream().mapToInt(cell -> {
-                return cell.getLetterValueMultiplier() * cell.getValue();
+                return !cell.isLastPlayed() ? cell.getValue() : cell.getLetterValueMultiplier() * cell.getValue();
             }).sum();
 
             final Integer wordScoreMultiplier = word.getBoard().getCells().stream().mapToInt(cell -> {
-                return cell.getWordScoreMultiplier();
+                return !cell.isLastPlayed() ? 1 : cell.getWordScoreMultiplier();
             }).reduce(1, Math::multiplyExact);
 
             final Integer totalScore = wordScore * wordScoreMultiplier;

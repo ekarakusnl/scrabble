@@ -1,11 +1,7 @@
 package com.gamecity.scrabble.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +19,7 @@ import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Player;
+import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.entity.GameStatus;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.entity.User;
@@ -44,9 +41,12 @@ import com.gamecity.scrabble.service.WordService;
 import com.gamecity.scrabble.service.exception.GameException;
 import com.gamecity.scrabble.service.exception.error.GameError;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class TestGameService extends AbstractServiceTest {
 
-    private static final Map<String, Integer> LETTER_VALUE_MAP = new HashMap<>();
+    private static final Map<String, Tile> TILE_MAP = new HashMap<>();
 
     @InjectMocks
     private GameService gameService = new GameServiceImpl();
@@ -91,32 +91,32 @@ class TestGameService extends AbstractServiceTest {
     }
 
     static {
-        LETTER_VALUE_MAP.put("A", 1);
-        LETTER_VALUE_MAP.put("B", 3);
-        LETTER_VALUE_MAP.put("C", 3);
-        LETTER_VALUE_MAP.put("D", 2);
-        LETTER_VALUE_MAP.put("E", 1);
-        LETTER_VALUE_MAP.put("F", 4);
-        LETTER_VALUE_MAP.put("G", 2);
-        LETTER_VALUE_MAP.put("H", 4);
-        LETTER_VALUE_MAP.put("I", 1);
-        LETTER_VALUE_MAP.put("J", 8);
-        LETTER_VALUE_MAP.put("K", 5);
-        LETTER_VALUE_MAP.put("L", 1);
-        LETTER_VALUE_MAP.put("M", 3);
-        LETTER_VALUE_MAP.put("N", 1);
-        LETTER_VALUE_MAP.put("O", 1);
-        LETTER_VALUE_MAP.put("P", 3);
-        LETTER_VALUE_MAP.put("Q", 10);
-        LETTER_VALUE_MAP.put("R", 1);
-        LETTER_VALUE_MAP.put("S", 1);
-        LETTER_VALUE_MAP.put("T", 1);
-        LETTER_VALUE_MAP.put("U", 1);
-        LETTER_VALUE_MAP.put("V", 4);
-        LETTER_VALUE_MAP.put("W", 4);
-        LETTER_VALUE_MAP.put("X", 8);
-        LETTER_VALUE_MAP.put("Y", 4);
-        LETTER_VALUE_MAP.put("Z", 10);
+        TILE_MAP.put("A", Tile.builder().letter("A").count(9).value(1).build());
+        TILE_MAP.put("B", Tile.builder().letter("B").count(2).value(3).build());
+        TILE_MAP.put("C", Tile.builder().letter("C").count(2).value(3).build());
+        TILE_MAP.put("D", Tile.builder().letter("D").count(4).value(2).build());
+        TILE_MAP.put("E", Tile.builder().letter("E").count(12).value(1).build());
+        TILE_MAP.put("F", Tile.builder().letter("F").count(2).value(4).build());
+        TILE_MAP.put("G", Tile.builder().letter("G").count(3).value(2).build());
+        TILE_MAP.put("H", Tile.builder().letter("H").count(2).value(4).build());
+        TILE_MAP.put("I", Tile.builder().letter("I").count(9).value(1).build());
+        TILE_MAP.put("J", Tile.builder().letter("J").count(1).value(8).build());
+        TILE_MAP.put("K", Tile.builder().letter("K").count(1).value(5).build());
+        TILE_MAP.put("L", Tile.builder().letter("L").count(4).value(1).build());
+        TILE_MAP.put("M", Tile.builder().letter("M").count(2).value(3).build());
+        TILE_MAP.put("N", Tile.builder().letter("N").count(6).value(1).build());
+        TILE_MAP.put("O", Tile.builder().letter("O").count(8).value(1).build());
+        TILE_MAP.put("P", Tile.builder().letter("P").count(2).value(3).build());
+        TILE_MAP.put("Q", Tile.builder().letter("Q").count(1).value(10).build());
+        TILE_MAP.put("R", Tile.builder().letter("R").count(6).value(1).build());
+        TILE_MAP.put("S", Tile.builder().letter("S").count(4).value(1).build());
+        TILE_MAP.put("T", Tile.builder().letter("T").count(6).value(1).build());
+        TILE_MAP.put("U", Tile.builder().letter("U").count(4).value(1).build());
+        TILE_MAP.put("V", Tile.builder().letter("V").count(2).value(4).build());
+        TILE_MAP.put("W", Tile.builder().letter("W").count(2).value(4).build());
+        TILE_MAP.put("X", Tile.builder().letter("X").count(1).value(8).build());
+        TILE_MAP.put("Y", Tile.builder().letter("Y").count(2).value(4).build());
+        TILE_MAP.put("Z", Tile.builder().letter("Z").count(1).value(10).build());
     }
 
     @Test
@@ -360,7 +360,7 @@ class TestGameService extends AbstractServiceTest {
             return invocation.getArgument(0);
         });
         when(virtualBagService.getTiles(eq(DEFAULT_GAME_ID), eq(Language.valueOf(DEFAULT_BAG_LANGUAGE))))
-                .thenReturn(Collections.emptyList());
+                .thenReturn(TILE_MAP.values().stream().collect(Collectors.toList()));
 
         final Game game = gameService.start(DEFAULT_GAME_ID);
 
@@ -372,6 +372,7 @@ class TestGameService extends AbstractServiceTest {
         assertEquals(1, game.getCurrentPlayerNumber());
         assertEquals(1, game.getRoundNumber());
         assertEquals(2, game.getVersion());
+        assertEquals(84, game.getRemainingTileCount());
     }
 
     @Test
@@ -503,7 +504,7 @@ class TestGameService extends AbstractServiceTest {
 
         final Player updatedPlayer = new Player();
         updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(11);
+        updatedPlayer.setScore(22);
 
         // the word score is added to the player score
         verify(playerService, times(1)).save(updatedPlayer);
@@ -513,7 +514,7 @@ class TestGameService extends AbstractServiceTest {
         word.setGameId(DEFAULT_GAME_ID);
         word.setUserId(DEFAULT_USER_ID);
         word.setRoundNumber(1);
-        word.setScore(11);
+        word.setScore(22);
         word.setWord("WEAK");
 
         // the word WEAK is logged in the words
@@ -557,6 +558,62 @@ class TestGameService extends AbstractServiceTest {
         } catch (GameException e) {
             assertEquals(GameError.WORDS_ARE_NOT_LINKED.getCode(), e.getCode());
         }
+    }
+
+    @Test
+    void test_play_new_horizontal_and_vertical_words() {
+        prepareGame();
+        preparePlayer(0);
+        prepareBoard();
+        // create the word WEAK
+        prepareUsedRackByRow(8, 7, "WEAK");
+        // create the word WAR
+        prepareUsedRackByColumn(8, 7, "WAR");
+        prepareRepository();
+
+        // the words are valid
+        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
+        final DictionaryWord warWord = DictionaryWord.builder().word("WAR").build();
+        when(dictionaryService.getWord(eq("WAR"), any(Language.class))).thenReturn(warWord);
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
+
+        // the words are found in the dictionary
+        verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
+        verify(dictionaryService, times(1)).getWord("WAR", Language.en);
+
+        final Player updatedPlayer = new Player();
+        updatedPlayer.setPlayerNumber(1);
+        updatedPlayer.setScore(29);
+
+        // the word score is added to the player score
+        verify(playerService, times(1)).save(updatedPlayer);
+
+        Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
+        word.setGameId(DEFAULT_GAME_ID);
+        word.setUserId(DEFAULT_USER_ID);
+        word.setRoundNumber(1);
+        word.setScore(22);
+        word.setWord("WEAK");
+
+        // the word WEAK is logged in the words
+        verify(wordService, times(1)).save(word);
+
+        word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
+        word.setGameId(DEFAULT_GAME_ID);
+        word.setUserId(DEFAULT_USER_ID);
+        word.setRoundNumber(1);
+        word.setScore(7);
+        word.setWord("WAR");
+
+        // the word WAR is logged in the words
+        verify(wordService, times(1)).save(word);
     }
 
     @Test
@@ -850,6 +907,64 @@ class TestGameService extends AbstractServiceTest {
         }
     }
 
+    @Test
+    void test_play_multiplier_cell_value_only_used_in_first_word() {
+        prepareGame();
+        preparePlayer(22);
+        prepareBoard();
+        // the word WEAK is an existing word in the board
+        prepareExistingWordByRow(8, 7, "WEAK");
+        // extend the word WEAK(ER)
+        prepareUsedRackByRow(8, 11, "ER");
+        // create the word WAR
+        prepareUsedRackByColumn(9, 8, "RRATA");
+        prepareRepository();
+
+        // the words are valid
+        final DictionaryWord weakerWord = DictionaryWord.builder().word("WEAKER").build();
+        when(dictionaryService.getWord(eq("WEAKER"), any(Language.class))).thenReturn(weakerWord);
+        final DictionaryWord errataWord = DictionaryWord.builder().word("ERRATA").build();
+        when(dictionaryService.getWord(eq("ERRATA"), any(Language.class))).thenReturn(errataWord);
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
+
+        // the words are found in the dictionary
+        verify(dictionaryService, times(1)).getWord("WEAKER", Language.en);
+        verify(dictionaryService, times(1)).getWord("ERRATA", Language.en);
+
+        final Player updatedPlayer = new Player();
+        updatedPlayer.setPlayerNumber(1);
+        updatedPlayer.setScore(43);
+
+        // the word score is added to the player score
+        verify(playerService, times(1)).save(updatedPlayer);
+
+        Word word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
+        word.setGameId(DEFAULT_GAME_ID);
+        word.setUserId(DEFAULT_USER_ID);
+        word.setRoundNumber(1);
+        word.setScore(14);
+        word.setWord("WEAKER");
+
+        // the word WEAKER is logged in the words
+        verify(wordService, times(1)).save(word);
+
+        word = new Word();
+        word.setActionId(DEFAULT_ACTION_ID);
+        word.setGameId(DEFAULT_GAME_ID);
+        word.setUserId(DEFAULT_USER_ID);
+        word.setRoundNumber(1);
+        word.setScore(7);
+        word.setWord("ERRATA");
+
+        // the word ERRATA is logged in the words
+        verify(wordService, times(1)).save(word);
+    }
+
     private void prepareGame() {
         game = createSampleGame(DEFAULT_USER_ID, 2);
         game.setId(DEFAULT_GAME_ID);
@@ -887,7 +1002,7 @@ class TestGameService extends AbstractServiceTest {
                     .playerNumber(1)
                     .rowNumber(startingRow)
                     .sealed(true)
-                    .value(LETTER_VALUE_MAP.get(String.valueOf(letter).toUpperCase()))
+                    .value(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue())
                     .build();
             tiles.add(tile);
             columnNumber = columnNumber + 1;
@@ -905,7 +1020,7 @@ class TestGameService extends AbstractServiceTest {
                     .playerNumber(1)
                     .rowNumber(rowNumber)
                     .sealed(true)
-                    .value(LETTER_VALUE_MAP.get(String.valueOf(letter).toUpperCase()))
+                    .value(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue())
                     .build();
             tiles.add(tile);
             rowNumber = rowNumber + 1;
@@ -918,7 +1033,7 @@ class TestGameService extends AbstractServiceTest {
             boardMatrix[startingRow - 1][columnNumber - 1].setLetter(String.valueOf(letter).toUpperCase());
             boardMatrix[startingRow - 1][columnNumber - 1].setSealed(true);
             boardMatrix[startingRow - 1][columnNumber - 1]
-                    .setValue(LETTER_VALUE_MAP.get(String.valueOf(letter).toUpperCase()));
+                    .setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
             columnNumber = columnNumber + 1;
         }
     }
@@ -929,7 +1044,7 @@ class TestGameService extends AbstractServiceTest {
             boardMatrix[rowNumber - 1][startingColumn - 1].setLetter(String.valueOf(letter).toUpperCase());
             boardMatrix[rowNumber - 1][startingColumn - 1].setSealed(true);
             boardMatrix[rowNumber - 1][startingColumn - 1]
-                    .setValue(LETTER_VALUE_MAP.get(String.valueOf(letter).toUpperCase()));
+                    .setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
             rowNumber = rowNumber + 1;
         }
     }
@@ -979,7 +1094,7 @@ class TestGameService extends AbstractServiceTest {
     private Integer getWordScoreMultiplier(Integer cellNumber) {
         if (Arrays.asList(1, 8, 15, 106, 120, 211, 218, 225).contains(cellNumber)) {
             return 3;
-        } else if (Arrays.asList(17, 29, 33, 43, 49, 57, 65, 71, 155, 161, 169, 177, 183, 193, 197, 209)
+        } else if (Arrays.asList(17, 29, 33, 43, 49, 57, 65, 71, 113, 155, 161, 169, 177, 183, 193, 197, 209)
                 .contains(cellNumber)) {
             return 2;
         } else {

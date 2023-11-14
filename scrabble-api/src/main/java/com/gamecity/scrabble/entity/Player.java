@@ -16,6 +16,7 @@ import com.gamecity.scrabble.Constants;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * A player represents the {@link User user} playing in a {@link Game game}
@@ -34,6 +35,7 @@ import lombok.Setter;
         @NamedQuery(
                 name = Constants.NamedQuery.getCurrentPlayers,
                 query = "Select p from Player p where p.gameId = :gameId and p.leftDate is null") })
+@ToString
 public class Player extends AbstractEntity {
 
     @Column(name = "game_id")
