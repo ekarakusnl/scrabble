@@ -74,12 +74,12 @@ export default function Menu() {
                 <Text
                   variant="titleLarge"
                   style={styles.actionTitle}>
-                  {t('menu.game.own.title')}
+                  {t('menu.game.my.title')}
                 </Text>
                 <Text
                   variant="bodyMedium"
                   style={styles.actionDescription}>
-                  {t('menu.game.own.description')}
+                  {t('menu.game.my.description')}
                 </Text>
               </Card.Content>
             </Card>

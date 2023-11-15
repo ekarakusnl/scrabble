@@ -51,8 +51,8 @@
   "menu.game.create.description": "Erstellen Sie ein neues Spiel",
   "menu.game.search.title": "Suchen",
   "menu.game.search.description": "Suche nach aktiven Spielen",
-  "menu.game.own.title": "Meine Spiele",
-  "menu.game.own.description": "Sehen Sie sich Ihre aktuellen Spiele an",
+  "menu.game.my.title": "Meine Spiele",
+  "menu.game.my.description": "Sehen Sie sich Ihre aktuellen Spiele an",
 
   "game.game": "Spiel",
   "game.create.new": "Neues Spiel",
@@ -64,11 +64,16 @@
   "game.create.button.create": "Erstellen",
 
   "search.no.game.found": "Es wurden keine Spiele gefunden",
-  "search.game.player.count": "{{0}} Spieler",
-  "search.game.duration.minutes": "{{0}} Minuten",
-  "search.game.view": "sicht",
-  "search.game.join": "verbinden",
-  "search.game.leave": "verlassen",
+
+  "game.card.player.count": "{{0}} Spieler",
+  "game.card.duration.minutes": "{{0}} Minuten",
+  "game.card.action.view": "sicht",
+  "game.card.action.join": "verbinden",
+  "game.card.action.leave": "verlassen",
+
+  "my.games.status.waiting": "Warten",
+  "my.games.status.progress": "Im Gange",
+  "my.games.status.ended": "Beendet",
 
   "game.turn.viewing.player": "Du bist dran",
   "game.turn.another.player": "Wende von {{0}}",

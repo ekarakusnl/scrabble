@@ -88,7 +88,7 @@ export function GameCard({ userId, game, notificationRef }) {
                   <Text
                     variant="titleSmall"
                     style={styles.propertyLabel}>
-                    {t('search.game.player.count', { 0: game.expectedPlayerCount })}
+                    {t('game.card.player.count', { 0: game.expectedPlayerCount })}
                   </Text>
                 </View>
                 <View style={styles.property}>
@@ -99,7 +99,7 @@ export function GameCard({ userId, game, notificationRef }) {
                   <Text
                     variant="titleSmall"
                     style={styles.propertyLabel}>
-                    {t('search.game.duration.minutes', { 0: game.duration / 60 })}
+                    {t('game.card.duration.minutes', { 0: game.duration / 60 })}
                   </Text>
                 </View>
               </View>

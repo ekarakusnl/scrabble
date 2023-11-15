@@ -51,8 +51,8 @@
   "menu.game.create.description": "Yeni bir oyun yarat",
   "menu.game.search.title": "Ara",
   "menu.game.search.description": "Aktif oyunlar içerisinde arayın",
-  "menu.game.own.title": "Oyunlarım",
-  "menu.game.own.description": "Mevcut oyunlarınızı görüntüleyin",
+  "menu.game.my.title": "Oyunlarım",
+  "menu.game.my.description": "Mevcut oyunlarınızı görüntüleyin",
 
   "game.game": "Oyun",
   "game.create.new": "Yeni Oyun",
@@ -64,11 +64,16 @@
   "game.create.button.create": "Oyun yarat",
 
   "search.no.game.found": "Oyun bulunamadı",
-  "search.game.player.count": "{{0}} oyuncu",
-  "search.game.duration.minutes": "{{0}} dakika",
-  "search.game.view": "görüntüle",
-  "search.game.join": "katıl",
-  "search.game.leave": "terket",
+
+  "game.card.player.count": "{{0}} oyuncu",
+  "game.card.duration.minutes": "{{0}} dakika",
+  "game.card.action.view": "görüntüle",
+  "game.card.action.join": "katıl",
+  "game.card.action.leave": "terket",
+
+  "my.games.status.waiting": "Bekleyen",
+  "my.games.status.progress": "Devam eden",
+  "my.games.status.ended": "Sona eren",
 
   "game.turn.viewing.player": "Sıra sizde",
   "game.turn.another.player": "Sıradaki oyuncu {{0}}",

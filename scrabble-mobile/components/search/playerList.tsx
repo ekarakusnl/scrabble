@@ -101,7 +101,7 @@ export function PlayerList({ userId, game, lastAction, notificationRef }) {
                     buttonColor='#007bff'
                     labelStyle={styles.actionLabel}
                     onPress={() => joinGame()}>
-                    {t('search.game.join')}
+                    {t('game.card.action.join')}
                   </Button>
                   :
                   player.allowedActions.includes('ACTION_LEAVE_GAME')
@@ -112,7 +112,7 @@ export function PlayerList({ userId, game, lastAction, notificationRef }) {
                       buttonColor='#007bff'
                       labelStyle={styles.actionLabel}
                       onPress={() => leaveGame()}>
-                      {t('search.game.leave')}
+                      {t('game.card.action.leave')}
                     </Button>
                     :
                     <Button
@@ -121,7 +121,7 @@ export function PlayerList({ userId, game, lastAction, notificationRef }) {
                       buttonColor='#007bff'
                       labelStyle={styles.actionLabel}
                       onPress={() => viewGame()}>
-                      {t('search.game.view')}
+                      {t('game.card.action.view')}
                     </Button>
             }
           </View>

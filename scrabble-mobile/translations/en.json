@@ -51,8 +51,8 @@
   "menu.game.create.description": "Create a new game",
   "menu.game.search.title": "Search",
   "menu.game.search.description": "Search active games",
-  "menu.game.own.title": "My Games",
-  "menu.game.own.description": "View your current games",
+  "menu.game.my.title": "My Games",
+  "menu.game.my.description": "View your current games",
 
   "game.game": "Game",
   "game.create.new": "New Game",
@@ -64,11 +64,16 @@
   "game.create.button.create": "Create",
 
   "search.no.game.found": "No games have been found",
-  "search.game.player.count": "{{0}} players",
-  "search.game.duration.minutes": "{{0}} minutes",
-  "search.game.view": "view",
-  "search.game.join": "join",
-  "search.game.leave": "leave",
+
+  "game.card.player.count": "{{0}} players",
+  "game.card.duration.minutes": "{{0}} minutes",
+  "game.card.action.view": "view",
+  "game.card.action.join": "join",
+  "game.card.action.leave": "leave",
+
+  "my.games.status.waiting": "Waiting",
+  "my.games.status.progress": "In Progress",
+  "my.games.status.ended": "Ended",
 
   "game.turn.viewing.player": "Your turn",
   "game.turn.another.player": "Turn of {{0}}",

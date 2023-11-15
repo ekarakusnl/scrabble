@@ -51,8 +51,8 @@
   "menu.game.create.description": "Maak een nieuw spel",
   "menu.game.search.title": "Zoekopdracht",
   "menu.game.search.description": "Zoek actieve spellen",
-  "menu.game.own.title": "Mijn spellen",
-  "menu.game.own.description": "Bekijk je huidige spellen",
+  "menu.game.my.title": "Mijn spellen",
+  "menu.game.my.description": "Bekijk je huidige spellen",
 
   "game.game": "Spel",
   "game.create.new": "Nieuw spel",
@@ -64,11 +64,16 @@
   "game.create.button.create": "Creëren",
 
   "search.no.game.found": "Er zijn geen spellen gevonden",
-  "search.game.player.count": "{{0}} spelers",
-  "search.game.duration.minutes": "{{0}} minuten",
-  "search.game.view": "weergave",
-  "search.game.join": "meedoen",
-  "search.game.leave": "vertrekken",
+
+  "game.card.player.count": "{{0}} spelers",
+  "game.card.duration.minutes": "{{0}} minuten",
+  "game.card.action.view": "weergave",
+  "game.card.action.join": "meedoen",
+  "game.card.action.leave": "vertrekken",
+
+  "my.games.status.waiting": "Aan het wachten",
+  "my.games.status.progress": "Bezig",
+  "my.games.status.ended": "Beëindigd",
 
   "game.turn.viewing.player": "Jouw beurt",
   "game.turn.another.player": "Draai van {{0}}",
