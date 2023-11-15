@@ -6,6 +6,9 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { PaperProvider, Portal } from 'react-native-paper';
 
 import { Board } from '../components/game/board/board';
+import { GameFooter } from '../components/game/footer';
+import { GameChat } from '../components/game/chat';
+import { GameHistory } from '../components/game/history';
 import { Header } from '../components/layout/header';
 import { Notification } from '../components/layout/notification';
 import { Rack } from '../components/game/rack/rack';
@@ -17,9 +20,7 @@ import PlayerService from '../services/player.service';
 
 import { Action } from '../model/action';
 import { Game } from '../model/game';
-import { GameFooter } from '../components/game/footer';
-import { GameChat } from '../components/game/chat';
-import { GameHistory } from '../components/game/history';
+import { GameStatus } from '../model/game-status';
 import { Player } from '../model/player';
 import { Tile } from '../model/tile';
 
@@ -73,7 +74,7 @@ export default function GameScreen() {
 
   function loadGame(id: number): void {
     GameService.get(id).then((game: Game) => {
-      if (!game || game.status === 'TERMINATED') {
+      if (!game || game.status === GameStatus.TERMINATED) {
         router.replace('/myGames');
         return;
       }
@@ -104,7 +105,7 @@ export default function GameScreen() {
         lastActionRef.current = action;
         versionRef.current = lastActionRef.current.version;
 
-        if (lastActionRef.current.gameStatus === 'ENDED') {
+        if (lastActionRef.current.gameStatus === GameStatus.ENDED) {
           // game is ended, use the previous version to show the latest board and score
           versionRef.current = versionRef.current - 1;
           createGamePanel();

@@ -349,6 +349,9 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         // increase the version number
         game.setVersion(game.getVersion() + 1);
 
+        // get the remaining tile count before filling the rack again
+        final Integer previousRemainingTileCount = game.getRemainingTileCount();
+
         // update the remaining tile count
         final Long usedRackTileCount = virtualRack.getTiles().stream().filter(VirtualTile::isSealed).count();
         game.setRemainingTileCount(Math.max(game.getRemainingTileCount() - usedRackTileCount.intValue(), 0));
@@ -358,18 +361,12 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             game.setRoundNumber(currentRoundNumber + 1);
         }
 
-        // do the end game validations if a new round is started
-        if (game.getRoundNumber() > currentRoundNumber) {
-            if (GameStatus.LAST_ROUND == game.getStatus()) {
-                log.info("The last round has been played, game {} is ready to end", game.getId());
-                game.setStatus(GameStatus.READY_TO_END);
-            } else {
-                // the bag is empty, set the last round
-                if (game.getRemainingTileCount().equals(0)) {
-                    log.info("No tiles left in the bag, the last round is going to be played on game {}", game.getId());
-                    game.setStatus(GameStatus.LAST_ROUND);
-                }
-            }
+        // end the game if there are no tiles left in the bag at the start of this round and
+        // the current player used all tiles in the rack
+        if (previousRemainingTileCount.equals(0) && virtualRack.getTiles().stream().allMatch(VirtualTile::isSealed)) {
+            // there are no tiles left in the bag and the current player finished the tiles on the rack
+            log.info("The last round has been played, game {} is ready to end", game.getId());
+            game.setStatus(GameStatus.READY_TO_END);
         }
 
         final Game updatedGame = baseDao.save(game);
@@ -813,7 +810,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         word.setUserId(userId);
         word.setRoundNumber(roundNumber);
         word.setScore(boardWord.getScore());
-        word.setWord(boardWord.getDictionaryWord().getWord());
+        word.setWord(boardWord.getDictionaryWord().getWord().toUpperCase());
         word.setDefinition(boardWord.getDictionaryWord().getDefinition());
         wordService.save(word);
     }

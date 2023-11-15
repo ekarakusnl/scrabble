@@ -1,3 +1,4 @@
+import { GameStatus } from './game-status';
 import { Player } from './player';
 
 export interface Game {
@@ -8,7 +9,7 @@ export interface Game {
   expectedPlayerCount?: number;
   activePlayerCount?: number;
   duration?: number;
-  status?: string;
+  status?: GameStatus;
   currentPlayerNumber?: number;
   roundNumber?: number;
   remainingTileCount?: number;

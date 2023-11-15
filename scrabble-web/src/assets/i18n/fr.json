@@ -42,7 +42,7 @@
   "game.your.turn": "C'est ton tour",
   "game.another.player.turn": "C'est au tour {{0}}",
   "game.select.tile": "Aucune tuile n'a été sélectionnée, veuillez d'abord sélectionner une tuile",
-  "game.last.round": "Le sac est vide, c'est le dernier tour du jeu",
+  "game.last.round": "Le sac est vide, le jeu se terminera lorsqu'un des joueurs aura utilisé toutes les tuiles du rack",
   "game.you.won": "Toutes nos félicitations ! Tu as gagné le jeu !",
   "game.another.player.won": "{{0}} a gagné le match",
   "game.round": "Tour",

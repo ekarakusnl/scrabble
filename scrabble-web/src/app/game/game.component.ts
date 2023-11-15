@@ -18,6 +18,7 @@ import { Action } from '../model/action';
 import { Cell } from '../model/cell';
 import { Chat } from '../model/chat';
 import { Game } from '../model/game';
+import { GameStatus } from '../model/game-status';
 import { Player } from '../model/player';
 import { Tile } from '../model/tile';
 import { Word } from '../model/word';
@@ -37,6 +38,9 @@ export class GameComponent implements OnInit, AfterViewChecked {
 
   profilePictureURL: string = environment.USER_IMAGE_URL;
   unixTime: number = Math.floor(Date.now() / 1000);
+
+  // enum value
+  GameStatus = GameStatus;
 
   id: number;
   userId: number;
@@ -123,7 +127,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
     this.gameService.getGame(this.id).subscribe((game: Game) => {
       this.game = game;
       this.currentStatus = game.status;
-      if (!game || game.status === 'TERMINATED') {
+      if (!game || game.status === GameStatus.TERMINATED) {
         this.router.navigate(['lobby']);
         return;
       }
@@ -135,7 +139,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   getLastAction(): void {
-    if (this.currentStatus === 'ENDED') {
+    if (this.currentStatus === GameStatus.ENDED) {
       this.loadCells();
       this.getPlayers();
       this.getWords();
@@ -150,9 +154,9 @@ export class GameComponent implements OnInit, AfterViewChecked {
         this.currentPlayerNumber = action.currentPlayerNumber;
         this.currentStatus = action.gameStatus;
 
-        if (this.currentStatus === 'ENDED') {
+        if (this.currentStatus === GameStatus.ENDED) {
           // game is ended, use the previous version to show the latest results
-          this.version = this.version - 1; 
+          this.version = this.version - 1;
           this.stopTimer();
           this.getLastAction();
           return;
@@ -179,9 +183,9 @@ export class GameComponent implements OnInit, AfterViewChecked {
     this.durationTimer = timer(0, 1000).subscribe(interval => {
       this.remainingDurationInSeconds = Math.trunc(defaultDurationInSeconds - interval);
       if (this.remainingDurationInSeconds < 0) {
-          this.remainingDurationInSeconds = 0;
-          this.remainingDuration = '00:00';
-          return;
+        this.remainingDurationInSeconds = 0;
+        this.remainingDuration = '00:00';
+        return;
       }
 
       const remainingSeconds = this.remainingDurationInSeconds % 60;
@@ -205,13 +209,13 @@ export class GameComponent implements OnInit, AfterViewChecked {
       this.players = players;
       this.setChatUsernames();
       this.playerNumber = this.players.find(player => player.userId == this.userId).playerNumber;
-      if (this.currentStatus === 'WAITING') {
-          // add missing players for remaining slots
-          while (this.players.length < this.game.expectedPlayerCount) {
-            const player: Player = { userId: 0, username: '?', playerNumber: -1, score: 0 };
-            this.players.push(player);
-          }
-      } else if (this.currentStatus === 'ENDED') {
+      if (this.currentStatus === GameStatus.WAITING) {
+        // add missing players for remaining slots
+        while (this.players.length < this.game.expectedPlayerCount) {
+          const player: Player = { userId: 0, username: '?', playerNumber: -1, score: 0 };
+          this.players.push(player);
+        }
+      } else if (this.currentStatus === GameStatus.ENDED) {
         this.winnerPlayer = players.reduce(
           (previous, current) => {
             return previous.score > current.score ? previous : current
@@ -220,14 +224,14 @@ export class GameComponent implements OnInit, AfterViewChecked {
         if (this.winnerPlayer.userId === this.userId) {
           this.toastService.success(this.translateService.instant('game.you.won'));
         } else {
-          this.toastService.info(this.translateService.instant('game.another.player.won', { 0 : this.winnerPlayer.username }));
+          this.toastService.info(this.translateService.instant('game.another.player.won', { 0: this.winnerPlayer.username }));
         }
-      } else if (this.currentStatus === 'IN_PROGRESS' || this.currentStatus === 'LAST_ROUND') {
+      } else if (this.currentStatus === GameStatus.IN_PROGRESS) {
         const currentPlayer = this.players.find(player => player.playerNumber === this.currentPlayerNumber);
         if (currentPlayer.userId == this.userId) {
           this.toastService.info(this.translateService.instant('game.your.turn'));
         } else {
-          this.toastService.info(this.translateService.instant('game.another.player.turn', { 0 : currentPlayer.username }));
+          this.toastService.info(this.translateService.instant('game.another.player.turn', { 0: currentPlayer.username }));
         }
         this.toastService.playSound();
         this.loadRack();
@@ -248,7 +252,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   getActionMessage(action: Action): string {
-    const actionDate = '(' + formatDate(action.lastUpdatedDate,'HH:mm:ss', this.locale) +  ') ';
+    const actionDate = '(' + formatDate(action.lastUpdatedDate, 'HH:mm:ss', this.locale) + ') ';
     if (action.type === 'CREATE') {
       return actionDate + this.translateService.instant('game.actions.create', { '0': this.getUsername(action.userId) });
     } else if (action.type === 'JOIN') {
@@ -277,8 +281,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   loadRack(): void {
-    if (this.currentStatus !== 'IN_PROGRESS' && this.currentStatus !== 'LAST_ROUND') {
-        return;
+    if (this.currentStatus !== GameStatus.IN_PROGRESS) {
+      return;
     }
 
     let playerRoundNumber = this.currentPlayerNumber >= this.playerNumber ? this.currentRoundNumber :
@@ -289,8 +293,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   loadCells(): void {
-    if (this.currentStatus === 'WAITING') {
-        return;
+    if (this.currentStatus === GameStatus.WAITING) {
+      return;
     }
 
     const boardVersion = this.version - this.game.expectedPlayerCount;
@@ -410,7 +414,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
       this.toastService.error(this.translateService.instant('error.2007'));
       return;
     }
-    
+
     this.gameService.play(this.game.id, this.virtualRack).subscribe();
   };
 

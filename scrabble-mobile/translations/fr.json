@@ -72,7 +72,7 @@
 
   "game.turn.viewing.player": "C'est ton tour",
   "game.turn.another.player": "C'est au tour de {{0}}",
-  "game.turn.last.round": "Le sac est vide, c'est le dernier tour du jeu",
+  "game.turn.last.round": "Le sac est vide, le jeu se terminera lorsqu'un des joueurs aura utilisé toutes les tuiles du rack",
   "game.turn.viewing.player.won": "Toutes nos félicitations! Vous avez gagné le jeu",
   "game.turn.another.player.won": "{{0}} a gagné la partie",
 

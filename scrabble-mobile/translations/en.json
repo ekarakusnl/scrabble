@@ -72,7 +72,7 @@
 
   "game.turn.viewing.player": "Your turn",
   "game.turn.another.player": "Turn of {{0}}",
-  "game.turn.last.round": "The bag is empty, this is the last round of the game",
+  "game.turn.last.round": "The bag is empty, game will end when one of the players uses all tiles in the rack",
   "game.turn.viewing.player.won": "Congratulations! You won the game",
   "game.turn.another.player.won": "{{0}} won the game",
 

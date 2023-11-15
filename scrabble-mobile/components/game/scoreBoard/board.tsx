@@ -2,13 +2,15 @@ import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { Player } from '../../../model/player';
+import { PassedTime } from './passedTime';
+import { PlayerScore } from './playerScore';
+import { RemainingTime } from './remainingTime';
+import { RemainingTile } from './remainingTileCount';
 
 import PlayerService from '../../../services/player.service';
-import { RemainingTime } from './remainingTime';
-import { PassedTime } from './passedTime';
-import { RemainingTile } from './remainingTileCount';
-import { PlayerScore } from './playerScore';
+
+import { GameStatus } from '../../../model/game-status';
+import { Player } from '../../../model/player';
 
 export function ScoreBoard({ game, lastAction, viewingPlayer, notificationRef }) {
 
@@ -25,10 +27,10 @@ export function ScoreBoard({ game, lastAction, viewingPlayer, notificationRef })
       return;
     }
 
-    if (lastAction.gameStatus === 'ENDED') {
+    if (lastAction.gameStatus === GameStatus.ENDED) {
       setTimer(null);
       setRemainingTile(<RemainingTile remainingTileCount={lastAction.remainingTileCount} />);
-    } else if (lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND') {
+    } else if (lastAction.gameStatus === GameStatus.IN_PROGRESS) {
       if (lastAction.remainingTileCount === 0) {
         notificationRef.current.info(t('game.turn.last.round'));
       }
@@ -38,7 +40,7 @@ export function ScoreBoard({ game, lastAction, viewingPlayer, notificationRef })
           lastUpdatedDate={lastAction.lastUpdatedDate} />
       );
       setRemainingTile(<RemainingTile remainingTileCount={lastAction.remainingTileCount} />);
-    } else if (lastAction.gameStatus === 'WAITING') {
+    } else if (lastAction.gameStatus === GameStatus.WAITING) {
       setTimer(
         <PassedTime
           key={'timer_' + lastAction.version}
@@ -58,13 +60,13 @@ export function ScoreBoard({ game, lastAction, viewingPlayer, notificationRef })
         return previous.playerNumber > current.playerNumber ? 1 : previous.playerNumber < current.playerNumber ? -1 : 0;
       });
 
-      if (lastAction.gameStatus === 'WAITING') {
+      if (lastAction.gameStatus === GameStatus.WAITING) {
         // add missing players for remaining slots
         while (players.length < game.expectedPlayerCount) {
           const player: Player = { userId: 0, username: '?', playerNumber: players.length + 1, score: 0 };
           players.push(player);
         }
-      } else if (lastAction.gameStatus === 'ENDED') {
+      } else if (lastAction.gameStatus === GameStatus.ENDED) {
         winnerPlayerRef.current = players.reduce((previous, current) => {
           return previous.score > current.score ? previous : current;
         });
@@ -73,7 +75,7 @@ export function ScoreBoard({ game, lastAction, viewingPlayer, notificationRef })
         } else {
           notificationRef.current.info(t('game.turn.another.player.won', { 0: winnerPlayerRef.current.username }));
         }
-      } else if (lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND') {
+      } else if (lastAction.gameStatus === GameStatus.IN_PROGRESS) {
         if (lastAction.currentPlayerNumber === viewingPlayer.playerNumber) {
           notificationRef.current.info(t('game.turn.viewing.player'));
         } else {

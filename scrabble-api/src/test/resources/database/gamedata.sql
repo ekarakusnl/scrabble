@@ -9,6 +9,7 @@ insert into user_roles (user_id, role, enabled) values (2, 'USER', 1);
 insert into boards (name, column_size, row_size) values ('15x15', 15, 15);
 -- pre-defined bags
 insert into bags (name, language, tile_count) values ('English Tile Bag', 'en', 98);
+insert into bags (name, language, tile_count) values ('French Tile Bag', 'fr', 15);
 -- pre-defined bag tiles
 -- english language
 insert into tiles (bag_id, letter, count, "value", vowel) values (1, 'A', 9, 1, 1);
@@ -37,6 +38,8 @@ insert into tiles (bag_id, letter, count, "value") values (1, 'W', 2, 4);
 insert into tiles (bag_id, letter, count, "value") values (1, 'X', 1, 8);
 insert into tiles (bag_id, letter, count, "value") values (1, 'Y', 2, 4);
 insert into tiles (bag_id, letter, count, "value") values (1, 'Z', 1, 10);
+-- french language
+insert into tiles (bag_id, letter, count, "value") values (2, 'O', 15, 1);
 -- cell define rules
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (1, 1, 1, 'red', 1, 3, 1, 0, 0, 1);
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom) values (2, 1, 2, 'white', 1, 1, 1, 1, 0, 1);

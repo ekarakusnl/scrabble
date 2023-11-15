@@ -9,6 +9,7 @@ import VirtualRackService from '../../../services/virtual-rack.service';
 import { Tile } from '../../../model/tile';
 import { VirtualRack } from '../../../model/virtual-rack';
 import { RackTile } from './tile';
+import { GameStatus } from '../../../model/game-status';
 
 const RACK_SIZE = 7;
 
@@ -21,7 +22,7 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
   const virtualRackRef = useRef<VirtualRack>();
 
   useEffect(() => {
-    if (!game || !lastAction || !viewingPlayer || !(lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND')) {
+    if (!game || !lastAction || !viewingPlayer || lastAction.gameStatus !== GameStatus.IN_PROGRESS) {
       return;
     }
 
@@ -73,7 +74,7 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
             key={'tile_' + emptyTile.number}
             tile={emptyTile}
             onSelectTile={onSelectTile} />
-          );
+        );
       }
     }
     setTiles(tiles);
@@ -200,12 +201,8 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
     }
   }
 
-  if (!game
-        || !lastAction
-        || !(lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND')
-        || !virtualRackRef
-        || !virtualRackRef.current
-        || !tiles) {
+  if (!game || !lastAction || lastAction.gameStatus !== GameStatus.IN_PROGRESS ||
+        !virtualRackRef || !virtualRackRef.current || !tiles) {
     return null;
   }
 

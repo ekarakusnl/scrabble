@@ -5,7 +5,7 @@
       <div class="card-body title-body">
         <!-- game settings -->
         <div class="row"
-             *ngIf="'WAITING' === currentStatus">
+             *ngIf="GameStatus.WAITING === currentStatus">
           <!-- language -->
           <div class="col-md-3 col-sm-6 col-12">
             <div class="info-box">
@@ -39,7 +39,7 @@
         </div>
         <!-- waiting players -->
         <div class="row"
-           *ngIf="'WAITING' === currentStatus">
+           *ngIf="GameStatus.WAITING === currentStatus">
           <div class="col-md-3 ml-1"
                *ngFor="let player of players">
             <div class="card card-outline"
@@ -68,7 +68,7 @@
         </div>
         <!-- playing players -->
         <div class="row"
-           *ngIf="'WAITING' !== currentStatus">
+           *ngIf="GameStatus.WAITING !== currentStatus">
           <div class="col-md-3 ml-1"
                *ngFor="let player of players">
             <div class="info-box border"
@@ -87,7 +87,7 @@
                 <span class="info-box-number">{{ player.score }}</span>
               </div>
               <div class="info-box-content"
-                   *ngIf="player.playerNumber === currentPlayerNumber && ('IN_PROGRESS' === currentStatus || 'LAST_ROUND' === currentStatus)">
+                   *ngIf="player.playerNumber === currentPlayerNumber && GameStatus.IN_PROGRESS === currentStatus">
                 <span class="btn btn-app bg-danger">
                   <i class="far fa-hourglass"></i>{{ remainingDuration }}
                 </span>
@@ -179,7 +179,7 @@
     </div>
   </div>
   <div class="col-md-5"
-       *ngIf="'IN_PROGRESS' === currentStatus || 'LAST_ROUND' === currentStatus || 'ENDED' === currentStatus">
+       *ngIf="GameStatus.IN_PROGRESS === currentStatus || GameStatus.ENDED === currentStatus">
     <div class="row">
       <div class="col-md-12">
         <div class="card card-outline card-secondary">
@@ -233,7 +233,7 @@
             </div>
           </div>
           <div class="card-footer"
-               *ngIf="'ENDED' !== currentStatus">
+               *ngIf="GameStatus.ENDED !== currentStatus">
             <form action="#" method="post">
               <div class="input-group">
                 <input class="form-control"

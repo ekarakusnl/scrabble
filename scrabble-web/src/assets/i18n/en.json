@@ -42,7 +42,7 @@
   "game.your.turn": "It's your turn",
   "game.another.player.turn": "It's the turn of {{0}}",
   "game.select.tile": "No tile has been selected, please select a tile first",
-  "game.last.round": "The bag is empty, this is the last round of the game",
+  "game.last.round": "The bag is empty, game will end when one of the players uses all tiles in the rack",
   "game.you.won": "Congratulations! You have won the game!",
   "game.another.player.won": "{{0}} has won the game",
   "game.round": "Round",

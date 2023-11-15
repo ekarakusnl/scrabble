@@ -72,7 +72,7 @@
 
   "game.turn.viewing.player": "Sıra sizde",
   "game.turn.another.player": "Sıradaki oyuncu {{0}}",
-  "game.turn.last.round": "Çantada harf bulunmuyor, oyundaki son round",
+  "game.turn.last.round": "Torbada harf bulunmuyor, oyunculardan biri bütün harfleri kullandığında oyun sona erecek",
   "game.turn.viewing.player.won": "Tebrikler! Oyunu kazandınız",
   "game.turn.another.player.won": "{{0}} oyunu kazandı",
 

@@ -6,6 +6,7 @@ import { PlayerService } from '../service/player.service';
 import { AuthenticationService } from '../service/authentication.service';
 
 import { Game } from '../model/game';
+import { GameStatus } from '../model/game-status';
 import { Player } from '../model/player';
 
 import { environment } from '../../environments/environment';
@@ -19,6 +20,9 @@ export class LoungeComponent implements OnInit {
 
   profilePictureURL: string = environment.USER_IMAGE_URL;
   unixTime: number = Math.floor(Date.now() / 1000);
+
+  // enum value
+  GameStatus = GameStatus;
 
   userId: number;
   username: string;

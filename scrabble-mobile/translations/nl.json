@@ -72,7 +72,7 @@
 
   "game.turn.viewing.player": "Jouw beurt",
   "game.turn.another.player": "Draai van {{0}}",
-  "game.turn.last.round": "De zak is leeg, dit is de laatste ronde van het spel",
+  "game.turn.last.round": "De zak is leeg, het spel eindigt als een van de spelers alle tegels in het rek heeft gebruikt",
   "game.turn.viewing.player.won": "Gefeliciteerd! Jij hebt het spel gewonnen",
   "game.turn.another.player.won": "{{0}} heeft het spel gewonnen",
 

@@ -9,6 +9,7 @@ import { PlayerList } from './playerList';
 import ActionService from '../../services/action.service';
 
 import { Action } from '../../model/action';
+import { GameStatus } from '../../model/game-status';
 
 export function GameCard({ userId, game, notificationRef }) {
 
@@ -53,7 +54,7 @@ export function GameCard({ userId, game, notificationRef }) {
         setLastAction(action);
         versionRef.current = action.version;
 
-        if (action.gameStatus === 'IN_PROGRESS' || action.gameStatus === 'ENDED' || action.gameStatus === 'TERMINATED') {
+        if (action.gameStatus === GameStatus.IN_PROGRESS || action.gameStatus === GameStatus.ENDED || action.gameStatus === GameStatus.TERMINATED) {
           // TODO game is not in the waiting status anymore, remove the game from the search list
           versionRef.current = versionRef.current - 1;
           return;

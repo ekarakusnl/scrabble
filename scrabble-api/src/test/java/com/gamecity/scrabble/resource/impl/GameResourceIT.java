@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.entity.GameStatus;
+import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.model.Mapper;
 import com.gamecity.scrabble.model.rest.ExceptionDto;
@@ -679,30 +680,24 @@ class GameResourceIT extends AbstractIntegrationTest {
 
     @Test
     void test_game_ends_after_last_round() throws IOException, InterruptedException {
-        final GameDto game = createNewGame(2);
+        final GameDto game = createNewGame(2, Language.fr);
         joinGame(game.getId(), 2L);
 
         waitUntilGameStarts();
 
         final GameDto startedGame = getGame(game.getId());
 
-        final List<Tile> updatedTiles = getTiles(game.getId());
-        updatedTiles.stream().forEach(tile -> {
-            tile.setCount(0);
-        });
-        updateTiles(game.getId(), updatedTiles);
-
         // round 1 player 1
 
         List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
 
-        letterValuePairs.add(Pair.of("P", 1));
+        letterValuePairs.add(Pair.of("F", 4));
         letterValuePairs.add(Pair.of("A", 1));
         letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("K", 1));
-        letterValuePairs.add(Pair.of("I", 1));
-        letterValuePairs.add(Pair.of("N", 1));
-        letterValuePairs.add(Pair.of("G", 1));
+        letterValuePairs.add(Pair.of("A", 1));
+        letterValuePairs.add(Pair.of("D", 2));
+        letterValuePairs.add(Pair.of("A", 1));
+        letterValuePairs.add(Pair.of("Y", 4));
 
         updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(),
                 letterValuePairs);
@@ -725,6 +720,18 @@ class GameResourceIT extends AbstractIntegrationTest {
         virtualRack.getTiles().get(3).setColumnNumber(10);
         virtualRack.getTiles().get(3).setSealed(true);
 
+        virtualRack.getTiles().get(4).setRowNumber(8);
+        virtualRack.getTiles().get(4).setColumnNumber(11);
+        virtualRack.getTiles().get(4).setSealed(true);
+
+        virtualRack.getTiles().get(5).setRowNumber(8);
+        virtualRack.getTiles().get(5).setColumnNumber(12);
+        virtualRack.getTiles().get(5).setSealed(true);
+
+        virtualRack.getTiles().get(6).setRowNumber(8);
+        virtualRack.getTiles().get(6).setColumnNumber(13);
+        virtualRack.getTiles().get(6).setSealed(true);
+
         GameDto playedGame = playWord(game.getId(), 1L, virtualRack);
 
         assertNotNull(playedGame);
@@ -735,47 +742,55 @@ class GameResourceIT extends AbstractIntegrationTest {
         VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
                 playedGame.getRoundNumber() + 1);
 
-        assertEquals(3, refreshedVirtualRack.getTiles().size());
+        assertEquals(1, refreshedVirtualRack.getTiles().size());
 
         // round 1 player 2
 
         letterValuePairs = new ArrayList<>();
 
-        letterValuePairs.add(Pair.of("S", 1));
+        letterValuePairs.add(Pair.of("A", 1));
         letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("I", 1));
-        letterValuePairs.add(Pair.of("N", 1));
         letterValuePairs.add(Pair.of("A", 1));
+        letterValuePairs.add(Pair.of("D", 2));
         letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("A", 1));
+        letterValuePairs.add(Pair.of("Y", 4));
+        letterValuePairs.add(Pair.of("W", 4));
 
         updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(),
                 letterValuePairs);
 
         virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
 
-        virtualRack.getTiles().get(0).setRowNumber(7);
-        virtualRack.getTiles().get(0).setColumnNumber(8);
+        virtualRack.getTiles().get(0).setRowNumber(9);
+        virtualRack.getTiles().get(0).setColumnNumber(7);
         virtualRack.getTiles().get(0).setSealed(true);
 
-        virtualRack.getTiles().get(1).setRowNumber(9);
-        virtualRack.getTiles().get(1).setColumnNumber(8);
+        virtualRack.getTiles().get(1).setRowNumber(10);
+        virtualRack.getTiles().get(1).setColumnNumber(7);
         virtualRack.getTiles().get(1).setSealed(true);
 
-        virtualRack.getTiles().get(2).setRowNumber(10);
-        virtualRack.getTiles().get(2).setColumnNumber(8);
+        virtualRack.getTiles().get(2).setRowNumber(11);
+        virtualRack.getTiles().get(2).setColumnNumber(7);
         virtualRack.getTiles().get(2).setSealed(true);
 
-        virtualRack.getTiles().get(3).setRowNumber(11);
-        virtualRack.getTiles().get(3).setColumnNumber(8);
+        virtualRack.getTiles().get(3).setRowNumber(12);
+        virtualRack.getTiles().get(3).setColumnNumber(7);
         virtualRack.getTiles().get(3).setSealed(true);
+
+        virtualRack.getTiles().get(4).setRowNumber(13);
+        virtualRack.getTiles().get(4).setColumnNumber(7);
+        virtualRack.getTiles().get(4).setSealed(true);
+
+        virtualRack.getTiles().get(5).setRowNumber(14);
+        virtualRack.getTiles().get(5).setColumnNumber(7);
+        virtualRack.getTiles().get(5).setSealed(true);
 
         playedGame = playWord(game.getId(), 2L, virtualRack);
 
         assertNotNull(playedGame);
         assertEquals(5, playedGame.getVersion());
         assertEquals(1, playedGame.getCurrentPlayerNumber());
-        assertEquals(GameStatus.LAST_ROUND.name(), playedGame.getStatus());
+        assertEquals(GameStatus.IN_PROGRESS.name(), playedGame.getStatus());
 
         refreshedVirtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() + 1);
 
@@ -785,171 +800,23 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         virtualRack = getVirtualRack(game.getId(), 1L, playedGame.getRoundNumber());
 
+        virtualRack.getTiles().get(0).setRowNumber(12);
+        virtualRack.getTiles().get(0).setColumnNumber(8);
+        virtualRack.getTiles().get(0).setSealed(true);
+
         playedGame = playWord(game.getId(), 1L, virtualRack);
 
         assertNotNull(playedGame);
         assertEquals(6, playedGame.getVersion());
         assertEquals(2, playedGame.getCurrentPlayerNumber());
-        assertEquals(GameStatus.LAST_ROUND.name(), playedGame.getStatus());
-
-        // round 2 player 2
-
-        virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
-
-        playedGame = playWord(game.getId(), 2L, virtualRack);
-
-        assertNotNull(playedGame);
-        assertEquals(7, playedGame.getVersion());
-        assertEquals(1, playedGame.getCurrentPlayerNumber());
         assertEquals(GameStatus.READY_TO_END.name(), playedGame.getStatus());
 
-        // wait for timeout
-        Thread.sleep(10000);
+        waitUntilGameEnds();
 
         final GameDto endedGame = getGame(game.getId());
 
         assertNotNull(endedGame);
-        assertEquals(8, endedGame.getVersion());
-        assertEquals(1, endedGame.getCurrentPlayerNumber());
-        assertEquals(GameStatus.ENDED.name(), endedGame.getStatus());
-    }
-
-    @Test
-    void test_game_ends_after_skip_turn_on_last_round() throws IOException, InterruptedException {
-        final GameDto game = createNewGame(2);
-        joinGame(game.getId(), 2L);
-
-        waitUntilGameStarts();
-
-        final GameDto startedGame = getGame(game.getId());
-
-        final List<Tile> updatedTiles = getTiles(game.getId());
-        updatedTiles.stream().forEach(tile -> {
-            tile.setCount(0);
-        });
-        updateTiles(game.getId(), updatedTiles);
-
-        // round 1 player 1
-
-        List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
-
-        letterValuePairs.add(Pair.of("P", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("K", 1));
-        letterValuePairs.add(Pair.of("I", 1));
-        letterValuePairs.add(Pair.of("N", 1));
-        letterValuePairs.add(Pair.of("G", 1));
-
-        updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(),
-                letterValuePairs);
-
-        VirtualRackDto virtualRack = getVirtualRack(game.getId(), 1L, startedGame.getRoundNumber());
-
-        virtualRack.getTiles().get(0).setRowNumber(8);
-        virtualRack.getTiles().get(0).setColumnNumber(7);
-        virtualRack.getTiles().get(0).setSealed(true);
-
-        virtualRack.getTiles().get(1).setRowNumber(8);
-        virtualRack.getTiles().get(1).setColumnNumber(8);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(8);
-        virtualRack.getTiles().get(2).setColumnNumber(9);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(8);
-        virtualRack.getTiles().get(3).setColumnNumber(10);
-        virtualRack.getTiles().get(3).setSealed(true);
-
-        GameDto playedGame = playWord(game.getId(), 1L, virtualRack);
-
-        assertNotNull(playedGame);
-        assertEquals(4, playedGame.getVersion());
-        assertEquals(2, playedGame.getCurrentPlayerNumber());
-        assertEquals(GameStatus.IN_PROGRESS.name(), playedGame.getStatus());
-
-        VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                playedGame.getRoundNumber() + 1);
-
-        assertEquals(3, refreshedVirtualRack.getTiles().size());
-
-        // round 1 player 2
-
-        letterValuePairs = new ArrayList<>();
-
-        letterValuePairs.add(Pair.of("S", 1));
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("I", 1));
-        letterValuePairs.add(Pair.of("N", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-
-        updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(),
-                letterValuePairs);
-
-        virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
-
-        virtualRack.getTiles().get(0).setRowNumber(7);
-        virtualRack.getTiles().get(0).setColumnNumber(8);
-        virtualRack.getTiles().get(0).setSealed(true);
-
-        virtualRack.getTiles().get(1).setRowNumber(9);
-        virtualRack.getTiles().get(1).setColumnNumber(8);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(10);
-        virtualRack.getTiles().get(2).setColumnNumber(8);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(11);
-        virtualRack.getTiles().get(3).setColumnNumber(8);
-        virtualRack.getTiles().get(3).setSealed(true);
-
-        playedGame = playWord(game.getId(), 2L, virtualRack);
-
-        assertNotNull(playedGame);
-        assertEquals(5, playedGame.getVersion());
-        assertEquals(1, playedGame.getCurrentPlayerNumber());
-        assertEquals(GameStatus.LAST_ROUND.name(), playedGame.getStatus());
-
-        refreshedVirtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() + 1);
-
-        assertNull(refreshedVirtualRack);
-
-        // round 2 player 1
-
-        virtualRack = getVirtualRack(game.getId(), 1L, playedGame.getRoundNumber());
-
-        playedGame = playWord(game.getId(), 1L, virtualRack);
-
-        assertNotNull(playedGame);
-        assertEquals(6, playedGame.getVersion());
-        assertEquals(2, playedGame.getCurrentPlayerNumber());
-        assertEquals(GameStatus.LAST_ROUND.name(), playedGame.getStatus());
-
-        // round 2 player 2
-
-        virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
-
-        // wait for timeout
-        Thread.sleep(5000);
-
-        final GameDto skippedGame = getGame(game.getId());
-
-        assertNotNull(skippedGame);
-        assertEquals(7, skippedGame.getVersion());
-        assertEquals(1, skippedGame.getCurrentPlayerNumber());
-        assertEquals(GameStatus.READY_TO_END.name(), skippedGame.getStatus());
-
-        // wait for timeout
-        Thread.sleep(6000);
-
-        final GameDto endedGame = getGame(game.getId());
-
-        assertNotNull(endedGame);
-        assertEquals(8, endedGame.getVersion());
+        assertEquals(7, endedGame.getVersion());
         assertEquals(1, endedGame.getCurrentPlayerNumber());
         assertEquals(GameStatus.ENDED.name(), endedGame.getStatus());
     }
@@ -1173,9 +1040,14 @@ class GameResourceIT extends AbstractIntegrationTest {
     }
 
     private GameDto createNewGame(Integer playerCount) throws IOException {
+        return createNewGame(playerCount, Language.en);
+    }
+
+    private GameDto createNewGame(Integer playerCount, Language language) throws IOException {
         final URL resource = GameResourceIT.class.getResource("/json/game.json");
         final GameDto game = JsonUtils.toDto(Resources.toString(resource, StandardCharsets.UTF_8), GameDto.class);
         game.setExpectedPlayerCount(playerCount);
+        game.setLanguage(language.name());
 
         final Response gameResponse = target("/games").request().put(Entity.entity(game, MediaType.APPLICATION_JSON));
 
@@ -1223,13 +1095,15 @@ class GameResourceIT extends AbstractIntegrationTest {
         List<VirtualTileDto> tiles = new ArrayList<>();
         IntStream.range(1, 8).forEach(tileNumber -> {
             final Pair<String, Integer> letterValuePair = letterValuePairs.get(tileNumber - 1);
-            tiles.add(VirtualTileDto.builder()
-                    .letter(letterValuePair.getKey())
-                    .value(letterValuePair.getValue())
-                    .number(tileNumber)
-                    .playerNumber(playerNumber)
-                    .roundNumber(roundNumber)
-                    .build());
+            if (letterValuePair != null) {
+                tiles.add(VirtualTileDto.builder()
+                        .letter(letterValuePair.getKey())
+                        .value(letterValuePair.getValue())
+                        .number(tileNumber)
+                        .playerNumber(playerNumber)
+                        .roundNumber(roundNumber)
+                        .build());
+            }
         });
 
         virtualRack.setTiles(tiles);
@@ -1293,6 +1167,10 @@ class GameResourceIT extends AbstractIntegrationTest {
     }
 
     private void waitUntilGameStarts() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
+    private void waitUntilGameEnds() throws InterruptedException {
         Thread.sleep(1000);
     }
 

@@ -72,7 +72,7 @@
 
   "game.turn.viewing.player": "Du bist dran",
   "game.turn.another.player": "Wende von {{0}}",
-  "game.turn.last.round": "Der Beutel ist leer, dies ist die letzte Runde des Spiels",
+  "game.turn.last.round": "Der Beutel ist leer, das Spiel endet, wenn einer der Spieler alle Plättchen im Regal aufgebraucht hat",
   "game.turn.viewing.player.won": "Glückwunsch! Du hast das Spiel gewonnen",
   "game.turn.another.player.won": "{{0}} hat das Spiel gewonnen",
 

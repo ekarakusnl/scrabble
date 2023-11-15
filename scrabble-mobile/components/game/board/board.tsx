@@ -7,6 +7,7 @@ import VirtualBoardService from '../../../services/virtual-board.service';
 import { VirtualBoard } from '../../../model/virtual-board';
 import { Cell } from '../../../model/cell';
 import { BoardRow } from './row';
+import { GameStatus } from '../../../model/game-status';
 
 const ROW_SIZE = 15;
 const COLUMN_SIZE = 15;
@@ -21,8 +22,7 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
   const virtualBoardRef = useRef<VirtualBoard>();
 
   useEffect(() => {
-    if (!game || !lastAction ||
-      !(lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND' || lastAction.gameStatus === 'ENDED')) {
+    if (!game || !lastAction || !(lastAction.gameStatus === GameStatus.IN_PROGRESS || lastAction.gameStatus === GameStatus.ENDED)) {
       return;
     }
 
@@ -34,7 +34,7 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
 
   function loadCells(): void {
     const boardVersion = lastAction.version - game.expectedPlayerCount;
-    VirtualBoardService.get(game.id, lastAction.gameStatus === 'ENDED' ? boardVersion - 1 : boardVersion).then((board: VirtualBoard) => {
+    VirtualBoardService.get(game.id, lastAction.gameStatus === GameStatus.ENDED ? boardVersion - 1 : boardVersion).then((board: VirtualBoard) => {
       virtualBoardRef.current = board;
       createRows();
     }).catch(error => {
@@ -136,7 +136,7 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
     }
   }
 
-  if (!rows || !lastAction || !(lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND' || lastAction.gameStatus === 'ENDED')) {
+  if (!rows || !lastAction || !(lastAction.gameStatus === GameStatus.IN_PROGRESS || lastAction.gameStatus === GameStatus.ENDED)) {
     return null;
   }
 

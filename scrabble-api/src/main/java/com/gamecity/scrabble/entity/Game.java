@@ -37,7 +37,7 @@ import lombok.Setter;
                 " where p.gameId = g.id " + 
                 "   and p.userId = :userId " +
                 "   and p.leftDate is null " +
-                "   and g.status in ('WAITING', 'IN_PROGRESS', 'LAST_ROUND', 'ENDED') " +
+                "   and g.status in ('WAITING', 'IN_PROGRESS', 'ENDED') " +
                 " order by g.createdDate asc"),
         @NamedQuery(name = Constants.NamedQuery.searchGames, query =
                 "Select g from Game g " +

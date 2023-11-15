@@ -28,11 +28,6 @@ public enum GameStatus {
     IN_PROGRESS,
 
     /**
-     * Last round of the game
-     */
-    LAST_ROUND,
-
-    /**
      * The game is ready to end
      */
     READY_TO_END,

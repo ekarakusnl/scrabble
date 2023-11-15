@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { Appbar, Badge, FAB, Text, useTheme } from 'react-native-paper';
 
+import { GameStatus } from '../../model/game-status';
+
 export function GameFooter({ lastAction, rackRef, chatRef, historyRef, footerRef }) {
 
   const { t } = useTranslation();
@@ -30,7 +32,7 @@ export function GameFooter({ lastAction, rackRef, chatRef, historyRef, footerRef
   }));
 
   function loadFooter(): void {
-    if (lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND') {
+    if (lastAction.gameStatus === GameStatus.IN_PROGRESS) {
       setLeftSideFooter(createLeftSideFooter());
       setRightSideFooter(createRightSideFooter());
     } else {

@@ -9,6 +9,7 @@ import Icon from 'react-native-paper/src/components/Icon'
 import GameService from '../../services/game.service';
 import PlayerService from '../../services/player.service';
 
+import { GameStatus } from '../../model/game-status';
 import { Player } from '../../model/player';
 
 export function PlayerList({ userId, game, lastAction, notificationRef }) {
@@ -36,7 +37,7 @@ export function PlayerList({ userId, game, lastAction, notificationRef }) {
 
       const currentPlayer = players.find((player) => player.userId === userId);
       if (currentPlayer) {
-        if (lastAction.gameStatus === 'IN_PROGRESS' || lastAction.gameStatus === 'LAST_ROUND' || lastAction.gameStatus === 'ENDED') {
+        if (lastAction.gameStatus === GameStatus.IN_PROGRESS || lastAction.gameStatus === GameStatus.ENDED) {
           currentPlayer.allowedActions = ['ACTION_VIEW_GAME'];
         } else if (currentPlayer.userId !== game.ownerId) {
           currentPlayer.allowedActions = ['ACTION_LEAVE_GAME'];

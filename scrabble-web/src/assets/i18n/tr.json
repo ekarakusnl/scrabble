@@ -42,7 +42,7 @@
   "game.your.turn": "Sıra sizde",
   "game.another.player.turn": "Sıradaki oyuncu {{0}}",
   "game.select.tile": "Harf seçimi yapılmadı, lütfen harf seçin",
-  "game.last.round": "Torbadaki harfler sonra erdi, son raund oynanıyor",
+  "game.last.round": "Torbada harf bulunmuyor, oyunculardan biri bütün harfleri kullandığında oyun sona erecek",
   "game.you.won": "Tebrikler! Oyunu kazandınız!",
   "game.another.player.won": "{{0}} oyunu kazandı",
   "game.round": "Raund",
