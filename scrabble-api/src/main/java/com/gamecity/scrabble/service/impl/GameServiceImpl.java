@@ -28,12 +28,16 @@ import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.entity.GameStatus;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.entity.User;
+import com.gamecity.scrabble.model.Bonus;
+import com.gamecity.scrabble.model.ConstructedWord;
+import com.gamecity.scrabble.model.ConstructedWord.Direction;
 import com.gamecity.scrabble.model.DictionaryWord;
 import com.gamecity.scrabble.model.VirtualBoard;
 import com.gamecity.scrabble.model.VirtualCell;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.model.VirtualTile;
 import com.gamecity.scrabble.service.ActionService;
+import com.gamecity.scrabble.service.ScoreService;
 import com.gamecity.scrabble.service.DictionaryService;
 import com.gamecity.scrabble.service.PlayerService;
 import com.gamecity.scrabble.service.ContentService;
@@ -46,13 +50,14 @@ import com.gamecity.scrabble.service.WordService;
 import com.gamecity.scrabble.service.exception.GameException;
 import com.gamecity.scrabble.service.exception.error.GameError;
 
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.gamecity.scrabble.Constants.Game.BOARD_ROW_SIZE;
 import static com.gamecity.scrabble.Constants.Game.BOARD_COLUMN_SIZE;
-import static com.gamecity.scrabble.Constants.Game.BONUS_SCORE;
+import static com.gamecity.scrabble.Constants.Game.NO_SCORE;
 import static com.gamecity.scrabble.Constants.Game.RACK_SIZE;
+import static com.gamecity.scrabble.model.ConstructedWord.Direction.HORIZONTAL;
+import static com.gamecity.scrabble.model.ConstructedWord.Direction.VERTICAL;
 
 @Service(value = "gameService")
 @Slf4j
@@ -67,47 +72,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private DictionaryService dictionaryService;
     private WordService wordService;
     private ActionService actionService;
-
-    private enum Direction {
-        VERTICAL, HORIZONTAL
-    }
-
-    @Data
-    private class BoardWord {
-        // cells used by the letters
-        private VirtualBoard board;
-
-        // word definition created by the tiles
-        // TODO find a better name
-        private StringBuilder wordDefinition;
-
-        // the word stored in the dictionary
-        private DictionaryWord dictionaryWord;
-
-        // direction of the word
-        private Direction direction;
-
-        // whether the word is linked to existing words
-        private boolean linked;
-
-        // calculated score of the word
-        private Integer score;
-
-        public BoardWord(Direction direction) {
-            this(new VirtualBoard(new ArrayList<>()), new StringBuilder(), direction, false);
-        }
-
-        public BoardWord(VirtualBoard board, StringBuilder wordDefinition, Direction direction, boolean linked) {
-            this.board = board;
-            this.wordDefinition = wordDefinition;
-            this.direction = direction;
-            this.linked = linked;
-        }
-
-        public void setDictionaryWord(final DictionaryWord dictionaryWord) {
-            this.dictionaryWord = dictionaryWord;
-        }
-    }
+    private ScoreService scoreService;
 
     @Autowired
     void setUserService(UserService userService) {
@@ -154,6 +119,11 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         this.actionService = actionService;
     }
 
+    @Autowired
+    void setScoreService(ScoreService scoreService) {
+        this.scoreService = scoreService;
+    }
+
     @Override
     public Game get(Long gameId) {
         final Game game = baseDao.get(gameId);
@@ -183,7 +153,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         playerService.add(game.getId(), user.getId(), game.getActivePlayerCount());
 
-        actionService.add(savedGame, game.getOwnerId(), ActionType.CREATE);
+        actionService.add(savedGame, game.getOwnerId(), NO_SCORE, ActionType.CREATE);
 
         log.debug("Game {} is created", game.getId());
 
@@ -235,7 +205,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game updatedGame = baseDao.save(game);
 
-        actionService.add(updatedGame, userId, ActionType.JOIN);
+        actionService.add(updatedGame, userId, NO_SCORE, ActionType.JOIN);
 
         return updatedGame;
     }
@@ -269,7 +239,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game updatedGame = baseDao.save(game);
 
-        actionService.add(updatedGame, userId, ActionType.LEAVE);
+        actionService.add(updatedGame, userId, NO_SCORE, ActionType.LEAVE);
 
         return updatedGame;
     }
@@ -305,7 +275,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game updatedGame = baseDao.save(game);
 
-        actionService.add(updatedGame, game.getOwnerId(), ActionType.START);
+        actionService.add(updatedGame, game.getOwnerId(), NO_SCORE, ActionType.START);
         contentService.create(updatedGame);
 
         return updatedGame;
@@ -332,18 +302,27 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final Integer currentPlayerNumber = game.getCurrentPlayerNumber();
         final Integer currentRoundNumber = game.getRoundNumber();
 
-        isCurrentPlayer(player.getPlayerNumber(), currentPlayerNumber);
-        isValidRack(game, player.getPlayerNumber(), virtualRack);
+        hasTurn(player.getPlayerNumber(), currentPlayerNumber);
+        hasValidRack(game, player.getPlayerNumber(), virtualRack);
 
+        // TODO create a service/utility to calculate board version
         final Integer boardVersion = game.getVersion() - game.getExpectedPlayerCount();
         final VirtualBoard virtualBoard = virtualBoardService.getBoard(game.getId(), boardVersion);
-        final List<BoardWord> newWords = findNewWords(game, virtualRack, virtualBoard);
+        final List<ConstructedWord> constructedWords = findNewWords(game, virtualRack, virtualBoard);
 
-        final Integer newWordsScore = calculateNewWordsScore(newWords);
-        updatePlayerScore(game.getId(), game.getCurrentPlayerNumber(),
-                newWordsScore + calculateBonusScore(virtualRack));
+        // calculate the total score
+        final Integer constructedWordsScore = constructedWords.stream().mapToInt(constructedWord -> {
+            final Integer score = scoreService.calculateConstructedWordScore(constructedWord);
+            constructedWord.setScore(score);
+            return score;
+        }).sum();
 
-        markNewWordsAsPlayed(newWords);
+        final List<Bonus> bonuses = scoreService.calculateBonuses(constructedWords, virtualRack);
+        final Integer bonusScore = bonuses.stream().mapToInt(Bonus::getScore).sum();
+
+        playerService.updateScore(game.getId(), game.getCurrentPlayerNumber(), constructedWordsScore + bonusScore);
+
+        markNewWordCellsAsPlayed(constructedWords);
         assignNextPlayer(game);
 
         // increase the version number
@@ -356,6 +335,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final Long usedRackTileCount = virtualRack.getTiles().stream().filter(VirtualTile::isSealed).count();
         game.setRemainingTileCount(Math.max(game.getRemainingTileCount() - usedRackTileCount.intValue(), 0));
 
+        // TODO create a service/utility to calculate round number
         // if the next player is the first player, then a new round starts
         if (game.getVersion() % game.getExpectedPlayerCount() == 1) {
             game.setRoundNumber(currentRoundNumber + 1);
@@ -371,8 +351,14 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game updatedGame = baseDao.save(game);
 
-        final Action action = actionService.add(updatedGame, userId, actionType);
-        logWords(id, userId, action.getId(), currentRoundNumber, newWords);
+        // create actions for bonuses
+        bonuses.stream().forEach(bonus -> {
+            actionService.add(updatedGame, userId, bonus.getScore(), bonus.getActionType());
+        });
+
+        // create action for play/skip
+        final Action action = actionService.add(updatedGame, userId, constructedWordsScore, actionType);
+        logWords(id, userId, action.getId(), currentRoundNumber, constructedWords);
         contentService.update(updatedGame, virtualRack, virtualBoard, currentPlayerNumber, currentRoundNumber);
 
         return updatedGame;
@@ -411,7 +397,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game updatedGame = baseDao.save(game);
 
-        actionService.add(updatedGame, winningPlayer.getUserId(), ActionType.END);
+        actionService.add(updatedGame, winningPlayer.getUserId(), NO_SCORE, ActionType.END);
 
         return updatedGame;
     }
@@ -435,7 +421,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game updatedGame = baseDao.save(game);
 
-        actionService.add(updatedGame, game.getOwnerId(), ActionType.TERMINATE);
+        actionService.add(updatedGame, game.getOwnerId(), NO_SCORE, ActionType.TERMINATE);
 
         return updatedGame;
     }
@@ -458,16 +444,16 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Whether the player who is playing has the turn
      */
-    private void isCurrentPlayer(Integer playerNumber, Integer currentPlayerNumber) {
+    private void hasTurn(Integer playerNumber, Integer currentPlayerNumber) {
         if (!playerNumber.equals(currentPlayerNumber)) {
             throw new GameException(GameError.TURN_OF_ANOTHER_PLAYER);
         }
     }
 
     /**
-     * Whether the rack of the player is the same rack as the service gets
+     * Whether the played rack is the same rack that was stored in the system
      */
-    private void isValidRack(Game game, Integer playerNumber, VirtualRack virtualRack) {
+    private void hasValidRack(Game game, Integer playerNumber, VirtualRack virtualRack) {
 
         final VirtualRack existingRack = virtualRackService.getRack(game.getId(), playerNumber, game.getRoundNumber());
 
@@ -485,12 +471,12 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     }
 
     /**
-     * Mark the new words as last played
+     * Mark the new word cells as last played
      */
-    private void markNewWordsAsPlayed(final List<BoardWord> newWords) {
+    private void markNewWordCellsAsPlayed(final List<ConstructedWord> constructedWords) {
         // mark new word cells as last played
-        newWords.stream().forEach(word -> {
-            word.getBoard().getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
+        constructedWords.stream().forEach(word -> {
+            word.getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
         });
     }
 
@@ -498,6 +484,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
      * Assigns the turn to the next player in the game
      */
     private void assignNextPlayer(Game game) {
+        // TODO create a service/utility to calculate next player number
         int nextPlayerNumber = (game.getVersion() % game.getExpectedPlayerCount()) + 1;
         game.setCurrentPlayerNumber(nextPlayerNumber);
         log.info("Current player is set as player {} on game {}", nextPlayerNumber, game.getId());
@@ -506,7 +493,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Does the validations and finds the words
      */
-    private List<BoardWord> findNewWords(Game game, VirtualRack updatedRack, VirtualBoard virtualBoard) {
+    private List<ConstructedWord> findNewWords(Game game, VirtualRack updatedRack, VirtualBoard virtualBoard) {
         boolean hasNewMove = updatedRack.getTiles().stream().anyMatch(VirtualTile::isSealed);
         if (!hasNewMove) {
             return Collections.emptyList();
@@ -521,22 +508,37 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         locateTilesOnBoard(updatedRack, boardMatrix);
         hasNonEmptyCenter(boardMatrix);
 
-        final List<BoardWord> newWords = findWordsOnBoard(game.getId(), game.getCurrentPlayerNumber(),
-                game.getRoundNumber(), boardMatrix);
+        final List<ConstructedWord> constructedWords = findWordsOnBoard(game.getId(), game.getCurrentPlayerNumber(), game.getRoundNumber(),
+                boardMatrix);
 
-        addWordDefinitions(newWords, game.getLanguage());
-        validateWordDefinitions(newWords, game.getLanguage());
-        hasValidLinks(newWords, boardMatrix);
-        hasSingleLetterWords(virtualBoard);
+        addWordDefinitions(constructedWords, game.getLanguage());
+        hasValidWords(constructedWords, game.getLanguage());
+        hasValidLinks(constructedWords, boardMatrix);
+        hasNoSingleLetterWords(virtualBoard);
 
-        return newWords;
+        return constructedWords;
     }
 
     /*
      * Log the words
      */
-    private void logWords(Long gameId, Long userId, Long actionId, Integer roundNumber, List<BoardWord> boardWords) {
-        boardWords.forEach(word -> saveWord(gameId, userId, actionId, roundNumber, word));
+    private void logWords(Long gameId, Long userId, Long actionId, Integer roundNumber, List<ConstructedWord> constructedWords) {
+        if (constructedWords.isEmpty()) {
+            return;
+        }
+
+        final List<Word> words = constructedWords.stream().map(constructedWord -> {
+            return Word.builder()
+                    .gameId(gameId)
+                    .userId(userId)
+                    .actionId(actionId)
+                    .roundNumber(roundNumber)
+                    .score(constructedWord.getScore())
+                    .word(constructedWord.getDictionaryWord().getWord().toUpperCase())
+                    .definition(constructedWord.getDictionaryWord().getDefinition())
+                    .build();
+        }).collect(Collectors.toList());
+        wordService.saveAll(words);
     }
 
     /**
@@ -551,8 +553,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             }
             cell.setLetter(tile.getLetter());
             cell.setValue(tile.getValue());
-            log.debug("Letter {} with value {} on rack tile {} is located to cell[{},{}]", cell.getLetter(),
-                    cell.getValue(), tile.getNumber(), cell.getRowNumber(), cell.getColumnNumber());
+            log.debug("Letter {} with value {} on rack tile {} is located to cell[{},{}]", cell.getLetter(), cell.getValue(),
+                    tile.getNumber(), cell.getRowNumber(), cell.getColumnNumber());
         });
     }
 
@@ -571,36 +573,35 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Finds and returns the words on the board
      */
-    private List<BoardWord> findWordsOnBoard(Long gameId, Integer playerNumber, Integer roundNumber,
-            VirtualCell[][] boardMatrix) {
-        final List<BoardWord> words = new ArrayList<>();
+    private List<ConstructedWord> findWordsOnBoard(Long gameId, Integer playerNumber, Integer roundNumber, VirtualCell[][] boardMatrix) {
+        final List<ConstructedWord> words = new ArrayList<>();
 
         // horizontal words
         IntStream.range(1, BOARD_ROW_SIZE + 1).forEach(rowNumber -> {
-            final BoardWord boardWord = new BoardWord(Direction.HORIZONTAL);
+            final ConstructedWord constructedWord = ConstructedWord.builder().direction(HORIZONTAL).build();
             IntStream.range(1, BOARD_COLUMN_SIZE + 1).forEach(columnNumber -> {
                 final VirtualCell cell = boardMatrix[rowNumber - 1][columnNumber - 1];
-                final BoardWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, cell,
-                        Direction.HORIZONTAL, boardWord);
+                final ConstructedWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, cell, HORIZONTAL,
+                        constructedWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
-                    log.debug("Horizontal word {} has been detected on game {} by player {}",
-                            detectedWord.getWordDefinition(), gameId, playerNumber);
+                    log.debug("Horizontal word {} has been detected on game {} by player {}", detectedWord.getWordBuilder(), gameId,
+                            playerNumber);
                 }
             });
         });
 
         // vertical words
         IntStream.range(1, BOARD_COLUMN_SIZE + 1).forEach(columnNumber -> {
-            final BoardWord boardWord = new BoardWord(Direction.VERTICAL);
+            final ConstructedWord constructedWord = ConstructedWord.builder().direction(VERTICAL).build();
             IntStream.range(1, BOARD_ROW_SIZE + 1).forEach(rowNumber -> {
                 final VirtualCell cell = boardMatrix[rowNumber - 1][columnNumber - 1];
-                final BoardWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, cell,
-                        Direction.VERTICAL, boardWord);
+                final ConstructedWord detectedWord = findWordsByDirection(gameId, playerNumber, roundNumber, cell, VERTICAL,
+                        constructedWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
-                    log.debug("Vertical word {} has been detected on game {} by player {}",
-                            detectedWord.getWordDefinition(), gameId, playerNumber);
+                    log.debug("Vertical word {} has been detected on game {} by player {}", detectedWord.getWordBuilder(), gameId,
+                            playerNumber);
                 }
             });
         });
@@ -611,98 +612,90 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Finds the words on the board by direction
      */
-    private BoardWord findWordsByDirection(Long gameId, Integer playerNumber, Integer roundNumber, VirtualCell cell,
-            Direction direction, BoardWord boardWord) {
+    private ConstructedWord findWordsByDirection(Long gameId, Integer playerNumber, Integer roundNumber, VirtualCell cell,
+                                                 Direction direction, ConstructedWord constructedWord) {
 
         if (cell.getLetter() != null) {
-            boardWord.getWordDefinition().append(cell.getLetter());
-            boardWord.getBoard().getCells().add(cell);
-            boardWord.setLinked(boardWord.isLinked() || cell.isCenter());
+            constructedWord.getWordBuilder().append(cell.getLetter());
+            constructedWord.getCells().add(cell);
+            constructedWord.setLinked(constructedWord.isLinked() || cell.isCenter());
             if (!cell.isSealed()) {
                 // letter is placed in the last round
                 cell.setLastPlayed(true);
                 cell.setRoundNumber(roundNumber);
             }
 
-            log.debug("A {} {} letter is spotted on [{},{}] on game {} by player {}",
-                    boardWord.isLinked() ? "new linked" : "new", direction, cell.getRowNumber(), cell.getColumnNumber(),
-                    gameId, playerNumber);
+            log.debug("A {} {} letter is spotted on [{},{}] on game {} by player {}", constructedWord.isLinked() ? "new linked" : "new",
+                    direction, cell.getRowNumber(), cell.getColumnNumber(), gameId, playerNumber);
         }
 
         boolean emptyCell = cell.getLetter() == null;
-        boolean horizontalLast = Direction.HORIZONTAL == direction && cell.getColumnNumber() == BOARD_COLUMN_SIZE;
-        boolean verticalLast = Direction.VERTICAL == direction && cell.getRowNumber() == BOARD_ROW_SIZE;
+        boolean horizontalLast = HORIZONTAL == direction && cell.getColumnNumber() == BOARD_COLUMN_SIZE;
+        boolean verticalLast = VERTICAL == direction && cell.getRowNumber() == BOARD_ROW_SIZE;
 
         // if the cell is not in the last row/column or not empty, then keep detecting the word
         if (!emptyCell && !horizontalLast && !verticalLast) {
             return null;
         }
 
-        if (boardWord.getWordDefinition().length() <= 1) {
-            resetBoardWordDefinition(boardWord);
+        if (constructedWord.getWordBuilder().length() <= 1) {
+            // char sequence is less than 2 letters to create a word, reset it
+            constructedWord.reset();
             return null;
         }
 
-        boolean existingWord = boardWord.getBoard().getCells().stream().allMatch(VirtualCell::isSealed);
+        boolean existingWord = constructedWord.getCells().stream().allMatch(VirtualCell::isSealed);
         if (existingWord) {
             // this is an existing word on the board, don't count it
-            resetBoardWordDefinition(boardWord);
+            constructedWord.reset();
             return null;
         }
 
-        if (boardWord.isLinked()) {
+        if (constructedWord.isLinked()) {
             // seal the cells if the word is a linked word
-            boardWord.getBoard().getCells().forEach(c -> c.setSealed(true));
+            constructedWord.getCells().forEach(c -> c.setSealed(true));
         }
 
-        final BoardWord detectedWord = new BoardWord(new VirtualBoard(boardWord.getBoard().getCells()),
-                boardWord.getWordDefinition(), direction, boardWord.isLinked());
+        // a word is found, build it
+        final ConstructedWord detectedWord = ConstructedWord.builder()
+                .cells(constructedWord.getCells())
+                .wordBuilder(constructedWord.getWordBuilder())
+                .direction(direction)
+                .linked(constructedWord.isLinked())
+                .build();
 
-        resetBoardWordDefinition(boardWord);
+        // a new word is detected, reset the last constructed word
+        constructedWord.reset();
 
         return detectedWord;
     }
 
-    /**
-     * Resets the last board word
-     */
-    private void resetBoardWordDefinition(BoardWord boardWord) {
-        // reset the word
-        boardWord.setBoard(new VirtualBoard(new ArrayList<>()));
-        boardWord.setWordDefinition(new StringBuilder());
-        boardWord.setDirection(null);
-    }
-
-    private void addWordDefinitions(List<BoardWord> newWords, Language language) {
-        newWords.stream().map(boardWord -> {
-            final DictionaryWord dictionaryWord = dictionaryService.getWord(boardWord.getWordDefinition().toString(),
-                    language);
-            boardWord.setDictionaryWord(dictionaryWord);
-            return boardWord;
+    private void addWordDefinitions(List<ConstructedWord> constructedWords, Language language) {
+        constructedWords.stream().map(constructedWord -> {
+            final DictionaryWord dictionaryWord = dictionaryService.getWord(constructedWord.getWordBuilder().toString(), language);
+            constructedWord.setDictionaryWord(dictionaryWord);
+            return constructedWord;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private void validateWordDefinitions(List<BoardWord> newWords, Language language) {
-        final List<BoardWord> invalidWords = newWords.stream()
+    private void hasValidWords(List<ConstructedWord> constructedWords, Language language) {
+        final List<ConstructedWord> invalidWords = constructedWords.stream()
                 .filter(word -> word.getDictionaryWord() == null)
                 .collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(invalidWords)) {
             final String commaSeperatedInvalidWords = String.join(",",
-                    invalidWords.stream().map(BoardWord::getWordDefinition).collect(Collectors.toList()));
+                    invalidWords.stream().map(ConstructedWord::getWordBuilder).collect(Collectors.toList()));
             log.debug("Word(s) {} are not found in {} dictionary", commaSeperatedInvalidWords, language);
-            throw new GameException(GameError.WORDS_ARE_NOT_FOUND,
-                    Arrays.asList(commaSeperatedInvalidWords, language.name()));
+            throw new GameException(GameError.WORDS_ARE_NOT_FOUND, Arrays.asList(commaSeperatedInvalidWords, language.name()));
         }
     }
 
     /**
      * Whether the words are linked to existing words
      */
-    private void hasValidLinks(List<BoardWord> newWords, VirtualCell[][] boardMatrix) {
-        final List<BoardWord> unlinkedWords = newWords.stream()
-                .filter(word -> !word.isLinked())
-                .collect(Collectors.toList());
+    private void hasValidLinks(List<ConstructedWord> constructedWords, VirtualCell[][] boardMatrix) {
+        final List<ConstructedWord> unlinkedWords = constructedWords.stream().filter(word -> !word.isLinked()).collect(Collectors.toList());
 
         if (unlinkedWords.isEmpty()) {
             return;
@@ -710,7 +703,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         int unlinkedWordCount = unlinkedWords.size();
         while (unlinkedWordCount > 0) {
-            final List<BoardWord> updatedUnlinkedWords = unlinkedWords.stream().map(word -> {
+            final List<ConstructedWord> updatedUnlinkedWords = unlinkedWords.stream().map(word -> {
                 return linkWord(word, boardMatrix);
             }).filter(word -> !word.isLinked()).collect(Collectors.toList());
 
@@ -724,7 +717,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 // since unlinked words count didn't change this means that trying one more time doesn't make any
                 // difference
                 final String commaSeperatedUnlinkedWords = String.join(",",
-                        unlinkedWords.stream().map(BoardWord::getWordDefinition).collect(Collectors.toList()));
+                        unlinkedWords.stream().map(ConstructedWord::getWordBuilder).collect(Collectors.toList()));
                 throw new GameException(GameError.WORDS_ARE_NOT_LINKED, Arrays.asList(commaSeperatedUnlinkedWords));
             }
         }
@@ -733,7 +726,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /**
      * Whether there are any words in the board with a single letter
      */
-    private void hasSingleLetterWords(VirtualBoard virtualBoard) {
+    private void hasNoSingleLetterWords(VirtualBoard virtualBoard) {
         // detect single word letter
         final List<String> singleLetterWords = virtualBoard.getCells()
                 .stream()
@@ -744,16 +737,15 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         if (!CollectionUtils.isEmpty(singleLetterWords)) {
             final String commaSeperatedSingleLetterWords = String.join(",", singleLetterWords);
             log.debug("Single letter word(s) {} are detected", commaSeperatedSingleLetterWords);
-            throw new GameException(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED,
-                    Arrays.asList(commaSeperatedSingleLetterWords));
+            throw new GameException(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED, Arrays.asList(commaSeperatedSingleLetterWords));
         }
     }
 
     /**
      * Link the new words to the existing words
      */
-    private BoardWord linkWord(BoardWord word, VirtualCell[][] boardMatrix) {
-        word.getBoard().getCells().forEach(cell -> {
+    private ConstructedWord linkWord(ConstructedWord word, VirtualCell[][] boardMatrix) {
+        word.getCells().forEach(cell -> {
             if (word.isLinked()) {
                 return;
             }
@@ -768,57 +760,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 word.setLinked(true);
 
                 // seal the cells if the word is a linked word
-                word.getBoard().getCells().forEach(c -> c.setSealed(true));
+                word.getCells().forEach(c -> c.setSealed(true));
             }
         });
         return word;
-    }
-
-    /**
-     * Calculate if there is a bonus score
-     */
-    private Integer calculateBonusScore(final VirtualRack virtualRack) {
-        final boolean allTilesSealed = virtualRack.getTiles().stream().allMatch(VirtualTile::isSealed);
-        // the player used all the tiles when the rack is full
-        if (allTilesSealed && virtualRack.getTiles().size() == RACK_SIZE) {
-            return BONUS_SCORE;
-        }
-
-        return 0;
-    }
-
-    private Integer calculateNewWordsScore(List<BoardWord> words) {
-        return words.stream().mapToInt(word -> {
-            final Integer wordScore = word.getBoard().getCells().stream().mapToInt(cell -> {
-                return !cell.isLastPlayed() ? cell.getValue() : cell.getLetterValueMultiplier() * cell.getValue();
-            }).sum();
-
-            final Integer wordScoreMultiplier = word.getBoard().getCells().stream().mapToInt(cell -> {
-                return !cell.isLastPlayed() ? 1 : cell.getWordScoreMultiplier();
-            }).reduce(1, Math::multiplyExact);
-
-            final Integer totalScore = wordScore * wordScoreMultiplier;
-            word.setScore(totalScore);
-            return totalScore;
-        }).sum();
-    }
-
-    private void saveWord(Long gameId, Long userId, Long actionId, Integer roundNumber, BoardWord boardWord) {
-        final Word word = new Word();
-        word.setActionId(actionId);
-        word.setGameId(gameId);
-        word.setUserId(userId);
-        word.setRoundNumber(roundNumber);
-        word.setScore(boardWord.getScore());
-        word.setWord(boardWord.getDictionaryWord().getWord().toUpperCase());
-        word.setDefinition(boardWord.getDictionaryWord().getDefinition());
-        wordService.save(word);
-    }
-
-    private void updatePlayerScore(Long gameId, Integer playerNumber, Integer newWordsScore) {
-        final Player player = playerService.getByPlayerNumber(gameId, playerNumber);
-        player.setScore(player.getScore() + newWordsScore);
-        playerService.save(player);
     }
 
 }

@@ -19,7 +19,7 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
 
     @Override
     @Transactional
-    public Action add(Game game, Long userId, ActionType actionType) {
+    public Action add(Game game, Long userId, Integer score, ActionType actionType) {
         final Action action = new Action();
         action.setGameId(game.getId());
         action.setUserId(userId);
@@ -29,6 +29,7 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
         action.setCurrentPlayerNumber(game.getCurrentPlayerNumber());
         action.setRoundNumber(game.getRoundNumber());
         action.setRemainingTileCount(game.getRemainingTileCount());
+        action.setScore(score);
         action.setCreatedDate(game.getLastUpdatedDate());
         action.setLastUpdatedDate(game.getLastUpdatedDate());
         return baseDao.save(action);

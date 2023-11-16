@@ -46,4 +46,7 @@ public class ActionDto extends AbstractDto implements Serializable {
     @JsonProperty("remainingTileCount")
     private Integer remainingTileCount;
 
+    @JsonProperty("score")
+    private Integer score;
+
 }

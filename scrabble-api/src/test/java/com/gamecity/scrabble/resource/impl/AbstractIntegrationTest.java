@@ -79,6 +79,7 @@ abstract class AbstractIntegrationTest extends JerseyTest {
 
         resourceConfig = new ResourceConfig();
         resourceConfig.property("contextConfig", applicationContext);
+        resourceConfig.register(applicationContext.getBean("actionResource"));
         resourceConfig.register(applicationContext.getBean("chatResource"));
         resourceConfig.register(applicationContext.getBean("gameResource"));
         resourceConfig.register(applicationContext.getBean("playerResource"));

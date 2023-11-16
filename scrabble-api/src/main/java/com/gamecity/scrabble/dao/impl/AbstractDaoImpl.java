@@ -56,6 +56,17 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
     }
 
     @Override
+    public List<T> saveAll(List<T> entities) {
+        final Date now = new Date();
+        entities.forEach(entity -> {
+            entity.setCreatedDate(entity.getId() == null ? now : entity.getCreatedDate());
+            entity.setLastUpdatedDate(now);
+        });
+        entities.forEach(entityManager::persist);
+        return entities;
+    }
+
+    @Override
     public void delete(Long id) {
         final T entity = get(id);
         entityManager.remove(entity);
@@ -84,6 +95,7 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
         return query.getResultList();
     }
 
+    @SuppressWarnings("unused")
     protected T getByNamedQuery(String querySql, List<Pair<String, Object>> paramPairs) {
         try {
             final Query query = createQueryWithParams(querySql, paramPairs);
@@ -104,6 +116,7 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
         return query;
     }
 
+    @SuppressWarnings("unused")
     protected <G> G findGenericTypeByNamedQuery(String querySql, List<Pair<String, Object>> paramPairs) {
         try {
             final Query query = createQueryWithParams(querySql, paramPairs);

@@ -46,12 +46,21 @@ public interface PlayerService extends BaseService<Player> {
     Player getByUserId(Long gameId, Long userId);
 
     /**
-     * Gets the {@link Player player} by <code>player number</code>
+     * Gets the {@link Player player} by <code>playerNumber</code>
      * 
      * @param gameId       <code>id</code> of the game
      * @param playerNumber <code>number</code> of the player
      * @return the player
      */
     Player getByPlayerNumber(Long gameId, Integer playerNumber);
+
+    /**
+     * Updates the <code>score</code> of a {@link Player player} by <code>playerNumber</code>
+     * 
+     * @param gameId       <code>id</code> of the game
+     * @param playerNumber <code>number</code> of the player
+     * @param score        <code>score</code> of the player
+     */
+    void updateScore(Long gameId, Integer playerNumber, Integer score);
 
 }

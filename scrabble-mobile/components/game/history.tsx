@@ -1,8 +1,8 @@
 import { AVPlaybackStatus, Audio } from 'expo-av';
 import moment from 'moment';
 import { ReactElement, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Trans, useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Avatar, Modal, Text } from 'react-native-paper';
 
 import { MessageBox } from '../layout/messageBox';
@@ -135,6 +135,8 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
       return getStandardActionMessage(t('game.history.action.leave'), action.lastUpdatedDate);
     } else if (action.type === 'START') {
       return getStandardActionMessage(t('game.history.action.start'), action.lastUpdatedDate);
+    } else if (action.type === 'BONUS_BINGO') {
+      return getBonusMessage(action);
     } else if (action.type === 'PLAY') {
       return getWordsMessage(action);
     } else if (action.type === 'SKIP') {
@@ -173,9 +175,18 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
     const actionMessage = actionWords.length === 1 ? 'game.history.action.played.word' : 'game.history.action.played.words';
     return (
       <Text style={styles.compositeAction}>
-        <Text style={styles.wordMessageText}>
-          {t(actionMessage)}
-        </Text>
+        <Trans
+          i18nKey={actionMessage}
+          values={{ score: action.score }}
+          parent={Text}
+          components={{
+            bold: (
+              <Text
+                style={styles.bonusScore}>
+              </Text>
+            )
+          }}
+          style={styles.wordMessageText} />
         {dictionaryWords}
         <Text
           variant='bodySmall'
@@ -186,11 +197,35 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
     );
   }
 
+  function getBonusMessage(action: Action): ReactElement {
+    return (
+      <Text style={styles.compositeAction}>
+        <Trans
+          i18nKey={'game.history.action.bonus.bingo'}
+          values={{ score: action.score }}
+          parent={Text}
+          components={{
+            bold: (
+              <Text
+                style={styles.bonusScore}>
+              </Text>
+            )
+          }}
+          style={styles.wordMessageText} />
+        <Text
+          variant='bodySmall'
+          style={styles.actionDate}>
+          {' [' + moment(action.lastUpdatedDate).format('HH:mm:ss') + ']'}
+        </Text>
+      </Text>
+    )
+  }
+
   function getDictionaryWord(word: Word): ReactElement {
     return (
       <Text
         key={'word_' + word.id}
-        onPress={() => setSelectedWord(word)}
+        onPress={() => onPressWord(word)}
         style={styles.wordText}>
         {' ' + word.word + '(' + word.score + ')'}
       </Text>
@@ -211,6 +246,10 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
         size={30}
         style={styles.avatar} />
     );
+  }
+
+  function onPressWord(word: Word): void {
+    setSelectedWord(word.definition ? word : null);
   }
 
   return (
@@ -287,7 +326,7 @@ const styles = StyleSheet.create({
   },
   wordText: {
     color: '#3c8dbc',
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'Gilroy-Regular',
     fontWeight: 'bold',
     textDecorationLine: 'underline',
@@ -297,4 +336,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Gilroy-Regular',
   },
+  bonusScore: {
+    fontWeight: 'bold',
+  }
 });

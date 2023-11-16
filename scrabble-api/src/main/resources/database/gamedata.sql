@@ -5,10 +5,6 @@ insert into users (username, email, password, preferred_language, enabled, accou
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (1, 'USER', 1, now(), now());
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (2, 'ADMIN', 1, now(), now());
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (2, 'USER', 1, now(), now());
--- pre-defined boards
-insert into boards (name, column_size, row_size, enabled, created_date, last_updated_date) values ('15x15', 15, 15, 1, now(), now());
-insert into boards (name, column_size, row_size, enabled, created_date, last_updated_date) values ('20x20', 20, 20, 1, now(), now());
-insert into boards (name, column_size, row_size, enabled, created_date, last_updated_date) values ('10x10', 10, 10, 1, now(), now());
 -- pre-defined bags
 insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('Turkish Tile Bag', 'tr', 98, 1, now(), now());
 insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('English Tile Bag', 'en', 98, 1, now(), now());
@@ -211,7 +207,7 @@ insert into cells (cell_number, row_number, column_number, color, letter_value_m
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (110, 8, 5, 'white', 1, 1, 1, 1, 1, 1, 0, now(), now());
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (111, 8, 6, 'white', 1, 1, 1, 1, 1, 1, 0, now(), now());
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (112, 8, 7, 'white', 1, 1, 1, 1, 1, 1, 0, now(), now());
-insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (113, 8, 8, 'orange', 1, 1, 1, 1, 1, 1, 1, now(), now());
+insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (113, 8, 8, 'orange', 1, 2, 1, 1, 1, 1, 1, now(), now());
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (114, 8, 9, 'white', 1, 1, 1, 1, 1, 1, 0, now(), now());
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (115, 8, 10, 'white', 1, 1, 1, 1, 1, 1, 0, now(), now());
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (116, 8, 11, 'white', 1, 1, 1, 1, 1, 1, 0, now(), now());

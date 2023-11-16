@@ -5,8 +5,6 @@ insert into users (username, email, password, preferred_language, enabled) value
 insert into user_roles (user_id, role, enabled) values (1, 'USER', 1);
 insert into user_roles (user_id, role, enabled) values (2, 'ADMIN', 1);
 insert into user_roles (user_id, role, enabled) values (2, 'USER', 1);
--- pre-defined boards
-insert into boards (name, column_size, row_size) values ('15x15', 15, 15);
 -- pre-defined bags
 insert into bags (name, language, tile_count) values ('English Tile Bag', 'en', 98);
 insert into bags (name, language, tile_count) values ('French Tile Bag', 'fr', 15);

@@ -58,6 +58,13 @@ class PlayerServiceImpl extends AbstractServiceImpl<Player, PlayerDao> implement
         return baseDao.getByPlayerNumber(gameId, playerNumber);
     }
 
+    @Override
+    public void updateScore(Long gameId, Integer playerNumber, Integer newWordsScore) {
+        final Player player = getByPlayerNumber(gameId, playerNumber);
+        player.setScore(player.getScore() + newWordsScore);
+        save(player);
+    }
+
     // ------------------------------------ private methods ------------------------------------ //
 
     private Player populateUsername(Player player) {

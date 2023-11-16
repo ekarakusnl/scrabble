@@ -7,16 +7,22 @@ import javax.persistence.Table;
 
 import com.gamecity.scrabble.Constants;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * Word represents the word played by a {@link Player player} in a {@link Game game}
  * 
  * @author ekarakus
  */
+@Builder
 @Data
 @EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "Word")
 @Table(name = "words")
 @NamedQuery(name = Constants.NamedQuery.getWords, query = "Select w from Word w where w.gameId = :gameId")

@@ -35,6 +35,14 @@ public interface BaseDao<T> {
     T save(T entity);
 
     /**
+     * Saves entities
+     * 
+     * @param entities entities to be saved
+     * @return the saved entities
+     */
+    List<T> saveAll(List<T> entities);
+
+    /**
      * Deletes an entity
      * 
      * @param id <code>id</code> of the the

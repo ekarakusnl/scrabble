@@ -38,7 +38,12 @@ public enum ActionType {
     SKIP,
 
     /**
-     * The turn is skipped due to pkay duration timeout
+     * The player used all tiles (7) in the rack to create a single word
+     */
+    BONUS_BINGO,
+
+    /**
+     * The turn is skipped due to play duration timeout
      */
     TIMEOUT,
 

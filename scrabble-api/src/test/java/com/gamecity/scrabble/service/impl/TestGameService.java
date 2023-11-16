@@ -81,6 +81,9 @@ class TestGameService extends AbstractServiceTest {
     @Mock
     private ActionService actionService;
 
+    @Mock
+    private ScoreServiceImpl scoreService;
+
     private Game game;
     private List<VirtualTile> tiles;
     private VirtualCell[][] boardMatrix;
@@ -192,8 +195,7 @@ class TestGameService extends AbstractServiceTest {
 
         final Game game = gameService.save(sampleGame);
 
-        verify(playerService, times(1)).add(sampleGame.getId(), sampleGame.getOwnerId(),
-                sampleGame.getActivePlayerCount());
+        verify(playerService, times(1)).add(sampleGame.getId(), sampleGame.getOwnerId(), sampleGame.getActivePlayerCount());
 
         assertNotNull(game.getId());
         assertEquals(GameStatus.WAITING, game.getStatus());
@@ -484,41 +486,38 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_center_is_not_empty() {
         prepareGame();
-        preparePlayer(0);
         prepareBoard();
         // the word WEAK is using the center
         prepareUsedRackByRow(8, 7, "WEAK");
         prepareRepository();
+        prepareCalculateScore();
 
         // the word is valid
         final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
         when(dictionaryService.getWord(any(String.class), any(Language.class))).thenReturn(weakWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
-        // the word HEAL is found in the dictionary
+        // the word WEAK is found in the dictionary
         verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(22);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 22);
 
-        final Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(22);
-        word.setWord("WEAK");
+        final Word weak = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(22)
+                .word("WEAK")
+                .build();
 
-        // the word WEAK is logged in the words
-        verify(wordService, times(1)).save(word);
+        // the word is logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(weak));
     }
 
     @Test
@@ -543,12 +542,13 @@ class TestGameService extends AbstractServiceTest {
     void test_play_new_word_not_linked_to_existing_words() {
         prepareGame();
         prepareBoard();
+        // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
         // the word HEAL not linked to an existing word
         prepareUsedRackByRow(3, 7, "HEAL");
         prepareRepository();
 
-        // the words are valid
+        // the word is valid
         final DictionaryWord healWord = DictionaryWord.builder().word("HEAL").build();
         when(dictionaryService.getWord(eq("HEAL"), any(Language.class))).thenReturn(healWord);
 
@@ -563,13 +563,13 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_new_horizontal_and_vertical_words() {
         prepareGame();
-        preparePlayer(0);
         prepareBoard();
         // create the word WEAK
         prepareUsedRackByRow(8, 7, "WEAK");
         // create the word WAR
         prepareUsedRackByColumn(9, 7, "AR");
         prepareRepository();
+        prepareCalculateScore();
 
         // the words are valid
         final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
@@ -578,7 +578,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.getWord(eq("WAR"), any(Language.class))).thenReturn(warWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -586,40 +586,34 @@ class TestGameService extends AbstractServiceTest {
         verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
         verify(dictionaryService, times(1)).getWord("WAR", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(29);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 29);
 
-        Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(22);
-        word.setWord("WEAK");
+        final Word weak = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(22)
+                .word("WEAK")
+                .build();
 
-        // the word WEAK is logged in the words
-        verify(wordService, times(1)).save(word);
+        final Word war = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(7)
+                .word("WAR")
+                .build();
 
-        word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(7);
-        word.setWord("WAR");
-
-        // the word WAR is logged in the words
-        verify(wordService, times(1)).save(word);
+        // the words are logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(weak, war));
     }
 
     @Test
     void test_play_new_words_linked_to_existing_words() {
         prepareGame();
-        preparePlayer(11);
         prepareBoard();
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
@@ -630,6 +624,7 @@ class TestGameService extends AbstractServiceTest {
         // the word W(E) is linked to the new ROLE word
         prepareUsedRackByColumn(5, 10, "W");
         prepareRepository();
+        prepareCalculateScore();
 
         // the words are valid
         final DictionaryWord rawWord = DictionaryWord.builder().word("RAW").build();
@@ -640,7 +635,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.getWord(eq("WE"), any(Language.class))).thenReturn(weWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -649,45 +644,38 @@ class TestGameService extends AbstractServiceTest {
         verify(dictionaryService, times(1)).getWord("ROLE", Language.en);
         verify(dictionaryService, times(1)).getWord("WE", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(31);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 20);
 
-        Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(7);
-        word.setWord("RAW");
+        final Word raw = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(7)
+                .word("RAW")
+                .build();
 
-        // the word RAW is logged in the words
-        verify(wordService, times(1)).save(word);
+        final Word role = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(6)
+                .word("ROLE")
+                .build();
 
-        word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(6);
-        word.setWord("ROLE");
+        final Word we = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(7)
+                .word("WE")
+                .build();
 
-        // the word ROLE is logged in the words
-        verify(wordService, times(1)).save(word);
-
-        word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(7);
-        word.setWord("WE");
-
-        // the word WE is logged in the words
-        verify(wordService, times(1)).save(word);
+        // the words are logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(role, raw, we));
     }
 
     @Test
@@ -699,7 +687,7 @@ class TestGameService extends AbstractServiceTest {
         prepareUsedRackByRow(9, 1, "G");
         prepareRepository();
 
-        // the words are not valid
+        // the word is not valid
         when(dictionaryService.getWord(eq("WEAKENIN"), any(Language.class))).thenReturn(null);
 
         try {
@@ -714,12 +702,15 @@ class TestGameService extends AbstractServiceTest {
     void test_play_word_detection_ends_in_bottom() {
         prepareGame();
         prepareBoard();
+        // the word WEAK is an existing word in the board
         prepareExistingWordByColumn(8, 8, "WEAK");
+        // the extension ENIN is linked to the WEAK word
         prepareUsedRackByColumn(12, 8, "ENIN");
+        // the extension G is added to the next cell in the next row
         prepareUsedRackByColumn(1, 9, "G");
         prepareRepository();
 
-        // the words are not valid
+        // the word is not valid
         when(dictionaryService.getWord(eq("WEAKENIN"), any(Language.class))).thenReturn(null);
 
         try {
@@ -733,49 +724,45 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_extend_an_existing_word() {
         prepareGame();
-        preparePlayer(11);
         prepareBoard();
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
         // the word (WEAK)ENING will extend the existing WEAK word
         prepareUsedRackByRow(8, 11, "ENING");
         prepareRepository();
+        prepareCalculateScore();
 
-        // the words are valid
+        // the word is valid
         final DictionaryWord weakeningWord = DictionaryWord.builder().word("WEAKENING").build();
         when(dictionaryService.getWord(eq("WEAKENING"), any(Language.class))).thenReturn(weakeningWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
-        // the words are found in the dictionary
+        // the word is found in the dictionary
         verify(dictionaryService, times(1)).getWord("WEAKENING", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(65);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 54);
 
-        Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(54);
-        word.setWord("WEAKENING");
+        final Word weakening = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(54)
+                .word("WEAKENING")
+                .build();
 
-        // the word WE is logged in the words
-        verify(wordService, times(1)).save(word);
+        // the word is logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(weakening));
     }
 
     @Test
     void test_play_use_a_letter_from_an_extended_word() {
         prepareGame();
-        preparePlayer(11);
         prepareBoard();
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
@@ -784,6 +771,7 @@ class TestGameService extends AbstractServiceTest {
         // the word (G)OAL will be linked to the WEAKENING word
         prepareUsedRackByColumn(9, 15, "OAL");
         prepareRepository();
+        prepareCalculateScore();
 
         // the words are valid
         final DictionaryWord weakeningWord = DictionaryWord.builder().word("WEAKENING").build();
@@ -792,7 +780,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.getWord(eq("GOAL"), any(Language.class))).thenReturn(goalWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -800,76 +788,68 @@ class TestGameService extends AbstractServiceTest {
         verify(dictionaryService, times(1)).getWord("WEAKENING", Language.en);
         verify(dictionaryService, times(1)).getWord("GOAL", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(80);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 69);
 
-        // the word WEAKENING is logged in the words
-        Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(54);
-        word.setWord("WEAKENING");
+        final Word weakening = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(54)
+                .word("WEAKENING")
+                .build();
 
-        verify(wordService, times(1)).save(word);
+        final Word goal = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(15)
+                .word("GOAL")
+                .build();
 
-        // the word WEAKENING is logged in the words
-        word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(15);
-        word.setWord("GOAL");
-
-        verify(wordService, times(1)).save(word);
+        // the words are logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(weakening, goal));
     }
 
     @Test
     void test_play_the_same_word_more_than_once() {
         prepareGame();
-        preparePlayer(11);
         prepareBoard();
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
-        // the word (G)OAL will be linked to the WEAKENING word
+        // the word (W)EAK will be linked to the W letter
         prepareUsedRackByColumn(9, 7, "EAK");
         prepareRepository();
+        prepareCalculateScore();
 
-        // the words are valid
+        // the word is valid
         final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
         when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the word is found in the dictionary
         verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(23);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 12);
 
-        // the word WEAKENING is logged in the words
-        Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(12);
-        word.setWord("WEAK");
+        final Word weak = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(12)
+                .word("WEAK")
+                .build();
 
-        verify(wordService, times(1)).save(word);
+        // the word is logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(weak));
     }
 
     @Test
@@ -895,7 +875,7 @@ class TestGameService extends AbstractServiceTest {
         prepareUsedRackByColumn(1, 1, "A");
         prepareRepository();
 
-        // the words are valid
+        // the word is valid
         final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
         when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
 
@@ -910,13 +890,13 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_multiplier_cell_value_only_used_in_first_word() {
         prepareGame();
-        preparePlayer(22);
         prepareBoard();
+        prepareCalculateScore();
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
         // extend the word WEAK(ER)
         prepareUsedRackByRow(8, 11, "ER");
-        // create the word WAR
+        // create the word (E)RRAT
         prepareUsedRackByColumn(9, 8, "RRAT");
         prepareRepository();
 
@@ -927,7 +907,7 @@ class TestGameService extends AbstractServiceTest {
         when(dictionaryService.getWord(eq("ERRAT"), any(Language.class))).thenReturn(erratWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
@@ -935,74 +915,117 @@ class TestGameService extends AbstractServiceTest {
         verify(dictionaryService, times(1)).getWord("WEAKER", Language.en);
         verify(dictionaryService, times(1)).getWord("ERRAT", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(42);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 20);
 
-        Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(14);
-        word.setWord("WEAKER");
+        final Word weaker = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(14)
+                .word("WEAKER")
+                .build();
 
-        // the word WEAKER is logged in the words
-        verify(wordService, times(1)).save(word);
+        final Word errat = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(6)
+                .word("ERRAT")
+                .build();
 
-        word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(6);
-        word.setWord("ERRAT");
-
-        // the word ERRAT is logged in the words
-        verify(wordService, times(1)).save(word);
+        // the words are logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(weaker, errat));
     }
 
     @Test
-    void test_play_all_tiles_to_get_bonus_score() {
+    void test_play_all_tiles_on_different_words_gets_no_bonus_score() {
         prepareGame();
-        preparePlayer(0);
+        prepareBoard();
+        // create the word PREP
+        prepareUsedRackByRow(8, 7, "PREP");
+        // create the word (R)EPO
+        prepareUsedRackByColumn(9, 8, "EPO");
+        prepareRepository();
+        prepareCalculateScore();
+
+        // the words are valid
+        final DictionaryWord prepWord = DictionaryWord.builder().word("PREP").build();
+        when(dictionaryService.getWord(eq("PREP"), any(Language.class))).thenReturn(prepWord);
+        final DictionaryWord repoWord = DictionaryWord.builder().word("REPO").build();
+        when(dictionaryService.getWord(eq("REPO"), any(Language.class))).thenReturn(repoWord);
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
+
+        // the words are found in the dictionary
+        verify(dictionaryService, times(1)).getWord("PREP", Language.en);
+        verify(dictionaryService, times(1)).getWord("REPO", Language.en);
+
+        // the word score is added to the player score
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 28);
+
+        final Word prep = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(16)
+                .word("PREP")
+                .build();
+
+        final Word repo = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(12)
+                .word("REPO")
+                .build();
+
+        // the words are logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(prep, repo));
+    }
+
+    @Test
+    void test_play_all_tiles_in_one_word_gets_bonus_score() {
+        prepareGame();
         prepareBoard();
         // create the word PREPARE
         prepareUsedRackByRow(8, 7, "PREPARE");
         prepareRepository();
+        prepareCalculateScore();
 
         // the word is valid
         final DictionaryWord prepareWord = DictionaryWord.builder().word("PREPARE").build();
         when(dictionaryService.getWord(eq("PREPARE"), any(Language.class))).thenReturn(prepareWord);
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(false, tiles), ActionType.PLAY);
 
         // the word is found in the dictionary
         verify(dictionaryService, times(1)).getWord("PREPARE", Language.en);
 
-        final Player updatedPlayer = new Player();
-        updatedPlayer.setPlayerNumber(1);
-        updatedPlayer.setScore(74);
-
         // the word score is added to the player score
-        verify(playerService, times(1)).save(updatedPlayer);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 74);
 
-        Word word = new Word();
-        word.setActionId(DEFAULT_ACTION_ID);
-        word.setGameId(DEFAULT_GAME_ID);
-        word.setUserId(DEFAULT_USER_ID);
-        word.setRoundNumber(1);
-        word.setScore(24);
-        word.setWord("PREPARE");
+        final Word prepare = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(24)
+                .word("PREPARE")
+                .build();
 
-        // the word PREPARE is logged in the words
-        verify(wordService, times(1)).save(word);
+        // the word is logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(prepare));
     }
 
     private void prepareGame() {
@@ -1018,15 +1041,6 @@ class TestGameService extends AbstractServiceTest {
         when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
             final Player player = new Player();
             player.setPlayerNumber(1);
-            return player;
-        });
-    }
-
-    private void preparePlayer(int score) {
-        when(playerService.getByPlayerNumber(eq(DEFAULT_GAME_ID), eq(1))).thenAnswer(invocation -> {
-            final Player player = new Player();
-            player.setPlayerNumber(1);
-            player.setScore(score);
             return player;
         });
     }
@@ -1072,8 +1086,7 @@ class TestGameService extends AbstractServiceTest {
         for (char letter : word.toCharArray()) {
             boardMatrix[startingRow - 1][columnNumber - 1].setLetter(String.valueOf(letter).toUpperCase());
             boardMatrix[startingRow - 1][columnNumber - 1].setSealed(true);
-            boardMatrix[startingRow - 1][columnNumber - 1]
-                    .setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
+            boardMatrix[startingRow - 1][columnNumber - 1].setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
             columnNumber = columnNumber + 1;
         }
     }
@@ -1083,8 +1096,7 @@ class TestGameService extends AbstractServiceTest {
         for (char letter : word.toCharArray()) {
             boardMatrix[rowNumber - 1][startingColumn - 1].setLetter(String.valueOf(letter).toUpperCase());
             boardMatrix[rowNumber - 1][startingColumn - 1].setSealed(true);
-            boardMatrix[rowNumber - 1][startingColumn - 1]
-                    .setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
+            boardMatrix[rowNumber - 1][startingColumn - 1].setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
             rowNumber = rowNumber + 1;
         }
     }
@@ -1118,12 +1130,16 @@ class TestGameService extends AbstractServiceTest {
         when(virtualRackService.getRack(eq(DEFAULT_GAME_ID), eq(1), eq(1))).thenReturn(new VirtualRack(false, tiles));
     }
 
+    private void prepareCalculateScore() {
+        when(scoreService.calculateConstructedWordScore(any())).thenCallRealMethod();
+        when(scoreService.calculateBonuses(any(), any())).thenCallRealMethod();
+    }
+
     private Integer getLetterValueMultiplier(Integer cellNumber) {
         if (Arrays.asList(21, 25, 77, 81, 85, 89, 137, 141, 145, 149, 201, 205).contains(cellNumber)) {
             return 3;
         } else if (Arrays
-                .asList(4, 12, 37, 39, 46, 53, 60, 93, 97, 99, 103, 109, 117, 123, 127, 129, 133, 166, 173, 180, 187,
-                        189, 214, 222)
+                .asList(4, 12, 37, 39, 46, 53, 60, 93, 97, 99, 103, 109, 117, 123, 127, 129, 133, 166, 173, 180, 187, 189, 214, 222)
                 .contains(cellNumber)) {
             return 2;
         } else {
@@ -1134,8 +1150,7 @@ class TestGameService extends AbstractServiceTest {
     private Integer getWordScoreMultiplier(Integer cellNumber) {
         if (Arrays.asList(1, 8, 15, 106, 120, 211, 218, 225).contains(cellNumber)) {
             return 3;
-        } else if (Arrays.asList(17, 29, 33, 43, 49, 57, 65, 71, 113, 155, 161, 169, 177, 183, 193, 197, 209)
-                .contains(cellNumber)) {
+        } else if (Arrays.asList(17, 29, 33, 43, 49, 57, 65, 71, 113, 155, 161, 169, 177, 183, 193, 197, 209).contains(cellNumber)) {
             return 2;
         } else {
             return 1;

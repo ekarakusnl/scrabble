@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.ws.rs.client.Entity;
@@ -16,14 +19,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
 import com.gamecity.scrabble.Constants;
+import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.GameStatus;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.model.Mapper;
+import com.gamecity.scrabble.model.rest.ActionDto;
 import com.gamecity.scrabble.model.rest.ExceptionDto;
 import com.gamecity.scrabble.model.rest.GameDto;
 import com.gamecity.scrabble.model.rest.PlayerDto;
@@ -37,6 +41,37 @@ import com.google.common.io.Resources;
 
 @SuppressWarnings("unchecked")
 class GameResourceIT extends AbstractIntegrationTest {
+
+    private static final Map<String, Tile> TILE_MAP = new HashMap<>();
+
+    static {
+        TILE_MAP.put("A", Tile.builder().letter("A").count(9).value(1).build());
+        TILE_MAP.put("B", Tile.builder().letter("B").count(2).value(3).build());
+        TILE_MAP.put("C", Tile.builder().letter("C").count(2).value(3).build());
+        TILE_MAP.put("D", Tile.builder().letter("D").count(4).value(2).build());
+        TILE_MAP.put("E", Tile.builder().letter("E").count(12).value(1).build());
+        TILE_MAP.put("F", Tile.builder().letter("F").count(2).value(4).build());
+        TILE_MAP.put("G", Tile.builder().letter("G").count(3).value(2).build());
+        TILE_MAP.put("H", Tile.builder().letter("H").count(2).value(4).build());
+        TILE_MAP.put("I", Tile.builder().letter("I").count(9).value(1).build());
+        TILE_MAP.put("J", Tile.builder().letter("J").count(1).value(8).build());
+        TILE_MAP.put("K", Tile.builder().letter("K").count(1).value(5).build());
+        TILE_MAP.put("L", Tile.builder().letter("L").count(4).value(1).build());
+        TILE_MAP.put("M", Tile.builder().letter("M").count(2).value(3).build());
+        TILE_MAP.put("N", Tile.builder().letter("N").count(6).value(1).build());
+        TILE_MAP.put("O", Tile.builder().letter("O").count(8).value(1).build());
+        TILE_MAP.put("P", Tile.builder().letter("P").count(2).value(3).build());
+        TILE_MAP.put("Q", Tile.builder().letter("Q").count(1).value(10).build());
+        TILE_MAP.put("R", Tile.builder().letter("R").count(6).value(1).build());
+        TILE_MAP.put("S", Tile.builder().letter("S").count(4).value(1).build());
+        TILE_MAP.put("T", Tile.builder().letter("T").count(6).value(1).build());
+        TILE_MAP.put("U", Tile.builder().letter("U").count(4).value(1).build());
+        TILE_MAP.put("V", Tile.builder().letter("V").count(2).value(4).build());
+        TILE_MAP.put("W", Tile.builder().letter("W").count(2).value(4).build());
+        TILE_MAP.put("X", Tile.builder().letter("X").count(1).value(8).build());
+        TILE_MAP.put("Y", Tile.builder().letter("Y").count(2).value(4).build());
+        TILE_MAP.put("Z", Tile.builder().letter("Z").count(1).value(10).build());
+    }
 
     @Test
     void test_create_game() throws IOException {
@@ -74,8 +109,7 @@ class GameResourceIT extends AbstractIntegrationTest {
                 .put(Entity.entity(createdGame, MediaType.APPLICATION_JSON));
 
         if (Status.OK.getStatusCode() != updateGameResponse.getStatus()) {
-            assertEquals(Status.OK.getStatusCode(), updateGameResponse.getStatus(),
-                    updateGameResponse.readEntity(String.class));
+            assertEquals(Status.OK.getStatusCode(), updateGameResponse.getStatus(), updateGameResponse.readEntity(String.class));
         }
 
         assertNotNull(updateGameResponse.getHeaderString(HttpHeaders.ETAG));
@@ -126,8 +160,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         final Response leaveGameResponse = target("/games/" + game.getId() + "/users/2").request().delete();
 
         if (Status.OK.getStatusCode() != leaveGameResponse.getStatus()) {
-            assertEquals(Status.OK.getStatusCode(), leaveGameResponse.getStatus(),
-                    leaveGameResponse.readEntity(String.class));
+            assertEquals(Status.OK.getStatusCode(), leaveGameResponse.getStatus(), leaveGameResponse.readEntity(String.class));
         }
 
         final GameDto leftGame = leaveGameResponse.readEntity(GameDto.class);
@@ -157,8 +190,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(1, startedGame.getCurrentPlayerNumber());
         assertEquals(GameStatus.IN_PROGRESS.name(), startedGame.getStatus());
 
-        final VirtualBoardDto virtualBoard = getVirtualBoard(game.getId(), startedGame.getVersion(),
-                game.getExpectedPlayerCount());
+        final VirtualBoardDto virtualBoard = getVirtualBoard(game.getId(), startedGame.getVersion(), game.getExpectedPlayerCount());
 
         assertNotNull(virtualBoard);
         assertEquals(225, virtualBoard.getCells().size());
@@ -167,8 +199,7 @@ class GameResourceIT extends AbstractIntegrationTest {
             assertNull(cell.getRoundNumber());
         });
 
-        final VirtualRackDto virtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                startedGame.getRoundNumber());
+        final VirtualRackDto virtualRack = getVirtualRack(game.getId(), game.getOwnerId(), startedGame.getRoundNumber());
 
         assertNotNull(virtualRack);
 
@@ -187,36 +218,16 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 1 player 1
 
-        List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
+        VirtualRackDto rack = updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(),
+                startedGame.getRoundNumber(), "WEAKOLE".toCharArray());
 
-        letterValuePairs.add(Pair.of("W", 4));
-        letterValuePairs.add(Pair.of("E", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("K", 5));
-        letterValuePairs.add(Pair.of("O", 1));
-        letterValuePairs.add(Pair.of("L", 1));
-        letterValuePairs.add(Pair.of("E", 1));
+        // WEAK
+        setRackTile(rack, 1, 8, 7, true);
+        setRackTile(rack, 2, 8, 8, true);
+        setRackTile(rack, 3, 8, 9, true);
+        setRackTile(rack, 4, 8, 10, true);
 
-        VirtualRackDto virtualRack = updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(),
-                startedGame.getRoundNumber(), letterValuePairs);
-
-        virtualRack.getTiles().get(0).setRowNumber(8);
-        virtualRack.getTiles().get(0).setColumnNumber(7);
-        virtualRack.getTiles().get(0).setSealed(true);
-
-        virtualRack.getTiles().get(1).setRowNumber(8);
-        virtualRack.getTiles().get(1).setColumnNumber(8);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(8);
-        virtualRack.getTiles().get(2).setColumnNumber(9);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(8);
-        virtualRack.getTiles().get(3).setColumnNumber(10);
-        virtualRack.getTiles().get(3).setSealed(true);
-
-        GameDto playedGame = playWord(game.getId(), game.getOwnerId(), virtualRack);
+        GameDto playedGame = playWord(game.getId(), game.getOwnerId(), rack);
 
         assertNotNull(playedGame);
         assertEquals(4, playedGame.getVersion());
@@ -226,82 +237,35 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(11, players.get(0).getScore());
         assertEquals(0, players.get(1).getScore());
 
-        VirtualRackDto updatedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                playedGame.getRoundNumber());
+        VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber());
 
-        updatedVirtualRack.getTiles().stream().forEach(tile -> assertEquals(1, tile.getRoundNumber()));
+        assertTrue(updatedRack.getTiles().stream().allMatch(tile -> tile.getRoundNumber().equals(1)));
+        assertTrue(updatedRack.getTiles().subList(0, 4).stream().allMatch(VirtualTileDto::isSealed));
+        assertTrue(updatedRack.getTiles().subList(4, 7).stream().noneMatch(VirtualTileDto::isSealed));
 
-        assertTrue(updatedVirtualRack.getTiles().get(0).isSealed());
-        assertTrue(updatedVirtualRack.getTiles().get(1).isSealed());
-        assertTrue(updatedVirtualRack.getTiles().get(2).isSealed());
-        assertTrue(updatedVirtualRack.getTiles().get(3).isSealed());
-        assertFalse(updatedVirtualRack.getTiles().get(4).isSealed());
-        assertFalse(updatedVirtualRack.getTiles().get(5).isSealed());
-        assertFalse(updatedVirtualRack.getTiles().get(6).isSealed());
+        VirtualBoardDto board = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
 
-        VirtualBoardDto virtualBoard = getVirtualBoard(game.getId(), playedGame.getVersion(),
-                game.getExpectedPlayerCount());
+        assertEquals("WEAK", board.getCells().subList(111, 115).stream().map(VirtualCellDto::getLetter).collect(Collectors.joining()));
+        assertTrue(board.getCells().subList(111, 115).stream().allMatch(cell -> cell.getRoundNumber().equals(1)));
+        assertTrue(board.getCells().subList(111, 115).stream().allMatch(VirtualCellDto::isLastPlayed));
 
-        assertEquals("W", virtualBoard.getCells().get(111).getLetter());
-        assertEquals("E", virtualBoard.getCells().get(112).getLetter());
-        assertEquals("A", virtualBoard.getCells().get(113).getLetter());
-        assertEquals("K", virtualBoard.getCells().get(114).getLetter());
+        VirtualRackDto refreshedRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber() + 1);
 
-        assertEquals(1, virtualBoard.getCells().get(111).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(112).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(113).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(114).getRoundNumber());
-
-        assertTrue(virtualBoard.getCells().get(111).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(112).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(113).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(114).isLastPlayed());
-
-        VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                playedGame.getRoundNumber() + 1);
-
-        assertEquals(2, refreshedVirtualRack.getTiles().get(0).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(1).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(2).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(3).getRoundNumber());
-        assertEquals(1, refreshedVirtualRack.getTiles().get(4).getRoundNumber());
-        assertEquals(1, refreshedVirtualRack.getTiles().get(5).getRoundNumber());
-        assertEquals(1, refreshedVirtualRack.getTiles().get(6).getRoundNumber());
-
-        refreshedVirtualRack.getTiles().stream().forEach(tile -> assertFalse(tile.isSealed()));
+        assertTrue(refreshedRack.getTiles().subList(0, 4).stream().allMatch(tile -> tile.getRoundNumber().equals(2)));
+        assertTrue(refreshedRack.getTiles().subList(4, 7).stream().allMatch(tile -> tile.getRoundNumber().equals(1)));
+        assertTrue(refreshedRack.getTiles().stream().noneMatch(VirtualTileDto::isSealed));
 
         // round 1 player 2
 
-        letterValuePairs = new ArrayList<>();
+        rack = updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(), "RALYERE".toCharArray());
 
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("L", 1));
-        letterValuePairs.add(Pair.of("Y", 4));
-        letterValuePairs.add(Pair.of("E", 1));
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("E", 1));
+        // RA(W)LY
+        setRackTile(rack, 1, 6, 7, true);
+        setRackTile(rack, 2, 7, 7, true);
+        setRackTile(rack, 3, 9, 7, true);
+        setRackTile(rack, 4, 10, 7, true);
 
-        virtualRack = updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(),
-                letterValuePairs);
-
-        virtualRack.getTiles().get(0).setRowNumber(6);
-        virtualRack.getTiles().get(0).setColumnNumber(7);
-        virtualRack.getTiles().get(0).setSealed(true);
-
-        virtualRack.getTiles().get(1).setRowNumber(7);
-        virtualRack.getTiles().get(1).setColumnNumber(7);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(9);
-        virtualRack.getTiles().get(2).setColumnNumber(7);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(10);
-        virtualRack.getTiles().get(3).setColumnNumber(7);
-        virtualRack.getTiles().get(3).setSealed(true);
-
-        playedGame = playWord(game.getId(), 2L, virtualRack);
+        playedGame = playWord(game.getId(), 2L, rack);
 
         assertNotNull(playedGame);
         assertEquals(5, playedGame.getVersion());
@@ -311,71 +275,41 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(11, players.get(0).getScore());
         assertEquals(13, players.get(1).getScore());
 
-        updatedVirtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() - 1);
+        updatedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() - 1);
 
-        updatedVirtualRack.getTiles().stream().forEach(tile -> assertEquals(1, tile.getRoundNumber()));
+        assertTrue(updatedRack.getTiles().stream().allMatch(tile -> tile.getRoundNumber().equals(1)));
+        assertTrue(updatedRack.getTiles().subList(0, 4).stream().allMatch(VirtualTileDto::isSealed));
+        assertTrue(updatedRack.getTiles().subList(4, 7).stream().noneMatch(VirtualTileDto::isSealed));
 
-        assertTrue(updatedVirtualRack.getTiles().get(0).isSealed());
-        assertTrue(updatedVirtualRack.getTiles().get(1).isSealed());
-        assertTrue(updatedVirtualRack.getTiles().get(2).isSealed());
-        assertTrue(updatedVirtualRack.getTiles().get(3).isSealed());
-        assertFalse(updatedVirtualRack.getTiles().get(4).isSealed());
-        assertFalse(updatedVirtualRack.getTiles().get(5).isSealed());
-        assertFalse(updatedVirtualRack.getTiles().get(6).isSealed());
+        board = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
 
-        virtualBoard = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
+        List<VirtualCellDto> verticalCells = board.getCells()
+                .stream()
+                .filter(cell -> cell.getColumnNumber().equals(7) && cell.getLetter() != null)
+                .collect(Collectors.toList());
 
-        assertEquals("R", virtualBoard.getCells().get(81).getLetter());
-        assertEquals("A", virtualBoard.getCells().get(96).getLetter());
-        assertEquals("W", virtualBoard.getCells().get(111).getLetter());
-        assertEquals("L", virtualBoard.getCells().get(126).getLetter());
-        assertEquals("Y", virtualBoard.getCells().get(141).getLetter());
+        assertEquals("RAWLY", verticalCells.stream().map(VirtualCellDto::getLetter).collect(Collectors.joining()));
+        assertTrue(verticalCells.stream().allMatch(tile -> tile.getRoundNumber().equals(1)));
+        assertTrue(verticalCells.stream().allMatch(VirtualCellDto::isLastPlayed));
+        assertTrue(board.getCells().subList(112, 115).stream().noneMatch(VirtualCellDto::isLastPlayed));
 
-        assertEquals(1, virtualBoard.getCells().get(81).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(96).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(111).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(126).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(141).getRoundNumber());
+        refreshedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
 
-        assertTrue(virtualBoard.getCells().get(81).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(96).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(111).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(126).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(141).isLastPlayed());
+        assertTrue(refreshedRack.getTiles().subList(0, 4).stream().allMatch(tile -> tile.getRoundNumber().equals(2)));
+        assertTrue(refreshedRack.getTiles().subList(4, 7).stream().allMatch(tile -> tile.getRoundNumber().equals(1)));
 
-        assertFalse(virtualBoard.getCells().get(112).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(113).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(114).isLastPlayed());
-
-        refreshedVirtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
-
-        assertEquals(2, refreshedVirtualRack.getTiles().get(0).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(1).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(2).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(3).getRoundNumber());
-        assertEquals(1, refreshedVirtualRack.getTiles().get(4).getRoundNumber());
-        assertEquals(1, refreshedVirtualRack.getTiles().get(5).getRoundNumber());
-        assertEquals(1, refreshedVirtualRack.getTiles().get(6).getRoundNumber());
-
-        refreshedVirtualRack.getTiles().stream().forEach(tile -> assertFalse(tile.isSealed()));
+        refreshedRack.getTiles().stream().forEach(tile -> assertFalse(tile.isSealed()));
 
         // round 2 player 1
 
-        virtualRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber());
 
-        virtualRack.getTiles().get(4).setRowNumber(6);
-        virtualRack.getTiles().get(4).setColumnNumber(8);
-        virtualRack.getTiles().get(4).setSealed(true);
+        // (R)OLE
+        setRackTile(rack, 5, 6, 8, true);
+        setRackTile(rack, 6, 6, 9, true);
+        setRackTile(rack, 7, 6, 10, true);
 
-        virtualRack.getTiles().get(5).setRowNumber(6);
-        virtualRack.getTiles().get(5).setColumnNumber(9);
-        virtualRack.getTiles().get(5).setSealed(true);
-
-        virtualRack.getTiles().get(6).setRowNumber(6);
-        virtualRack.getTiles().get(6).setColumnNumber(10);
-        virtualRack.getTiles().get(6).setSealed(true);
-
-        playedGame = playWord(game.getId(), game.getOwnerId(), virtualRack);
+        playedGame = playWord(game.getId(), game.getOwnerId(), rack);
 
         assertNotNull(playedGame);
         assertEquals(6, playedGame.getVersion());
@@ -385,64 +319,41 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(17, players.get(0).getScore());
         assertEquals(13, players.get(1).getScore());
 
-        updatedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber());
+        updatedRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber());
 
-        virtualBoard = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
+        board = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
 
-        assertEquals("R", virtualBoard.getCells().get(81).getLetter());
-        assertEquals("O", virtualBoard.getCells().get(82).getLetter());
-        assertEquals("L", virtualBoard.getCells().get(83).getLetter());
-        assertEquals("E", virtualBoard.getCells().get(84).getLetter());
+        assertEquals("ROLE", board.getCells().subList(81, 85).stream().map(VirtualCellDto::getLetter).collect(Collectors.joining()));
+        assertTrue(board.getCells().subList(81, 82).stream().allMatch(cell -> cell.getRoundNumber().equals(1)));
+        assertTrue(board.getCells().subList(82, 85).stream().allMatch(cell -> cell.getRoundNumber().equals(2)));
+        assertTrue(board.getCells().subList(81, 85).stream().allMatch(VirtualCellDto::isLastPlayed));
 
-        assertEquals(1, virtualBoard.getCells().get(81).getRoundNumber());
-        assertEquals(2, virtualBoard.getCells().get(82).getRoundNumber());
-        assertEquals(2, virtualBoard.getCells().get(83).getRoundNumber());
-        assertEquals(2, virtualBoard.getCells().get(84).getRoundNumber());
+        verticalCells = board.getCells()
+                .stream()
+                .filter(cell -> cell.getColumnNumber().equals(7) && cell.getLetter() != null)
+                .collect(Collectors.toList());
 
-        assertTrue(virtualBoard.getCells().get(81).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(82).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(83).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(84).isLastPlayed());
+        // R OF RAWLY
+        assertTrue(verticalCells.subList(0, 1).stream().allMatch(VirtualCellDto::isLastPlayed));
+        // AWLY OF RAWLY
+        assertTrue(verticalCells.subList(1, 5).stream().noneMatch(VirtualCellDto::isLastPlayed));
 
-        assertTrue(virtualBoard.getCells().get(81).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(96).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(111).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(126).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(141).isLastPlayed());
+        refreshedRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber() + 1);
 
-        refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber() + 1);
+        assertTrue(refreshedRack.getTiles().subList(0, 4).stream().allMatch(tile -> tile.getRoundNumber().equals(2)));
+        assertTrue(refreshedRack.getTiles().subList(4, 7).stream().allMatch(tile -> tile.getRoundNumber().equals(3)));
 
-        assertEquals(2, refreshedVirtualRack.getTiles().get(0).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(1).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(2).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(3).getRoundNumber());
-        assertEquals(3, refreshedVirtualRack.getTiles().get(4).getRoundNumber());
-        assertEquals(3, refreshedVirtualRack.getTiles().get(5).getRoundNumber());
-        assertEquals(3, refreshedVirtualRack.getTiles().get(6).getRoundNumber());
-
-        refreshedVirtualRack.getTiles().stream().forEach(tile -> assertFalse(tile.isSealed()));
+        refreshedRack.getTiles().stream().forEach(tile -> assertFalse(tile.isSealed()));
 
         // round 2 player 2
 
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("L", 1));
-        letterValuePairs.add(Pair.of("Y", 4));
-        letterValuePairs.add(Pair.of("E", 1));
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("E", 1));
+        rack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
 
-        virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        // (WEAK)ER
+        setRackTile(rack, 5, 8, 11, true);
+        setRackTile(rack, 6, 8, 12, true);
 
-        virtualRack.getTiles().get(4).setRowNumber(8);
-        virtualRack.getTiles().get(4).setColumnNumber(11);
-        virtualRack.getTiles().get(4).setSealed(true);
-
-        virtualRack.getTiles().get(5).setRowNumber(8);
-        virtualRack.getTiles().get(5).setColumnNumber(12);
-        virtualRack.getTiles().get(5).setSealed(true);
-
-        playedGame = playWord(game.getId(), 2L, virtualRack);
+        playedGame = playWord(game.getId(), 2L, rack);
 
         assertNotNull(playedGame);
         assertEquals(7, playedGame.getVersion());
@@ -452,47 +363,76 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(17, players.get(0).getScore());
         assertEquals(27, players.get(1).getScore());
 
-        updatedVirtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() - 1);
+        updatedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() - 1);
 
-        virtualBoard = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
+        board = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
 
-        assertEquals("W", virtualBoard.getCells().get(111).getLetter());
-        assertEquals("E", virtualBoard.getCells().get(112).getLetter());
-        assertEquals("A", virtualBoard.getCells().get(113).getLetter());
-        assertEquals("K", virtualBoard.getCells().get(114).getLetter());
-        assertEquals("E", virtualBoard.getCells().get(115).getLetter());
-        assertEquals("R", virtualBoard.getCells().get(116).getLetter());
+        assertEquals("WEAKER", board.getCells().subList(111, 117).stream().map(VirtualCellDto::getLetter).collect(Collectors.joining()));
+        assertTrue(board.getCells().subList(111, 115).stream().allMatch(cell -> cell.getRoundNumber().equals(1)));
+        assertTrue(board.getCells().subList(115, 117).stream().allMatch(cell -> cell.getRoundNumber().equals(2)));
+        assertTrue(board.getCells().subList(111, 117).stream().allMatch(VirtualCellDto::isLastPlayed));
+        assertTrue(board.getCells().subList(81, 85).stream().noneMatch(VirtualCellDto::isLastPlayed));
 
-        assertEquals(1, virtualBoard.getCells().get(111).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(112).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(113).getRoundNumber());
-        assertEquals(1, virtualBoard.getCells().get(114).getRoundNumber());
-        assertEquals(2, virtualBoard.getCells().get(115).getRoundNumber());
-        assertEquals(2, virtualBoard.getCells().get(116).getRoundNumber());
+        refreshedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
 
-        assertTrue(virtualBoard.getCells().get(111).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(112).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(113).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(114).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(115).isLastPlayed());
-        assertTrue(virtualBoard.getCells().get(116).isLastPlayed());
+        assertTrue(refreshedRack.getTiles().subList(0, 4).stream().allMatch(tile -> tile.getRoundNumber().equals(2)));
+        assertTrue(refreshedRack.getTiles().subList(4, 6).stream().allMatch(tile -> tile.getRoundNumber().equals(3)));
+        assertTrue(refreshedRack.getTiles().subList(6, 7).stream().allMatch(tile -> tile.getRoundNumber().equals(1)));
 
-        assertFalse(virtualBoard.getCells().get(81).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(82).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(83).isLastPlayed());
-        assertFalse(virtualBoard.getCells().get(84).isLastPlayed());
+        refreshedRack.getTiles().stream().forEach(tile -> assertFalse(tile.isSealed()));
+    }
 
-        refreshedVirtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+    @Test
+    void test_play_player_is_rewarded_with_bingo_bonus() throws IOException, InterruptedException {
+        final GameDto game = createNewGame(2);
+        joinGame(game.getId(), 2L);
 
-        assertEquals(2, refreshedVirtualRack.getTiles().get(0).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(1).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(2).getRoundNumber());
-        assertEquals(2, refreshedVirtualRack.getTiles().get(3).getRoundNumber());
-        assertEquals(3, refreshedVirtualRack.getTiles().get(4).getRoundNumber());
-        assertEquals(3, refreshedVirtualRack.getTiles().get(5).getRoundNumber());
-        assertEquals(1, refreshedVirtualRack.getTiles().get(6).getRoundNumber());
+        waitUntilGameStarts();
 
-        refreshedVirtualRack.getTiles().stream().forEach(tile -> assertFalse(tile.isSealed()));
+        final GameDto startedGame = getGame(game.getId());
+
+        // round 1 player 1
+
+        final VirtualRackDto rack = updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(),
+                startedGame.getRoundNumber(), "FARADAY".toCharArray());
+
+        // FARADAY
+        setRackTile(rack, 1, 8, 7, true);
+        setRackTile(rack, 2, 8, 8, true);
+        setRackTile(rack, 3, 8, 9, true);
+        setRackTile(rack, 4, 8, 10, true);
+        setRackTile(rack, 5, 8, 11, true);
+        setRackTile(rack, 6, 8, 12, true);
+        setRackTile(rack, 7, 8, 13, true);
+
+        final GameDto playedGame = playWord(game.getId(), game.getOwnerId(), rack);
+
+        assertNotNull(playedGame);
+        assertEquals(4, playedGame.getVersion());
+        assertEquals(2, playedGame.getCurrentPlayerNumber());
+
+        final List<PlayerDto> players = getPlayers(game.getId(), playedGame.getVersion());
+        assertEquals(65, players.get(0).getScore());
+        assertEquals(0, players.get(1).getScore());
+
+        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber());
+
+        assertTrue(updatedRack.getTiles().stream().allMatch(tile -> tile.getRoundNumber().equals(1)));
+        assertTrue(updatedRack.getTiles().subList(0, 7).stream().allMatch(VirtualTileDto::isSealed));
+
+        final VirtualBoardDto board = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
+
+        assertEquals("FARADAY", board.getCells().subList(111, 118).stream().map(VirtualCellDto::getLetter).collect(Collectors.joining()));
+        assertTrue(board.getCells().subList(111, 118).stream().allMatch(cell -> cell.getRoundNumber().equals(1)));
+        assertTrue(board.getCells().subList(111, 118).stream().allMatch(VirtualCellDto::isLastPlayed));
+
+        final VirtualRackDto refreshedRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber() + 1);
+
+        assertTrue(refreshedRack.getTiles().subList(0, 7).stream().allMatch(tile -> tile.getRoundNumber().equals(2)));
+        assertTrue(refreshedRack.getTiles().stream().noneMatch(VirtualTileDto::isSealed));
+
+        final List<ActionDto> actions = getActions(game.getId());
+        assertTrue(actions.stream().anyMatch(action -> ActionType.BONUS_BINGO.name().equals(action.getType())));
     }
 
     @Test
@@ -504,36 +444,25 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         final GameDto startedGame = getGame(game.getId());
 
-        final List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
-
-        letterValuePairs.add(Pair.of("B", 1));
-        letterValuePairs.add(Pair.of("C", 1));
-        letterValuePairs.add(Pair.of("D", 1));
-        letterValuePairs.add(Pair.of("F", 1));
-        letterValuePairs.add(Pair.of("G", 1));
-        letterValuePairs.add(Pair.of("H", 1));
-        letterValuePairs.add(Pair.of("K", 1));
-
         updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(),
-                letterValuePairs);
+                "BCDFGHK".toCharArray());
 
         List<Tile> tiles = getTiles(game.getId());
         Tile exchangedTile = tiles.stream().filter(tile -> "B".equals(tile.getLetter())).findFirst().orElse(null);
 
         int countBeforeExchange = exchangedTile.getCount();
 
-        final Response exchangeTileResponse = target(
-                "/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
+        final Response exchangeTileResponse = target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1)
+                .request()
                 .post(Entity.entity("", MediaType.APPLICATION_JSON));
 
-        VirtualTileDto virtualTile = exchangeTileResponse.readEntity(VirtualTileDto.class);
+        final VirtualTileDto virtualTile = exchangeTileResponse.readEntity(VirtualTileDto.class);
 
         assertNotNull(virtualTile);
         assertNotEquals("B", virtualTile.getLetter());
         assertTrue(virtualTile.isVowel());
 
-        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                startedGame.getRoundNumber());
+        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(), startedGame.getRoundNumber());
 
         assertEquals(virtualTile.getLetter(), updatedRack.getTiles().get(0).getLetter());
         assertEquals(virtualTile.isVowel(), updatedRack.getTiles().get(0).isVowel());
@@ -547,8 +476,8 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         exchangedTile = tiles.stream().filter(tile -> "C".equals(tile.getLetter())).findFirst().orElse(null);
 
-        final Response secondExchangeTileResponse = target(
-                "/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 2).request()
+        final Response secondExchangeTileResponse = target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 2)
+                .request()
                 .post(Entity.entity("", MediaType.APPLICATION_JSON));
 
         final ExceptionDto exception = secondExchangeTileResponse.readEntity(ExceptionDto.class);
@@ -569,18 +498,8 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         final GameDto startedGame = getGame(game.getId());
 
-        final List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
-
-        letterValuePairs.add(Pair.of("B", 1));
-        letterValuePairs.add(Pair.of("C", 1));
-        letterValuePairs.add(Pair.of("D", 1));
-        letterValuePairs.add(Pair.of("F", 1));
-        letterValuePairs.add(Pair.of("G", 1));
-        letterValuePairs.add(Pair.of("H", 1));
-        letterValuePairs.add(Pair.of("K", 1));
-
         updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(),
-                letterValuePairs);
+                "BCDFGHK".toCharArray());
 
         final List<Tile> updatedTiles = getTiles(game.getId());
         updatedTiles.stream().forEach(tile -> {
@@ -594,8 +513,8 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertNotNull(exchangedTile);
         assertEquals(0, exchangedTile.getCount());
 
-        final Response exchangeTileResponse = target(
-                "/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
+        final Response exchangeTileResponse = target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1)
+                .request()
                 .post(Entity.entity("", MediaType.APPLICATION_JSON));
 
         final VirtualTileDto virtualTile = exchangeTileResponse.readEntity(VirtualTileDto.class);
@@ -603,8 +522,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertNotNull(virtualTile);
         assertEquals("B", virtualTile.getLetter());
 
-        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                startedGame.getRoundNumber());
+        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(), startedGame.getRoundNumber());
 
         assertEquals(virtualTile.getLetter(), updatedRack.getTiles().get(0).getLetter());
         assertEquals(virtualTile.isVowel(), updatedRack.getTiles().get(0).isVowel());
@@ -627,25 +545,13 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         final GameDto startedGame = getGame(game.getId());
 
-        final List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
-
-        letterValuePairs.add(Pair.of("B", 1));
-        letterValuePairs.add(Pair.of("C", 1));
-        letterValuePairs.add(Pair.of("D", 1));
-        letterValuePairs.add(Pair.of("F", 1));
-        letterValuePairs.add(Pair.of("G", 1));
-        letterValuePairs.add(Pair.of("H", 1));
-        letterValuePairs.add(Pair.of("K", 1));
-
         updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(),
-                letterValuePairs);
+                "BCDFGHK".toCharArray());
 
         final List<Tile> updatedTiles = getTiles(game.getId());
-        updatedTiles.stream()
-                .filter(tile -> !tile.getLetter().equals("C") && !tile.getLetter().equals("F"))
-                .forEach(tile -> {
-                    tile.setCount(0);
-                });
+        updatedTiles.stream().filter(tile -> !tile.getLetter().equals("C") && !tile.getLetter().equals("F")).forEach(tile -> {
+            tile.setCount(0);
+        });
         updateTiles(game.getId(), updatedTiles);
 
         List<Tile> tiles = getTiles(game.getId());
@@ -654,8 +560,8 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertNotNull(exchangedTile);
         assertEquals(0, exchangedTile.getCount());
 
-        final Response exchangeTileResponse = target(
-                "/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1).request()
+        final Response exchangeTileResponse = target("/games/" + game.getId() + "/racks/users/" + game.getOwnerId() + "/tiles/" + 1)
+                .request()
                 .post(Entity.entity("", MediaType.APPLICATION_JSON));
 
         final VirtualTileDto virtualTile = exchangeTileResponse.readEntity(VirtualTileDto.class);
@@ -663,8 +569,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertNotNull(virtualTile);
         assertEquals("B", virtualTile.getLetter());
 
-        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                startedGame.getRoundNumber());
+        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), game.getOwnerId(), startedGame.getRoundNumber());
 
         assertEquals(virtualTile.getLetter(), updatedRack.getTiles().get(0).getLetter());
         assertEquals(virtualTile.isVowel(), updatedRack.getTiles().get(0).isVowel());
@@ -689,103 +594,44 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 1 player 1
 
-        List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
-
-        letterValuePairs.add(Pair.of("F", 4));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("D", 2));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("Y", 4));
-
         updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(),
-                letterValuePairs);
+                "FARADAY".toCharArray());
 
-        VirtualRackDto virtualRack = getVirtualRack(game.getId(), 1L, startedGame.getRoundNumber());
+        VirtualRackDto rack = getVirtualRack(game.getId(), 1L, startedGame.getRoundNumber());
 
-        virtualRack.getTiles().get(0).setRowNumber(8);
-        virtualRack.getTiles().get(0).setColumnNumber(7);
-        virtualRack.getTiles().get(0).setSealed(true);
+        setRackTile(rack, 1, 8, 7, true);
+        setRackTile(rack, 2, 8, 8, true);
+        setRackTile(rack, 3, 8, 9, true);
+        setRackTile(rack, 4, 8, 10, true);
+        setRackTile(rack, 5, 8, 11, true);
+        setRackTile(rack, 6, 8, 12, true);
+        setRackTile(rack, 7, 8, 13, true);
 
-        virtualRack.getTiles().get(1).setRowNumber(8);
-        virtualRack.getTiles().get(1).setColumnNumber(8);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(8);
-        virtualRack.getTiles().get(2).setColumnNumber(9);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(8);
-        virtualRack.getTiles().get(3).setColumnNumber(10);
-        virtualRack.getTiles().get(3).setSealed(true);
-
-        virtualRack.getTiles().get(4).setRowNumber(8);
-        virtualRack.getTiles().get(4).setColumnNumber(11);
-        virtualRack.getTiles().get(4).setSealed(true);
-
-        virtualRack.getTiles().get(5).setRowNumber(8);
-        virtualRack.getTiles().get(5).setColumnNumber(12);
-        virtualRack.getTiles().get(5).setSealed(true);
-
-        virtualRack.getTiles().get(6).setRowNumber(8);
-        virtualRack.getTiles().get(6).setColumnNumber(13);
-        virtualRack.getTiles().get(6).setSealed(true);
-
-        GameDto playedGame = playWord(game.getId(), 1L, virtualRack);
+        GameDto playedGame = playWord(game.getId(), 1L, rack);
 
         assertNotNull(playedGame);
         assertEquals(4, playedGame.getVersion());
         assertEquals(2, playedGame.getCurrentPlayerNumber());
         assertEquals(GameStatus.IN_PROGRESS.name(), playedGame.getStatus());
 
-        VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                playedGame.getRoundNumber() + 1);
+        VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(), playedGame.getRoundNumber() + 1);
 
         assertEquals(1, refreshedVirtualRack.getTiles().size());
 
         // round 1 player 2
 
-        letterValuePairs = new ArrayList<>();
+        updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(), "ARADAYW".toCharArray());
 
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("R", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("D", 2));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("Y", 4));
-        letterValuePairs.add(Pair.of("W", 4));
+        rack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
 
-        updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(),
-                letterValuePairs);
+        setRackTile(rack, 1, 9, 7, true);
+        setRackTile(rack, 2, 10, 7, true);
+        setRackTile(rack, 3, 11, 7, true);
+        setRackTile(rack, 4, 12, 7, true);
+        setRackTile(rack, 5, 13, 7, true);
+        setRackTile(rack, 6, 14, 7, true);
 
-        virtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
-
-        virtualRack.getTiles().get(0).setRowNumber(9);
-        virtualRack.getTiles().get(0).setColumnNumber(7);
-        virtualRack.getTiles().get(0).setSealed(true);
-
-        virtualRack.getTiles().get(1).setRowNumber(10);
-        virtualRack.getTiles().get(1).setColumnNumber(7);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(11);
-        virtualRack.getTiles().get(2).setColumnNumber(7);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(12);
-        virtualRack.getTiles().get(3).setColumnNumber(7);
-        virtualRack.getTiles().get(3).setSealed(true);
-
-        virtualRack.getTiles().get(4).setRowNumber(13);
-        virtualRack.getTiles().get(4).setColumnNumber(7);
-        virtualRack.getTiles().get(4).setSealed(true);
-
-        virtualRack.getTiles().get(5).setRowNumber(14);
-        virtualRack.getTiles().get(5).setColumnNumber(7);
-        virtualRack.getTiles().get(5).setSealed(true);
-
-        playedGame = playWord(game.getId(), 2L, virtualRack);
+        playedGame = playWord(game.getId(), 2L, rack);
 
         assertNotNull(playedGame);
         assertEquals(5, playedGame.getVersion());
@@ -798,13 +644,11 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 2 player 1
 
-        virtualRack = getVirtualRack(game.getId(), 1L, playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), 1L, playedGame.getRoundNumber());
 
-        virtualRack.getTiles().get(0).setRowNumber(12);
-        virtualRack.getTiles().get(0).setColumnNumber(8);
-        virtualRack.getTiles().get(0).setSealed(true);
+        setRackTile(rack, 1, 12, 8, true);
 
-        playedGame = playWord(game.getId(), 1L, virtualRack);
+        playedGame = playWord(game.getId(), 1L, rack);
 
         assertNotNull(playedGame);
         assertEquals(6, playedGame.getVersion());
@@ -850,34 +694,13 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 1 player 1
 
-        final List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
+        final VirtualRackDto virtualRack = updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(),
+                startedGame.getRoundNumber(), "WEAKOLE".toCharArray());
 
-        letterValuePairs.add(Pair.of("W", 4));
-        letterValuePairs.add(Pair.of("E", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("K", 5));
-        letterValuePairs.add(Pair.of("O", 1));
-        letterValuePairs.add(Pair.of("L", 1));
-        letterValuePairs.add(Pair.of("E", 1));
-
-        final VirtualRackDto virtualRack = updateRack(game.getId(), game.getOwnerId(),
-                startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(), letterValuePairs);
-
-        virtualRack.getTiles().get(0).setRowNumber(8);
-        virtualRack.getTiles().get(0).setColumnNumber(7);
-        virtualRack.getTiles().get(0).setSealed(true);
-
-        virtualRack.getTiles().get(1).setRowNumber(8);
-        virtualRack.getTiles().get(1).setColumnNumber(8);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(8);
-        virtualRack.getTiles().get(2).setColumnNumber(9);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(8);
-        virtualRack.getTiles().get(3).setColumnNumber(10);
-        virtualRack.getTiles().get(3).setSealed(true);
+        setRackTile(virtualRack, 1, 8, 7, true);
+        setRackTile(virtualRack, 2, 8, 8, true);
+        setRackTile(virtualRack, 3, 8, 9, true);
+        setRackTile(virtualRack, 4, 8, 10, true);
 
         Thread.sleep(3850);
 
@@ -891,21 +714,17 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(11, players.get(0).getScore());
         assertEquals(0, players.get(1).getScore());
 
-        final VirtualBoardDto virtualBoard = getVirtualBoard(game.getId(), playGame.getVersion(),
-                game.getExpectedPlayerCount());
+        final VirtualBoardDto board = getVirtualBoard(game.getId(), playGame.getVersion(), game.getExpectedPlayerCount());
 
-        assertEquals("W", virtualBoard.getCells().get(111).getLetter());
-        assertEquals("E", virtualBoard.getCells().get(112).getLetter());
-        assertEquals("A", virtualBoard.getCells().get(113).getLetter());
-        assertEquals("K", virtualBoard.getCells().get(114).getLetter());
+        assertEquals("WEAK", board.getCells().subList(111, 115).stream().map(VirtualCellDto::getLetter).collect(Collectors.joining()));
 
-        final VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                playGame.getRoundNumber() + 1);
+        final VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(), playGame.getRoundNumber() + 1);
 
         assertEquals(7, refreshedVirtualRack.getTiles().size());
     }
 
     @Test
+    @SuppressWarnings("unused")
     void test_word_is_played_while_skip_turn_job_is_running() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
         joinGame(game.getId(), 2L);
@@ -916,34 +735,13 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 1 player 1
 
-        final List<Pair<String, Integer>> letterValuePairs = new ArrayList<>();
+        final VirtualRackDto virtualRack = updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(),
+                startedGame.getRoundNumber(), "WEAKOLE".toCharArray());
 
-        letterValuePairs.add(Pair.of("W", 4));
-        letterValuePairs.add(Pair.of("E", 1));
-        letterValuePairs.add(Pair.of("A", 1));
-        letterValuePairs.add(Pair.of("K", 5));
-        letterValuePairs.add(Pair.of("O", 1));
-        letterValuePairs.add(Pair.of("L", 1));
-        letterValuePairs.add(Pair.of("E", 1));
-
-        final VirtualRackDto virtualRack = updateRack(game.getId(), game.getOwnerId(),
-                startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(), letterValuePairs);
-
-        virtualRack.getTiles().get(0).setRowNumber(8);
-        virtualRack.getTiles().get(0).setColumnNumber(7);
-        virtualRack.getTiles().get(0).setSealed(true);
-
-        virtualRack.getTiles().get(1).setRowNumber(8);
-        virtualRack.getTiles().get(1).setColumnNumber(8);
-        virtualRack.getTiles().get(1).setSealed(true);
-
-        virtualRack.getTiles().get(2).setRowNumber(8);
-        virtualRack.getTiles().get(2).setColumnNumber(9);
-        virtualRack.getTiles().get(2).setSealed(true);
-
-        virtualRack.getTiles().get(3).setRowNumber(8);
-        virtualRack.getTiles().get(3).setColumnNumber(10);
-        virtualRack.getTiles().get(3).setSealed(true);
+        setRackTile(virtualRack, 1, 8, 7, true);
+        setRackTile(virtualRack, 2, 8, 8, true);
+        setRackTile(virtualRack, 3, 8, 9, true);
+        setRackTile(virtualRack, 4, 8, 10, true);
 
         Thread.sleep(4100);
 
@@ -964,14 +762,12 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertEquals(0, players.get(0).getScore());
         assertEquals(0, players.get(1).getScore());
 
-        final VirtualBoardDto virtualBoard = getVirtualBoard(game.getId(), updatedGame.getVersion(),
-                game.getExpectedPlayerCount());
+        final VirtualBoardDto virtualBoard = getVirtualBoard(game.getId(), updatedGame.getVersion(), game.getExpectedPlayerCount());
 
         boolean hasNonEmptyCells = virtualBoard.getCells().stream().anyMatch(VirtualCellDto::isSealed);
         assertFalse(hasNonEmptyCells);
 
-        final VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(),
-                updatedGame.getRoundNumber() + 1);
+        final VirtualRackDto refreshedVirtualRack = getVirtualRack(game.getId(), game.getOwnerId(), updatedGame.getRoundNumber() + 1);
 
         assertEquals(7, refreshedVirtualRack.getTiles().size());
     }
@@ -1066,8 +862,7 @@ class GameResourceIT extends AbstractIntegrationTest {
                 .put(Entity.entity("", MediaType.APPLICATION_JSON));
 
         if (Status.OK.getStatusCode() != joinGameResponse.getStatus()) {
-            assertEquals(Status.OK.getStatusCode(), joinGameResponse.getStatus(),
-                    joinGameResponse.readEntity(String.class));
+            assertEquals(Status.OK.getStatusCode(), joinGameResponse.getStatus(), joinGameResponse.readEntity(String.class));
         }
 
         final GameDto joinGameDto = joinGameResponse.readEntity(GameDto.class);
@@ -1088,28 +883,24 @@ class GameResourceIT extends AbstractIntegrationTest {
         return playGame;
     }
 
-    private VirtualRackDto updateRack(Long gameId, Long userId, Integer playerNumber, Integer roundNumber,
-            List<Pair<String, Integer>> letterValuePairs) {
+    private VirtualRackDto updateRack(Long gameId, Long userId, Integer playerNumber, Integer roundNumber, char[] letters) {
         final VirtualRackDto virtualRack = getVirtualRack(gameId, userId, roundNumber);
 
         List<VirtualTileDto> tiles = new ArrayList<>();
         IntStream.range(1, 8).forEach(tileNumber -> {
-            final Pair<String, Integer> letterValuePair = letterValuePairs.get(tileNumber - 1);
-            if (letterValuePair != null) {
-                tiles.add(VirtualTileDto.builder()
-                        .letter(letterValuePair.getKey())
-                        .value(letterValuePair.getValue())
-                        .number(tileNumber)
-                        .playerNumber(playerNumber)
-                        .roundNumber(roundNumber)
-                        .build());
-            }
+            final Character letter = letters[tileNumber - 1];
+            tiles.add(VirtualTileDto.builder()
+                    .letter(letter.toString())
+                    .value(TILE_MAP.get(letter.toString()).getValue())
+                    .number(tileNumber)
+                    .playerNumber(playerNumber)
+                    .roundNumber(roundNumber)
+                    .build());
         });
 
         virtualRack.setTiles(tiles);
 
-        redisTemplate.boundListOps(Constants.CacheKey.RACK + ":" + gameId + ":" + userId)
-                .set(0, Mapper.toEntity(virtualRack));
+        redisTemplate.boundListOps(Constants.CacheKey.RACK + ":" + gameId + ":" + userId).set(0, Mapper.toEntity(virtualRack));
 
         return virtualRack;
     }
@@ -1118,14 +909,18 @@ class GameResourceIT extends AbstractIntegrationTest {
         redisTemplate.opsForValue().set(Constants.CacheKey.TILES + ":" + gameId, updatedTiles);
     }
 
+    void setRackTile(final VirtualRackDto virtualRack, final int tileNumber, final int rowNumber, final int columnnNumber,
+                     final boolean sealed) {
+        virtualRack.getTiles().get(tileNumber - 1).setRowNumber(rowNumber);
+        virtualRack.getTiles().get(tileNumber - 1).setColumnNumber(columnnNumber);
+        virtualRack.getTiles().get(tileNumber - 1).setSealed(sealed);
+    }
+
     private List<PlayerDto> getPlayers(Long gameId, Integer version) {
-        final Response playersResponse = target("/games/" + gameId + "/players").queryParam("version", version)
-                .request()
-                .get();
+        final Response playersResponse = target("/games/" + gameId + "/players").queryParam("version", version).request().get();
 
         if (Status.OK.getStatusCode() != playersResponse.getStatus()) {
-            assertEquals(Status.OK.getStatusCode(), playersResponse.getStatus(),
-                    playersResponse.readEntity(String.class));
+            assertEquals(Status.OK.getStatusCode(), playersResponse.getStatus(), playersResponse.readEntity(String.class));
         }
 
         final List<PlayerDto> players = playersResponse.readEntity(new GenericType<List<PlayerDto>>() {
@@ -1137,8 +932,7 @@ class GameResourceIT extends AbstractIntegrationTest {
     }
 
     private VirtualBoardDto getVirtualBoard(Long gameId, Integer version, Integer playerCount) {
-        final Response virtualBoardResponse = target("/games/" + gameId + "/boards")
-                .queryParam("version", version - playerCount)
+        final Response virtualBoardResponse = target("/games/" + gameId + "/boards").queryParam("version", version - playerCount)
                 .request()
                 .get();
 
@@ -1150,8 +944,7 @@ class GameResourceIT extends AbstractIntegrationTest {
     }
 
     private VirtualRackDto getVirtualRack(Long gameId, Long userId, Integer roundNumber) {
-        final Response virtualRackResponse = target("/games/" + gameId + "/racks/users/" + userId)
-                .queryParam("roundNumber", roundNumber)
+        final Response virtualRackResponse = target("/games/" + gameId + "/racks/users/" + userId).queryParam("roundNumber", roundNumber)
                 .request()
                 .get();
 
@@ -1160,6 +953,21 @@ class GameResourceIT extends AbstractIntegrationTest {
         virtualRackResponse.close();
 
         return virtualRack;
+    }
+
+    private List<ActionDto> getActions(Long gameId) {
+        final Response actionsResponse = target("/games/" + gameId + "/actions").request().get();
+
+        if (Status.OK.getStatusCode() != actionsResponse.getStatus()) {
+            assertEquals(Status.OK.getStatusCode(), actionsResponse.getStatus(), actionsResponse.readEntity(String.class));
+        }
+
+        final List<ActionDto> actions = actionsResponse.readEntity(new GenericType<List<ActionDto>>() {
+        });
+
+        actionsResponse.close();
+
+        return actions;
     }
 
     private List<Tile> getTiles(Long gameId) {

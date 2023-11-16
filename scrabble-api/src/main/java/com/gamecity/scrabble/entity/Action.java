@@ -33,13 +33,10 @@ import lombok.experimental.SuperBuilder;
 @Entity(name = "Action")
 @Table(name = "actions")
 @NamedQueries({
-        @NamedQuery(name = Constants.NamedQuery.getActions, query = "Select a from Action a where a.gameId = :gameId"),
-        @NamedQuery(name = Constants.NamedQuery.getLastAction,
-                query = "Select a from Action a where a.gameId = :gameId order by id desc"),
-        @NamedQuery(name = Constants.NamedQuery.getActionByVersion,
-                query = "Select a from Action a where a.gameId = :gameId and a.version = :version order by id desc"),
-        @NamedQuery(name = Constants.NamedQuery.getLastActionsByCount,
-                query = "Select a from Action a where a.gameId = :gameId order by id desc") })
+        @NamedQuery(name = Constants.NamedQuery.getActions, query = "Select a from Action a where a.gameId = :gameId order by id asc"),
+        @NamedQuery(name = Constants.NamedQuery.getLastAction, query = "Select a from Action a where a.gameId = :gameId and a.type != 'BONUS' order by id desc"),
+        @NamedQuery(name = Constants.NamedQuery.getActionByVersion, query = "Select a from Action a where a.gameId = :gameId and a.version = :version and a.type != 'BONUS' order by id desc"),
+        @NamedQuery(name = Constants.NamedQuery.getLastActionsByCount, query = "Select a from Action a where a.gameId = :gameId and a.type != 'BONUS' order by id desc") })
 public class Action extends AbstractEntity implements Serializable {
 
     private static final long serialVersionUID = -8857819980114071959L;
@@ -70,5 +67,8 @@ public class Action extends AbstractEntity implements Serializable {
 
     @Column(name = "remaining_tile_count")
     private Integer remainingTileCount;
+
+    @Column(name = "score")
+    private Integer score;
 
 }

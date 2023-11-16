@@ -360,6 +360,7 @@ public class Mapper {
                 .roundNumber(action.getRoundNumber())
                 .gameStatus(action.getGameStatus().name())
                 .remainingTileCount(action.getRemainingTileCount())
+                .score(action.getScore())
                 .type(action.getType().name())
                 .userId(action.getUserId())
                 .build();
@@ -380,6 +381,7 @@ public class Mapper {
         action.setLastUpdatedDate(actionDto.getLastUpdatedDate());
         action.setRemainingTileCount(actionDto.getRemainingTileCount());
         action.setRoundNumber(actionDto.getRoundNumber());
+        action.setScore(actionDto.getScore());
         action.setType(ActionType.valueOf(actionDto.getType()));
         action.setUserId(actionDto.getUserId());
         return action;
@@ -412,15 +414,15 @@ public class Mapper {
      * @return entity representation of the {@link WordDto}
      */
     public static Word toEntity(WordDto wordDto) {
-        final Word word = new Word();
-        word.setActionId(wordDto.getActionId());
-        word.setGameId(wordDto.getGameId());
-        word.setUserId(wordDto.getUserId());
-        word.setRoundNumber(wordDto.getRoundNumber());
-        word.setScore(wordDto.getScore());
-        word.setWord(wordDto.getWord());
-        word.setDefinition(wordDto.getDefinition());
-        return word;
+        return Word.builder()
+                .actionId(wordDto.getActionId())
+                .gameId(wordDto.getGameId())
+                .userId(wordDto.getUserId())
+                .roundNumber(wordDto.getRoundNumber())
+                .score(wordDto.getScore())
+                .word(wordDto.getWord())
+                .definition(wordDto.getDefinition())
+                .build();
     }
 
     /**

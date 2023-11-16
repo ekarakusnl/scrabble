@@ -22,10 +22,11 @@ public interface ActionService extends BaseService<Action> {
      * 
      * @param game       the game
      * @param userId     <code>id</code> of the user
+     * @param score      <code>score</code> of the action
      * @param actionType <code>type</code> of the action
      * @return the added action
      */
-    Action add(Game game, Long userId, ActionType actionType);
+    Action add(Game game, Long userId, Integer score, ActionType actionType);
 
     /**
      * Whether a new {@link Action action} happened in the {@link Game game}
@@ -38,6 +39,7 @@ public interface ActionService extends BaseService<Action> {
 
     /**
      * Gets the {@link Action action} in the {@link Game game} by the specified <code>version</code>
+     * Bonus actions are excluded
      * 
      * @param gameId  <code>id</code> of the game
      * @param version <code>version</code> of the action

@@ -27,9 +27,14 @@ public interface Constants {
         Integer BOARD_COLUMN_SIZE = 15;
 
         /**
-         * Bonus score for using all tiles (7) in the rack
+         * No score
          */
-        Integer BONUS_SCORE = 50;
+        Integer NO_SCORE = 0;
+
+        /**
+         * Bingo bonus for using all tiles (7) in the rack
+         */
+        Integer BINGO_SCORE = 50;
     }
 
     /**
