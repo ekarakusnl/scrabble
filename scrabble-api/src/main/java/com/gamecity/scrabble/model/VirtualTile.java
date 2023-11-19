@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * Virtual representation of a {@link Tile tile} in a {@link VirtualRack rack} in a {@link Game game}
+ * Virtual representation of a {@link Tile tile} in a {@link VirtualRack rack} in a {@link Game
+ * game}
  * 
  * @author ekarakus
  */
@@ -44,5 +45,7 @@ public class VirtualTile implements Serializable {
     private Integer roundNumber;
 
     private boolean sealed;
+
+    private boolean exchanged;
 
 }

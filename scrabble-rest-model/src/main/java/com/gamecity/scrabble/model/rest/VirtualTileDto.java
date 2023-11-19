@@ -45,4 +45,7 @@ public class VirtualTileDto extends AbstractDto {
     @JsonProperty("sealed")
     private boolean sealed;
 
+    @JsonProperty("exchanged")
+    private boolean exchanged;
+
 }

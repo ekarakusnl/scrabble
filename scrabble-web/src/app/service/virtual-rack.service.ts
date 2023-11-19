@@ -21,9 +21,4 @@ export class VirtualRackService {
         roundNumber);
   }
 
-  exchangeTile(gameId: number, tileNumber: number): Observable<Tile> {
-    return this.http.post<Tile>(environment.GATEWAY_URL + '/rest/games/' + gameId + '/racks/tiles/' +
-        tileNumber, null);
-  }
-
 }

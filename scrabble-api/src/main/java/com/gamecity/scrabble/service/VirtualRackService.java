@@ -32,9 +32,8 @@ public interface VirtualRackService {
      * @param playerNumber <code>number</code> of the player
      * @param roundNumber  <code>number</code> of the round played
      * @param virtualRack  the virtual rack to refresh
-     * @return the rack
      */
-    VirtualRack fillRack(Long gameId, Language language, Integer playerNumber, Integer roundNumber, VirtualRack virtualRack);
+    void fillRack(Long gameId, Language language, Integer playerNumber, Integer roundNumber, VirtualRack virtualRack);
 
     /**
      * Updates the {@link VirtualRack rack} of the {@link Player player} after a {@link Word word} is played
@@ -57,15 +56,24 @@ public interface VirtualRackService {
     VirtualRack getRack(Long gameId, Integer playerNumber, Integer roundNumber);
 
     /**
-     * Exchanges the {@link VirtualTile tile} of the {@link VirtualRack rack} in the {@link Game game}
+     * Exchanges the selected {@link VirtualTile tiles} in the {@link VirtualRack rack}
+     * 
+     * @param gameId        <code>id</code> of the game
+     * @param language      <code>language</code> of the bag
+     * @param playerNumber  <code>number</code> of the player
+     * @param roundNumber   <code>number</code> of the round played
+     * @param exchangedRack rack with the exchanged tiles
+     */
+    void exchange(Long gameId, Language language, Integer playerNumber, Integer roundNumber, VirtualRack exchangedRack);
+
+    /**
+     * Whether the played {@link VirtualRack rack} of the player is the one that is stored in the system
      * 
      * @param gameId       <code>id</code> of the game
-     * @param language     <code>language</code> of the bag
      * @param playerNumber <code>number</code> of the player
      * @param roundNumber  <code>number</code> of the round played
-     * @param tileNumber   <code>number</code> of tile to exchange
-     * @return the rack
+     * @param playedRack   rack with the played tiles
      */
-    VirtualTile exchangeTile(Long gameId, Language language, Integer playerNumber, Integer roundNumber, Integer tileNumber);
+    void validateRack(Long gameId, Integer playerNumber, Integer roundNumber, VirtualRack playedRack);
 
 }

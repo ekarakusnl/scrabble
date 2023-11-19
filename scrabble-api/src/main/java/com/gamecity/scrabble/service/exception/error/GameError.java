@@ -75,14 +75,19 @@ public enum GameError {
     WAITING(2013, "Game is waiting players!"),
 
     /**
-     * A letter has already been exchanged
+     * The rack is not full to exchange tiles
      */
-    EXCHANGED(2014, "A letter has already been exchanged in this round!"),
+    RACK_IS_NOT_FULL(2014, "The rack is not full, you cannot exchange the tiles!"),
 
     /**
      * Single letter words are not allowed
      */
-    SINGLE_LETTER_WORDS_NOT_ALLOWED(2015, "Single letter words {0} are not allowed!");
+    SINGLE_LETTER_WORDS_NOT_ALLOWED(2015, "Single letter words {0} are not allowed!"),
+
+    /**
+     * There are less tiles in the bag than the exchanged tiles
+     */
+    INSUFFICIENT_TILES(2016, "There are less tiles in the bag than the exchanged tiles!");
 
     private int code;
     private String message;

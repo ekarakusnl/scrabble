@@ -1,25 +1,30 @@
-import { ReactElement, useEffect, useRef, useState } from 'react';
+import { ReactElement, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
+import { BoardRow } from './row';
+
 import VirtualBoardService from '../../../services/virtual-board.service';
 
-import { VirtualBoard } from '../../../model/virtual-board';
 import { Cell } from '../../../model/cell';
-import { BoardRow } from './row';
+import { DraggableTile } from '../../../model/draggable-tile';
+import { DroppableCell } from '../../../model/droppable-cell';
 import { GameStatus } from '../../../model/game-status';
+import { VirtualBoard } from '../../../model/virtual-board';
 
 const ROW_SIZE = 15;
 const COLUMN_SIZE = 15;
 
-export function Board({ game, lastAction, selectedTileRef, rackRef, notificationRef }) {
+export function Board({ game, lastAction, boardRef, boardZoneRef, rackRef, notificationRef }) {
 
   const { t } = useTranslation();
 
   const [rows, setRows] = useState<ReactElement[]>();
-  const rowsRef = useRef<ReactElement[]>();
 
+  const rowsRef = useRef<ReactElement[]>();
+  const boardLayoutRef = useRef<View>();
   const virtualBoardRef = useRef<VirtualBoard>();
+  const droppableCellsRef = useRef<DroppableCell[]>([]);
 
   useEffect(() => {
     if (!game || !lastAction || !(lastAction.gameStatus === GameStatus.IN_PROGRESS || lastAction.gameStatus === GameStatus.ENDED)) {
@@ -31,6 +36,11 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
     return () => {
     };
   }, [lastAction]);
+
+  useImperativeHandle(boardRef, () => ({
+    onDragTile: (draggableTile: DraggableTile) => { onDragTile(draggableTile) },
+    onDropTile: (draggableTile: DraggableTile) => { onDropTile(draggableTile) },
+  }));
 
   function loadCells(): void {
     const boardVersion = lastAction.version - game.expectedPlayerCount;
@@ -51,7 +61,8 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
         <BoardRow
           key={'row_' + number}
           cells={virtualBoardRef.current.cells.slice(startColumn, endColumn)}
-          onPutTile={onPutTile} />
+          onRemoveTile={onRemoveTile}
+          onInitializeDroppableCell={onInitializeDroppableCell} />
       );
     }
     rowsRef.current = rows;
@@ -67,7 +78,8 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
       <BoardRow
         key={'row_' + rowNumber}
         cells={virtualBoardRef.current.cells.slice(startColumn, endColumn)}
-        onPutTile={onPutTile} />;
+        onRemoveTile={onRemoveTile}
+        onInitializeDroppableCell={onInitializeDroppableCell} />;
 
     const updatedRows = [];
     for (let rowNumber = 0; rowNumber < ROW_SIZE; rowNumber++) {
@@ -81,67 +93,112 @@ export function Board({ game, lastAction, selectedTileRef, rackRef, notification
     setRows(updatedRows);
   }
 
-  function onPutTile(cell: Cell) {
-    if (selectedTileRef.current) {
-      // put the tile to the board
-      if (!cell.letter) {
-        // update the cell with the values of the selected tile
-        cell.letter = selectedTileRef.current.letter;
-        cell.value = selectedTileRef.current.value;
-        cell.selectedTile = selectedTileRef.current;
+  function onBoardLayout(): void {
+    if (boardLayoutRef.current && !boardZoneRef.current) {
+      const paddingHorizontal = 0;
+      const paddingVertical = 0;
+      boardLayoutRef.current.measure((fx, fy, width, height, px, py) => {
+        boardZoneRef.current = {
+          x: px + paddingHorizontal,
+          y: py + paddingVertical,
+          width: width - paddingHorizontal,
+          height: height - paddingVertical
+        };
+      });
+    }
+  }
 
-        selectedTileRef.current.cellNumber = cell.cellNumber;
-        selectedTileRef.current.rowNumber = cell.rowNumber;
-        selectedTileRef.current.columnNumber = cell.columnNumber;
-        selectedTileRef.current.sealed = true;
+  function onInitializeDroppableCell(droppableCell: DroppableCell): void {
+    droppableCellsRef.current.push(droppableCell);
+  }
 
-        // update the board
-        updateRows(cell);
+  function isTileBetweenHorizontal(currentx: number, start: number, end: number): boolean {
+    return start <= currentx && currentx <= end;
+  }
 
-        // reset the selected tile
-        selectedTileRef.current = null;
+  function isTileBetweenVertical(currenty: number, start: number, end: number): boolean {
+    return start <= currenty && currenty <= end;
+  }
 
-        // update the rack
-        rackRef.current.update();
-      } else if (cell.letter) {
-        notificationRef.current.warning(t('error.2010', { 0: cell.rowNumber, 1: cell.columnNumber }));
-        selectedTileRef.current.sealed = false;
-        selectedTileRef.current.selected = false;
+  function onDragTile(draggableTile: DraggableTile): void {
+    
+  }
 
-        // reset the selected tile
-        selectedTileRef.current = null;
+  function onDropTile(draggableTile: DraggableTile): void {
+    const horizontalCenter = draggableTile.x + (draggableTile.width / 2);
+    const verticalCenter = draggableTile.y + (draggableTile.height / 2);
 
-        // update the rack
-        rackRef.current.update();
-      }
-    } else if (cell.letter && cell.selectedTile) {
-      // remove the tile from the board
-      cell.selectedTile.sealed = false;
-      cell.selectedTile.selected = false;
-      cell.selectedTile.cellNumber = null;
-      cell.selectedTile.rowNumber = null;
-      cell.selectedTile.columnNumber = null;
+    const droppableCell = droppableCellsRef.current.find((droppableCell: DroppableCell) => {
+      return isTileBetweenHorizontal(horizontalCenter, droppableCell.x, droppableCell.x + droppableCell.width)
+        && isTileBetweenVertical(verticalCenter, droppableCell.y, droppableCell.y + droppableCell.height);
+    });
 
-      // reset the cell
-      cell.letter = null;
-      cell.selectedTile = null;
-      cell.value = null;
+    if (!droppableCell) {
+      return;
+    }
+
+    const selectedTile = draggableTile.tile;
+    const cell = droppableCell.cell;
+    // put the tile to the board
+    if (!cell.letter) {
+      // update the cell with the values of the selected tile
+      cell.letter = selectedTile.letter;
+      cell.value = selectedTile.value;
+      cell.selectedTile = selectedTile;
+
+      selectedTile.cellNumber = cell.cellNumber;
+      selectedTile.rowNumber = cell.rowNumber;
+      selectedTile.columnNumber = cell.columnNumber;
+      selectedTile.sealed = true;
 
       // update the board
       updateRows(cell);
 
-      selectedTileRef.current = cell.selectedTile;
+      // update the rack
+      rackRef.current.update();
+    } else if (cell.letter) {
+      notificationRef.current.warning(t('error.2010', { 0: cell.rowNumber, 1: cell.columnNumber }));
+      selectedTile.sealed = false;
+      selectedTile.selected = false;
+
       // update the rack
       rackRef.current.update();
     }
   }
 
-  if (!rows || !lastAction || !(lastAction.gameStatus === GameStatus.IN_PROGRESS || lastAction.gameStatus === GameStatus.ENDED)) {
+  function onRemoveTile(cell: Cell): void {
+    if (!cell.selectedTile) {
+      return;
+    }
+
+    // remove the tile from the board
+    cell.selectedTile.sealed = false;
+    cell.selectedTile.selected = false;
+    cell.selectedTile.cellNumber = null;
+    cell.selectedTile.rowNumber = null;
+    cell.selectedTile.columnNumber = null;
+
+    // reset the cell
+    cell.letter = null;
+    cell.selectedTile = null;
+    cell.value = null;
+
+    // update the board
+    updateRows(cell);
+
+    // update the rack
+    rackRef.current.update();
+  }
+
+  if (!rows || !lastAction || !(lastAction.gameStatus === GameStatus.IN_PROGRESS || lastAction.gameStatus === GameStatus.ENDED)) {
     return null;
   }
 
   return (
-    <View style={styles.board}>
+    <View
+      style={styles.board}
+      ref={(ref) => boardLayoutRef.current = ref}
+      onLayout={() => { onBoardLayout() }}>
       {rows}
     </View>
   )

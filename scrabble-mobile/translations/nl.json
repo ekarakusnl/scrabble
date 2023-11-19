@@ -81,8 +81,10 @@
   "game.turn.viewing.player.won": "Gefeliciteerd! Jij hebt het spel gewonnen",
   "game.turn.another.player.won": "{{0}} heeft het spel gewonnen",
 
-  "game.rack.tile.select": "Er is geen tegel geselecteerd. Selecteer eerst een tegel",
+  "game.rack.tile.remove": "Er is geen tegel verwijderd. Verplaats minimaal 1 tegel naar de prullenbak",
+  "game.rack.exchange.empty": "Er zitten verwijderde tegels in de prullenbak. Maak deze eerst leeg",
   "game.board.tile.locate": "Er is geen tegel op het bord geplaatst. Plaats eerst een tegel",
+  "game.board.tile.remove": "Er zijn tegels op het bord geplaatst, verwijder deze eerst",
   "game.user.action.in.progress": "De laatste actie wordt momenteel uitgevoerd. Even geduld a.u.b",
 
   "game.scoreboard.time": "Tijd",
@@ -92,13 +94,14 @@
   "game.chat.loading": "Het laden van de berichten",
   "game.chat.no.message.found": "Er zijn geen berichten gevonden",
 
-  "game.history.action.create": "het spel gemaakt",
+  "game.history.action.create": "heeft het spel gemaakt",
   "game.history.action.join": "deed mee aan het spel",
   "game.history.action.leave": "heeft het spel verlaten",
   "game.history.action.start": "begon het spel",
   "game.history.action.bonus.bingo": "heeft <bold>{{score}}</bold> bonuspunten gekregen voor het gebruiken van alle tegels in het rek om een woord te maken",
   "game.history.action.played.word": "kreeg <bold>{{score}}</bold> punten door het woord te spelen",
   "game.history.action.played.words": "kreeg <bold>{{score}}</bold> punten door de woorden te spelen",
+  "game.history.action.exchange": "heeft <bold>{{exchangedTileCount}}</bold> tegels uitgewisseld",
   "game.history.action.skip": "de beurt overgeslagen",
   "game.history.action.timeout": "heeft de beurt overgeslagen vanwege een time-out",
   "game.history.action.end": "won het spel",
@@ -138,8 +141,9 @@
   "error.2011": "Woorden {{0}} zijn niet gekoppeld aan bestaande woorden",
   "error.2012": "Woorden {{0}} zijn niet gedefinieerd in de taal {{1}}",
   "error.2013": "Het spel wacht op spelers",
-  "error.2014": "Er is deze ronde al een brief uitgewisseld",
+  "error.2014": "Het rek is niet vol, je kunt de tegels niet ruilen",
   "error.2015": "Woorden van één letter {{0}} zijn niet toegestaan",
+  "error.2016": "Er zitten minder tegels in de zak dan de uitgewisselde tegels",
 
   "validation.required": "{{0}} is benodigd",
   "validation.not.valid": "{{0}} is niet geldig"

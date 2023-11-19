@@ -139,6 +139,8 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
       return getBonusMessage(action);
     } else if (action.type === 'PLAY') {
       return getWordsMessage(action);
+    } else if (action.type === 'EXCHANGE') {
+      return getExchangeMessage(action);
     } else if (action.type === 'SKIP') {
       return getStandardActionMessage(t('game.history.action.skip'), action.lastUpdatedDate);
     } else if (action.type === 'TIMEOUT') {
@@ -182,7 +184,7 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
           components={{
             bold: (
               <Text
-                style={styles.bonusScore}>
+                style={styles.bold}>
               </Text>
             )
           }}
@@ -207,7 +209,31 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
           components={{
             bold: (
               <Text
-                style={styles.bonusScore}>
+                style={styles.bold}>
+              </Text>
+            )
+          }}
+          style={styles.wordMessageText} />
+        <Text
+          variant='bodySmall'
+          style={styles.actionDate}>
+          {' [' + moment(action.lastUpdatedDate).format('HH:mm:ss') + ']'}
+        </Text>
+      </Text>
+    )
+  }
+
+  function getExchangeMessage(action: Action): ReactElement {
+    return (
+      <Text style={styles.compositeAction}>
+        <Trans
+          i18nKey={'game.history.action.exchange'}
+          values={{ exchangedTileCount: '?' }}
+          parent={Text}
+          components={{
+            bold: (
+              <Text
+                style={styles.bold}>
               </Text>
             )
           }}
@@ -336,7 +362,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Gilroy-Regular',
   },
-  bonusScore: {
+  bold: {
     fontWeight: 'bold',
   }
 });

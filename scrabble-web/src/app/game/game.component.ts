@@ -433,10 +433,12 @@ export class GameComponent implements OnInit, AfterViewChecked {
       return;
     }
 
+    /*
     this.virtualRackService.exchangeTile(this.game.id, this.selectedTile.number).subscribe((tile: Tile) => {
       this.virtualRack.tiles[this.selectedTile.number - 1] = tile;
       this.selectedTile = null;
     });
+    */
   }
 
   getUsername(userId: number): string {

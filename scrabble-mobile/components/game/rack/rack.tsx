@@ -1,25 +1,39 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { ReactElement, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Badge } from 'react-native-paper';
+
+import Icon from 'react-native-paper/src/components/Icon'
 
 import GameService from '../../../services/game.service';
 import VirtualRackService from '../../../services/virtual-rack.service';
 
+import { DraggableTile } from '../../../model/draggable-tile';
+import { DroppableZone } from '../../../model/droppable-zone';
+import { GameStatus } from '../../../model/game-status';
+import { RackTile } from './tile';
 import { Tile } from '../../../model/tile';
 import { VirtualRack } from '../../../model/virtual-rack';
-import { RackTile } from './tile';
-import { GameStatus } from '../../../model/game-status';
 
 const RACK_SIZE = 7;
+const ON_EXCHANGE_OPACITY = 1;
+const NOT_ON_EXCHANGE_OPACITY = 0.2;
 
-export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef, notificationRef }) {
+export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, boardZoneRef, notificationRef }) {
 
   const { t } = useTranslation();
 
-  const [tiles, setTiles] = useState<ReactElement[]>();
+  const [tiles, setTiles] = useState<ReactElement[]>([]);
+  const [exchangedOpacity, setExchangedOpacity] = useState<number>(0.2);
+  const [exchangedTileCount, setExchangedTileCount] = useState<number>(0);
+  const [showCleanExchangedButton, setShowCleanExchangedButton] = useState<boolean>(false);
+
   const actionInProgress = useRef<boolean>(false);
   const virtualRackRef = useRef<VirtualRack>();
+  const exchangeLayoutRef = useRef<View>();
+  const exchangeZoneRef = useRef<DroppableZone>();
+  const exchangedTilesRef = useRef<Tile[]>([]);
 
   useEffect(() => {
     if (!game || !lastAction || !viewingPlayer || lastAction.gameStatus !== GameStatus.IN_PROGRESS) {
@@ -27,6 +41,7 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
     }
 
     loadRack();
+    setExchangedTileCount(0);
 
     return () => {
       virtualRackRef.current = null;
@@ -62,18 +77,22 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
           <RackTile
             key={'tile_' + tile.number}
             tile={tile}
-            onSelectTile={onSelectTile} />
+            hasTurn={viewingPlayer.playerNumber === lastAction.currentPlayerNumber && !tile.sealed && !tile.exchanged}
+            onDragTile={onDragTile}
+            onDropTile={onDropTile} />
         );
       } else {
         const emptyTile: Tile = {
-          playerNo: null, number: tileNumber + 1, rowNumber: null, columnNumber: null,
-          letter: null, value: null, vowel: false, roundNumber: null, sealed: false, selected: false
+          playerNo: null, number: tileNumber + 1, rowNumber: null, columnNumber: null, letter: null,
+          value: null, vowel: false, roundNumber: null, sealed: false, selected: false, exchanged: false,
         };
         tiles.push(
           <RackTile
             key={'tile_' + emptyTile.number}
             tile={emptyTile}
-            onSelectTile={onSelectTile} />
+            hasTurn={false}
+            onDragTile={null}
+            onDropTile={null} />
         );
       }
     }
@@ -91,9 +110,15 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
       return;
     }
 
-    const anyTileSelected = virtualRackRef.current.tiles.some(tile => tile.sealed);
-    if (!anyTileSelected) {
+    const anyTileSealed = virtualRackRef.current.tiles.some(tile => tile.sealed);
+    if (!anyTileSealed) {
       notificationRef.current.warning(t('game.board.tile.locate'));
+      return;
+    }
+
+    const anyTileExchanged = virtualRackRef.current.tiles.some(tile => tile.exchanged);
+    if (anyTileExchanged) {
+      notificationRef.current.warning(t('game.rack.exchange.empty'));
       return;
     }
 
@@ -117,11 +142,22 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
       return;
     }
 
+    const anyTileExchanged = virtualRackRef.current.tiles.some(tile => tile.exchanged);
+    if (anyTileExchanged) {
+      notificationRef.current.warning(t('game.rack.exchange.empty'));
+      return;
+    }
+
     actionInProgress.current = true;
     virtualRackRef.current.tiles.map((tile: Tile) => {
       tile.sealed = false;
+      tile.cellNumber = null;
+      tile.rowNumber = null;
+      tile.columnNumber = null;
     });
+
     update();
+
     GameService.play(game.id, virtualRackRef.current).then(() => {
       actionInProgress.current = false;
     }).catch((error) => {
@@ -139,19 +175,22 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
     if (viewingPlayer.playerNumber !== lastAction.currentPlayerNumber) {
       notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
       return;
-    } else if (!selectedTileRef.current) {
-      notificationRef.current.warning(t('game.rack.tile.select'));
+    } else if (exchangedTilesRef.current.length === 0) {
+      notificationRef.current.warning(t('game.rack.tile.remove'));
       return;
     } else if (virtualRackRef.current.exchanged) {
       notificationRef.current.warning(t('error.2014'));
       return;
     }
 
+    const anyTileSealed = virtualRackRef.current.tiles.some(tile => tile.sealed);
+    if (anyTileSealed) {
+      notificationRef.current.warning(t('game.board.tile.remove'));
+      return;
+    }
+
     actionInProgress.current = true;
-    VirtualRackService.exchangeTile(game.id, selectedTileRef.current.number).then((tile: Tile) => {
-      virtualRackRef.current.tiles[selectedTileRef.current.number - 1] = tile;
-      update();
-      selectedTileRef.current = null;
+    GameService.play(game.id, virtualRackRef.current).then(() => {
       actionInProgress.current = false;
     }).catch((error) => {
       actionInProgress.current = false;
@@ -159,50 +198,122 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
     });
   }
 
-  function onSelectTile(tile: Tile): void {
+  function onDragTile(draggableTile: DraggableTile): void {
     if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
-      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
       return;
     }
 
-    if (tile.sealed) {
-      // the tile already is sealed in the board
-      selectedTileRef.current = null;
-    } else if (selectedTileRef.current && selectedTileRef.current.number === tile.number) {
-      // the selected tile is clicked again, deselect now
-      selectedTileRef.current.selected = false;
+    if (isBoardZone(draggableTile)) {
+      boardRef.current.onDragTile(draggableTile);
+    }
 
-      // reset the selected tile number
-      selectedTileRef.current = null;
-
-      // update the rack
-      update();
-    } else if (selectedTileRef.current && selectedTileRef.current.number !== tile.number) {
-      // first deselect the previous selected tile
-      selectedTileRef.current.selected = false;
-
-      // now select the current selected tile
-      tile.selected = true;
-
-      // set the selected tile
-      selectedTileRef.current = tile;
-
-      // update the rack
-      update();
+    if (isExchangeZone(draggableTile)) {
+      setExchangedOpacity(ON_EXCHANGE_OPACITY);
     } else {
-      // select the selected tile
-      tile.selected = true;
+      setExchangedOpacity(NOT_ON_EXCHANGE_OPACITY);
+    }
+  }
 
-      // set the selected tile
-      selectedTileRef.current = tile;
+  function onDropTile(draggableTile: DraggableTile): void {
+    if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
+      return;
+    }
 
-      // update the rack
+    if (!draggableTile.tile.sealed && isExchangeZone(draggableTile)) {
+      draggableTile.tile.exchanged = true;
+      exchangedTilesRef.current.push(draggableTile.tile);
+      setExchangedTileCount(exchangedTilesRef.current.length);
+    } else if (isBoardZone(draggableTile)) {
+      boardRef.current.onDropTile(draggableTile);
+    }
+    setExchangedOpacity(NOT_ON_EXCHANGE_OPACITY);
+  }
+
+  function isBoardZone(draggableTile: DraggableTile): boolean {
+    if (!boardZoneRef.current) {
+      return false;
+    }
+
+    const horizontalCenter = draggableTile.x + (draggableTile.width / 2);
+    const verticalCenter = draggableTile.y + (draggableTile.height / 2);
+
+    const boardZone = boardZoneRef.current;
+    return (isTileBetweenHorizontal(horizontalCenter, boardZone.x, boardZone.x + boardZone.width)
+      && isTileBetweenVertical(verticalCenter, boardZone.y, boardZone.y + boardZone.height));
+  }
+
+  function isExchangeZone(draggableTile: DraggableTile): boolean {
+    const exchangeZone = exchangeZoneRef.current;
+    return (isTileBetweenHorizontal(exchangeZone.x, draggableTile.x, draggableTile.x + draggableTile.width)
+      || isTileBetweenHorizontal(exchangeZone.x + exchangeZone.width, draggableTile.x, draggableTile.x + draggableTile.width))
+      && (isTileBetweenVertical(exchangeZone.y, draggableTile.y, draggableTile.y + draggableTile.height)
+        || isTileBetweenVertical(exchangeZone.y + exchangeZone.height, draggableTile.y, draggableTile.y + draggableTile.height));
+  }
+
+  function isTileBetweenHorizontal(x: number, start: number, end: number): boolean {
+    return start <= x && x <= end;
+  }
+
+  function isTileBetweenVertical(y: number, start: number, end: number): boolean {
+    return start <= y && y <= end;
+  }
+
+  function onExchangeLayout(): void {
+    if (exchangeLayoutRef.current) {
+      const paddingHorizontal = 14;
+      const paddingVertical = 10;
+      exchangeLayoutRef.current.measure((fx, fy, width, height, px, py) => {
+        exchangeZoneRef.current = {
+          x: px + paddingHorizontal,
+          y: py + paddingVertical,
+          width: width - paddingHorizontal,
+          height: height - paddingVertical
+        };
+      });
+    }
+  }
+
+  function onPressExchanged(): void {
+    if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
+      return;
+    }
+
+    if (!showCleanExchangedButton) {
+      setShowCleanExchangedButton(true);
+      setExchangedOpacity(ON_EXCHANGE_OPACITY);
+    } else {
+      setShowCleanExchangedButton(false);
+      setExchangedOpacity(NOT_ON_EXCHANGE_OPACITY);
+    }
+  }
+
+  function onPressCleanExchanged(): void {
+    if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
+      return;
+    }
+
+    if (showCleanExchangedButton) {
+      // reset the exchange status of the tiles
+      exchangedTilesRef.current.forEach((tile: Tile) => {
+        tile.exchanged = false;
+      });
+
+      // empty the exchanged tiles
+      exchangedTilesRef.current = [];
+
+      // reset the exchanged tile count
+      setExchangedTileCount(0);
+
+      // reset the rack
       update();
+
+      setShowCleanExchangedButton(false);
+      setExchangedOpacity(NOT_ON_EXCHANGE_OPACITY);
     }
   }
 
   if (!game || !lastAction || lastAction.gameStatus !== GameStatus.IN_PROGRESS ||
-        !virtualRackRef || !virtualRackRef.current || !tiles) {
+    !virtualRackRef || !virtualRackRef.current || !tiles) {
     return null;
   }
 
@@ -211,6 +322,26 @@ export function Rack({ game, lastAction, viewingPlayer, selectedTileRef, rackRef
       colors={['#e3cfaa', '#7d5b42']}
       style={styles.rack}>
       {tiles}
+      <View
+        ref={(ref) => exchangeLayoutRef.current = ref}
+        onLayout={() => { onExchangeLayout() }}
+        style={styles.exchange}>
+        <TouchableOpacity
+          onPress={() => onPressExchanged()}
+          style={{ opacity: exchangedOpacity }}>
+          <Icon
+            source="trash-can-outline"
+            color='black'
+            size={48} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => onPressCleanExchanged()}>
+          <Badge
+            size={16}
+            style={[styles.exchangeBadge, { backgroundColor: showCleanExchangedButton ? 'red' : '#343a40' }]}>
+            {showCleanExchangedButton ? 'X' : exchangedTileCount}
+          </Badge>
+        </TouchableOpacity>
+      </View>
     </LinearGradient>
   )
 };
@@ -226,10 +357,23 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 3,
     borderWidth: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingTop: 6,
     paddingBottom: 6,
     marginTop: 4,
     marginLeft: 8,
     marginRight: 8,
+  },
+  exchange: {
+    flexDirection: 'row',
+  },
+  exchangeBadge: {
+    backgroundColor: '#343a40',
+    color: '#f8f9fa',
+    fontSize: 10,
+    fontFamily: 'Gilroy-Bold',
+    position: 'absolute',
+    top: 0,
+    right: 0,
   },
 });

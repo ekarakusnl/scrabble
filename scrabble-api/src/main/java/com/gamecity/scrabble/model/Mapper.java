@@ -228,6 +228,7 @@ public class Mapper {
                 .playerNumber(tile.getPlayerNumber())
                 .roundNumber(tile.getRoundNumber())
                 .rowNumber(tile.getRowNumber())
+                .exchanged(tile.isExchanged())
                 .sealed(tile.isSealed())
                 .value(tile.getValue())
                 .vowel(tile.isVowel())
@@ -252,6 +253,7 @@ public class Mapper {
                 .roundNumber(tileDto.getRoundNumber())
                 .rowNumber(tileDto.getRowNumber())
                 .sealed(tileDto.isSealed())
+                .exchanged(tileDto.isExchanged())
                 .value(tileDto.getValue())
                 .vowel(tileDto.isVowel())
                 .build();

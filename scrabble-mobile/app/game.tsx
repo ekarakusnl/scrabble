@@ -19,10 +19,10 @@ import GameService from '../services/game.service';
 import PlayerService from '../services/player.service';
 
 import { Action } from '../model/action';
+import { DroppableZone } from '../model/droppable-zone';
 import { Game } from '../model/game';
 import { GameStatus } from '../model/game-status';
 import { Player } from '../model/player';
-import { Tile } from '../model/tile';
 
 export default function GameScreen() {
 
@@ -45,7 +45,7 @@ export default function GameScreen() {
   const gameRef = useRef<Game>();
   const playerRef = useRef<Player>();
   const lastActionRef = useRef<Action>();
-  const selectedTileRef = useRef<Tile>();
+  const boardZoneRef = useRef<DroppableZone>();
 
   // page variables
   const syncLastActionRef = useRef<boolean>(false);
@@ -133,7 +133,8 @@ export default function GameScreen() {
       <Board
         game={gameRef.current}
         lastAction={lastActionRef.current}
-        selectedTileRef={selectedTileRef}
+        boardRef={boardRef}
+        boardZoneRef={boardZoneRef}
         rackRef={rackRef}
         notificationRef={notificationRef} />
     );
@@ -145,8 +146,9 @@ export default function GameScreen() {
         game={gameRef.current}
         lastAction={lastActionRef.current}
         viewingPlayer={playerRef.current}
-        selectedTileRef={selectedTileRef}
         rackRef={rackRef}
+        boardRef={boardRef}
+        boardZoneRef={boardZoneRef}
         notificationRef={notificationRef} />
     );
   }

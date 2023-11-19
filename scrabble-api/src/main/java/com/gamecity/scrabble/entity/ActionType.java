@@ -38,6 +38,11 @@ public enum ActionType {
     SKIP,
 
     /**
+     * The turn is skipped due to exchanging letters
+     */
+    EXCHANGE,
+
+    /**
      * The player used all tiles (7) in the rack to create a single word
      */
     BONUS_BINGO,

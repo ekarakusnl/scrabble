@@ -10,4 +10,5 @@ export interface Tile {
   roundNumber: number;
   sealed: boolean;
   selected: boolean;
+  exchanged: boolean;
 }

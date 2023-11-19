@@ -27,7 +27,6 @@ public class VirtualRack implements Serializable {
 
     private static final long serialVersionUID = -174263293304406460L;
 
-    private boolean exchanged;
     private List<VirtualTile> tiles;
 
 }

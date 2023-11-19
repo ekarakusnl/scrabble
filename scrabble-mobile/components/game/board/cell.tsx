@@ -1,19 +1,46 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Avatar, Text, TouchableRipple } from 'react-native-paper';
+
+import { DroppableCell } from '../../../model/droppable-cell';
 
 const usedCellColor = ['#fae1a6', '#d8bd72'];
 const playedCellColor = ['#abdbe3', '#abdbe3'];
 const sealedCellColor = ['#f5b7b1', '#f5b7b1'];
 
-export function BoardCell({ cell, onPutTile }) {
+const TILE_ON_CELL_OPACITY = 0.2;
+const TILE_NOT_ON_CELL_OPACITY = 1;
+
+export function BoardCell({ cell, onRemoveTile, onInitializeDroppableCell }) {
+
+  const cellRef = useRef<View>();
+  const droppableCellRef = useRef<DroppableCell>();
+
+  function onCellLayout(): void {
+    if (cellRef.current) {
+      cellRef.current.measure((fx, fy, width, height, px, py) => {
+        droppableCellRef.current = {
+          cell: cell,
+          x: px,
+          y: py,
+          width: width,
+          height: height,
+        };
+        onInitializeDroppableCell(droppableCellRef.current);
+      });
+    }
+  }
 
   return (
     <TouchableRipple
-      onPress={() => onPutTile(cell)}>
-      {
-        cell.letter ?
-          <View style={styles.cell}>
+      onPress={() => onRemoveTile(cell)}>
+      <View
+        ref={(ref) => cellRef.current = ref}
+        onLayout={() => { onCellLayout() }}
+        style={[styles.cell, { backgroundColor: cell.color }]}>
+        {
+          cell.letter ?
             <LinearGradient
               colors={cell.lastPlayed ? playedCellColor : cell.selectedTile ? sealedCellColor : usedCellColor}
               style={styles.cellLetter}>
@@ -21,23 +48,19 @@ export function BoardCell({ cell, onPutTile }) {
                 <Text style={styles.cellLetterScore}>{cell.value}</Text>
               </Text>
             </LinearGradient>
-          </View>
-          :
-          <View style={[styles.cell, { backgroundColor: cell.color }]}>
-            {
-              cell.center ?
-                <Avatar.Icon
-                  size={25}
-                  icon="star-outline"
-                  style={styles.centerIcon} />
-                :
-                <Text style={styles.multiplierLetter}>
-                  {cell.wordScoreMultiplier > 1 ? cell.wordScoreMultiplier + 'W' : cell.letterValueMultiplier > 1 ? cell.letterValueMultiplier + 'L' : ''}
-                </Text>
-            }
-          </View>
-      }
-    </TouchableRipple>
+            :
+            cell.center ?
+              <Avatar.Icon
+                size={25}
+                icon="star-outline"
+                style={styles.centerIcon} />
+              :
+              <Text style={styles.multiplierLetter}>
+                {cell.wordScoreMultiplier > 1 ? cell.wordScoreMultiplier + 'W' : cell.letterValueMultiplier > 1 ? cell.letterValueMultiplier + 'L' : ''}
+              </Text>
+        }
+      </View>
+    </TouchableRipple >
   );
 };
 

@@ -81,8 +81,10 @@
   "game.turn.viewing.player.won": "Congratulations! You won the game",
   "game.turn.another.player.won": "{{0}} won the game",
 
-  "game.rack.tile.select": "No tile has been selected, please select a tile first",
+  "game.rack.tile.remove": "No tile has been removed, please move at least 1 tile to the trash",
+  "game.rack.exchange.empty": "There are removed tiles in the trash, please empty it first",
   "game.board.tile.locate": "No tile has been placed on the board, please place a tile first",
+  "game.board.tile.remove": "There are placed tiles on the board, please remove them first",
   "game.user.action.in.progress": "Last action currently is in progress, please wait",
 
   "game.scoreboard.time": "Time",
@@ -99,6 +101,7 @@
   "game.history.action.bonus.bingo": "got <bold>{{score}}</bold> bonus points for using all tiles in the rack to create a word",
   "game.history.action.played.word": "got <bold>{{score}}</bold> points by playing the word",
   "game.history.action.played.words": "got <bold>{{score}}</bold> points by playing the words",
+  "game.history.action.exchange": "exchanged <bold>{{exchangedTileCount}}</bold> tiles",
   "game.history.action.skip": "skipped the turn",
   "game.history.action.timeout": "skipped the turn due to timeout",
   "game.history.action.end": "won the game",
@@ -139,8 +142,9 @@
   "error.2011": "Words {{0}} are not linked to any existing words",
   "error.2012": "Words {{0}} are not defined in {{1}} language",
   "error.2013": "Game is waiting players",
-  "error.2014": "A letter has already been exchanged this round",
+  "error.2014": "The rack is not full, you cannot exchange the tiles",
   "error.2015": "Single letter words {{0}} are not allowed",
+  "error.2016": "There are less tiles in the bag than the exchanged tiles",
 
   "validation.required": "{{0}} is required",
   "validation.not.valid": "{{0}} is not valid"

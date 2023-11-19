@@ -81,8 +81,10 @@
   "game.turn.viewing.player.won": "Tebrikler! Oyunu kazandınız",
   "game.turn.another.player.won": "{{0}} oyunu kazandı",
 
-  "game.rack.tile.select": "Harf seçilmedi, lütfen önce bir harf seçin",
+  "game.rack.tile.remove": "Çöp kutusu boş, lütfen en az 1 harfi çöp kutusuna taşıyın",
+  "game.rack.exchange.empty": "Çöp kutusunda harfler var, lütfen önce çöp kutusunu boşaltın",
   "game.board.tile.locate": "Tahtaya herhangi bir harf yerleştirilmedi, lütfen en az 1 harf yerleştirin",
+  "game.board.tile.remove": "Tahtaya yerleştirilmiş harfler var, lütfen önce harfleri kaldırın",
   "game.user.action.in.progress": "Son yapılan işlem devam ediyor, lütfen bekleyiniz",
 
   "game.scoreboard.time": "Süre",
@@ -99,6 +101,7 @@
   "game.history.action.bonus.bingo": "tahtadaki bütün harfleri kullanarak bir kelime oluşturduğu için <bold>{{score}}</bold> puan kazandı",
   "game.history.action.played.word": "şu kelimeyi oynayarak <bold>{{score}}</bold> puan kazandı",
   "game.history.action.played.words": "şu kelimeleri oynayarak <bold>{{score}}</bold> puan kazandı",
+  "game.history.action.exchange": "<bold>{{exchangedTileCount}}</bold> harf değiştirdi",
   "game.history.action.skip": "pas geçti",
   "game.history.action.timeout": "süresi dolduğu için pas geçti",
   "game.history.action.end": "oyunu kazandı",
@@ -138,8 +141,9 @@
   "error.2011": "{{0}} kelimeleri tahtadaki kelimelere bağlı değil",
   "error.2012": "{{0}} kelimeleri {{1}} sözlükte bulunamadı",
   "error.2013": "Oyuncular bekleniyor",
-  "error.2014": "Bu round bir harf değiştirdiniz",
+  "error.2014": "Hard değiştirebilmek için tahtanın dolunu olması gerekiyor",
   "error.2015": "Tek harfli {{0}} kelimeleri kullanılamaz",
+  "error.2016": "Değiştirilen harf sayısı torbadaki harf sayısından fazla olamaz ",
 
   "validation.required": "{{0}} zorunludur",
   "validation.not.valid": "{{0}} geçerli değil"

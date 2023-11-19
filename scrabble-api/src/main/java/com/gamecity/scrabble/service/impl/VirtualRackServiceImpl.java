@@ -1,16 +1,18 @@
 package com.gamecity.scrabble.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.RedisRepository;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
@@ -45,14 +47,18 @@ class VirtualRackServiceImpl implements VirtualRackService {
 
     @Override
     public void createRack(Long gameId, Language language, Integer playerNumber) {
-        final VirtualTile[] tiles = new VirtualTile[RACK_SIZE];
+        final List<Tile> tiles = virtualBagService.getTiles(gameId, language);
 
+        final VirtualTile[] virtualTiles = new VirtualTile[RACK_SIZE];
         IntStream.range(1, RACK_SIZE + 1).forEach(tileNumber -> {
-            final VirtualTile tile = createTile(gameId, language, playerNumber, tileNumber, 1, null);
-            tiles[tile.getNumber() - 1] = tile;
+            final VirtualTile tile = createTile(gameId, language, playerNumber, tileNumber, 1, tiles);
+            virtualTiles[tile.getNumber() - 1] = tile;
         });
 
-        final VirtualRack rack = new VirtualRack(false, Arrays.asList(tiles));
+        // update the cached tiles
+        virtualBagService.updateTiles(gameId, tiles);
+
+        final VirtualRack rack = new VirtualRack(Arrays.asList(virtualTiles));
         redisRepository.fillRack(gameId, playerNumber, rack);
         log.info("Rack has been created for player {} on game {}", playerNumber, gameId);
     }
@@ -68,12 +74,9 @@ class VirtualRackServiceImpl implements VirtualRackService {
      * @param vowel        whether a vowel letter should be selected
      * @return the created tile
      */
-    private VirtualTile createTile(Long gameId, Language language, Integer playerNumber, int tileNumber,
-            int roundNumber, Boolean vowel) {
-        final List<Tile> tiles = virtualBagService.getTiles(gameId, language);
-        final List<Tile> availableTiles = tiles.stream()
-                .filter(tile -> tile.getCount() > 0)
-                .collect(Collectors.toList());
+    private VirtualTile createTile(Long gameId, Language language, Integer playerNumber, int tileNumber, int roundNumber,
+                                   List<Tile> tiles) {
+        final List<Tile> availableTiles = tiles.stream().filter(tile -> tile.getCount() > 0).collect(Collectors.toList());
 
         VirtualTile virtualTile = null;
         int index = 0;
@@ -83,18 +86,8 @@ class VirtualRackServiceImpl implements VirtualRackService {
                 return null;
             }
 
-            // a vowel letter is requested but there are no vowels left in the bag
-            if (Boolean.TRUE.equals(vowel) && availableTiles.stream().filter(Tile::isVowel).count() == 0) {
-                return null;
-            }
-
             index = new Random().nextInt(availableTiles.size()) + 1;
             final Tile tile = availableTiles.get(index - 1);
-
-            // filter by vowel
-            if (vowel != null && !vowel.equals(tile.isVowel())) {
-                continue;
-            }
 
             if (tile.getCount() > 0) {
                 virtualTile = VirtualTile.builder()
@@ -108,29 +101,30 @@ class VirtualRackServiceImpl implements VirtualRackService {
                         .build();
 
                 tile.setCount(tile.getCount() - 1);
+                log.debug("Tile {} has been created for player {}", tile.getLetter(), playerNumber);
                 break;
             }
         }
 
-        virtualBagService.updateTiles(gameId, tiles);
         return virtualTile;
     }
 
     @Override
-    public VirtualRack fillRack(Long gameId, Language language, Integer playerNumber, Integer roundNumber,
-            VirtualRack virtualRack) {
-        final List<VirtualTile> updatedTiles = virtualRack.getTiles().stream().map(tile -> {
-            if (Boolean.TRUE.equals(tile.isSealed())) {
-                return createTile(gameId, language, playerNumber, tile.getNumber(), roundNumber, null);
+    public void fillRack(Long gameId, Language language, Integer playerNumber, Integer roundNumber, VirtualRack virtualRack) {
+        final List<Tile> tiles = virtualBagService.getTiles(gameId, language);
+        final List<VirtualTile> updatedVirtualTiles = virtualRack.getTiles().stream().map(tile -> {
+            if (Boolean.TRUE.equals(tile.isSealed()) || Boolean.TRUE.equals(tile.isExchanged())) {
+                return createTile(gameId, language, playerNumber, tile.getNumber(), roundNumber, tiles);
             }
             return tile;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        final VirtualRack filledRack = new VirtualRack(false, updatedTiles);
+        // update the cached tiles
+        virtualBagService.updateTiles(gameId, tiles);
+
+        final VirtualRack filledRack = new VirtualRack(updatedVirtualTiles);
         redisRepository.fillRack(gameId, playerNumber, filledRack);
         log.info("Rack has been refilled for player {} on game {}", playerNumber, gameId);
-
-        return filledRack;
     }
 
     @Override
@@ -145,40 +139,57 @@ class VirtualRackServiceImpl implements VirtualRackService {
     }
 
     @Override
-    public VirtualTile exchangeTile(Long gameId, Language language, Integer playerNumber, Integer roundNumber,
-            Integer tileNumber) {
-        final VirtualRack virtualRack = getRack(gameId, playerNumber, roundNumber);
-        if (virtualRack.isExchanged()) {
-            throw new GameException(GameError.EXCHANGED);
+    public void validateRack(Long gameId, Integer playerNumber, Integer roundNumber, VirtualRack playedRack) {
+        final VirtualRack existingRack = getRack(gameId, playerNumber, roundNumber);
+
+        final Map<Integer, String> tileMap = existingRack.getTiles()
+                .stream()
+                .collect(Collectors.toMap(VirtualTile::getNumber, VirtualTile::getLetter));
+
+        final Predicate<VirtualTile> filter = tile -> tileMap.containsKey(tile.getNumber())
+                && tileMap.get(tile.getNumber()).equals(tile.getLetter());
+
+        long rackMatchCount = playedRack.getTiles().stream().filter(filter).count();
+        if (rackMatchCount != playedRack.getTiles().size()) {
+            throw new GameException(GameError.RACK_DOES_NOT_MATCH);
         }
+    }
 
-        final VirtualTile exchangedVirtualTile = virtualRack.getTiles().get(tileNumber - 1);
-        final VirtualTile newVirtualTile = createTile(gameId, language, playerNumber, tileNumber, roundNumber, true);
-
-        // return the default rack if the requested letter was not able to be created
-        if (newVirtualTile == null) {
-            return exchangedVirtualTile;
-        }
-
-        final List<VirtualTile> updatedTiles = new ArrayList<>(virtualRack.getTiles());
-        updatedTiles.set(tileNumber - 1, newVirtualTile);
-
+    @Override
+    public void exchange(Long gameId, Language language, Integer playerNumber, Integer roundNumber, VirtualRack exchangedRack) {
         final List<Tile> tiles = virtualBagService.getTiles(gameId, language);
-        final Tile exchangedTile = tiles.stream()
-                .filter(tile -> exchangedVirtualTile.getLetter().equals(tile.getLetter()))
-                .findFirst()
-                .orElse(null);
 
-        exchangedTile.setCount(exchangedTile.getCount() + 1);
+        // rack should be full to be able to exchange
+        if (exchangedRack.getTiles().stream().filter(Objects::nonNull).count() < Constants.Game.RACK_SIZE) {
+            throw new GameException(GameError.RACK_IS_NOT_FULL);
+        }
+
+        // number of exchanged tiles cannot be more than the number of tiles in the bag
+        if (exchangedRack.getTiles().stream().filter(VirtualTile::isExchanged).count() > tiles.stream().mapToInt(Tile::getCount).sum()) {
+            throw new GameException(GameError.INSUFFICIENT_TILES);
+        }
+
+        exchangedRack.getTiles().stream().forEach(exchangedRackTile -> {
+            // this tile is not exchanged, return the existing rack tile
+            if (exchangedRackTile.isExchanged()) {
+                // increase the count of the exchanged tile after creating a new tile
+                final Tile exchangedTile = tiles.stream()
+                        .filter(tile -> exchangedRackTile.getLetter().equals(tile.getLetter()))
+                        .findFirst()
+                        .orElse(null);
+                exchangedTile.setCount(exchangedTile.getCount() + 1);
+            }
+        });
+
+        // update the cached tiles
         virtualBagService.updateTiles(gameId, tiles);
 
-        final VirtualRack updatedVirtualRack = new VirtualRack(true, updatedTiles);
-        updateRack(gameId, playerNumber, roundNumber, updatedVirtualRack);
-
-        log.info("Letter {} has been exchanged with {} for player {} on game {}", exchangedVirtualTile.getLetter(),
-                newVirtualTile.getLetter(), playerNumber, gameId);
-
-        return newVirtualTile;
+        final String exchangedRackLetters = exchangedRack.getTiles()
+                .stream()
+                .filter(VirtualTile::isExchanged)
+                .map(VirtualTile::getLetter)
+                .collect(Collectors.joining(","));
+        log.info("Letters {} has been exchanged for player {} on game {}", exchangedRackLetters, playerNumber, gameId);
     }
 
 }

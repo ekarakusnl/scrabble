@@ -1,9 +1,10 @@
 import { StyleSheet, View } from 'react-native';
 
 import { BoardCell } from './cell';
+
 import { Cell } from '../../../model/cell';
 
-export function BoardRow({ cells, onPutTile }) {
+export function BoardRow({ cells, onRemoveTile, onInitializeDroppableCell }) {
 
   return (
     <View style={styles.row}>
@@ -12,7 +13,8 @@ export function BoardRow({ cells, onPutTile }) {
           <BoardCell
             key={'column_' + cell.rowNumber + '_' + cell.columnNumber}
             cell={cell}
-            onPutTile={onPutTile} />
+            onRemoveTile={onRemoveTile}
+            onInitializeDroppableCell={onInitializeDroppableCell} />
         ))
       }
     </View>
