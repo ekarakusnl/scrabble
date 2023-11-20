@@ -1,9 +1,13 @@
-import { Tile } from "./tile";
-
 export interface DraggableTile {
 
-  // the tile
-  tile: Tile;
+  // tile number
+  number: number;
+
+  // tile letter
+  letter: string;
+
+  // tile value
+  value: number;
 
   // initial x coordinate
   x: number;

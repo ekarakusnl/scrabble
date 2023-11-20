@@ -68,7 +68,7 @@ export function PlayerList({ userId, game, lastAction, notificationRef }) {
 
   function leaveGame(): void {
     GameService.leave(game.id).then(() => {
-      router.replace('/search');
+      router.push('/search');
     }).catch((error) => {
       notificationRef.current.error(error.toString());
     });

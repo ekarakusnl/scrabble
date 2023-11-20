@@ -75,7 +75,7 @@ export default function GameScreen() {
   function loadGame(id: number): void {
     GameService.get(id).then((game: Game) => {
       if (!game || game.status === GameStatus.TERMINATED) {
-        router.replace('/myGames');
+        router.push('/myGames');
         return;
       }
 

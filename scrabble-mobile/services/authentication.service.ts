@@ -18,7 +18,7 @@ const AuthenticationService = {
   },
   logout() {
     StorageService.evictUser();
-    router.replace("/login");
+    router.push("/login");
   },
 }
 

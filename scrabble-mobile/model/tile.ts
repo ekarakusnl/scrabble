@@ -9,6 +9,5 @@ export interface Tile {
   vowel: boolean;
   roundNumber: number;
   sealed: boolean;
-  selected: boolean;
   exchanged: boolean;
 }

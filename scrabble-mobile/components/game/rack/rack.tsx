@@ -9,6 +9,8 @@ import Icon from 'react-native-paper/src/components/Icon'
 import GameService from '../../../services/game.service';
 import VirtualRackService from '../../../services/virtual-rack.service';
 
+import { Action } from '../../../model/action';
+import { Cell } from '../../../model/cell';
 import { DraggableTile } from '../../../model/draggable-tile';
 import { DroppableZone } from '../../../model/droppable-zone';
 import { GameStatus } from '../../../model/game-status';
@@ -29,6 +31,7 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
   const [exchangedTileCount, setExchangedTileCount] = useState<number>(0);
   const [showCleanExchangedButton, setShowCleanExchangedButton] = useState<boolean>(false);
 
+  const lastActionRef = useRef<Action>();
   const actionInProgress = useRef<boolean>(false);
   const virtualRackRef = useRef<VirtualRack>();
   const exchangeLayoutRef = useRef<View>();
@@ -40,8 +43,9 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
       return;
     }
 
+    exchangedTilesRef.current = [];
+    lastActionRef.current = lastAction;
     loadRack();
-    setExchangedTileCount(0);
 
     return () => {
       virtualRackRef.current = null;
@@ -49,7 +53,8 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
   }, [lastAction]);
 
   useImperativeHandle(rackRef, () => ({
-    update: () => { update() },
+    updateTile: (tileNumber: number, cell: Cell) => { updateTile(tileNumber, cell) },
+    resetTile: (tileNumber: number) => { resetTile(tileNumber) },
     play: () => { play() },
     skip: () => { skip() },
     exchange: () => { exchange() },
@@ -77,14 +82,14 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
           <RackTile
             key={'tile_' + tile.number}
             tile={tile}
-            hasTurn={viewingPlayer.playerNumber === lastAction.currentPlayerNumber && !tile.sealed && !tile.exchanged}
+            hasTurn={viewingPlayer.playerNumber === lastActionRef.current.currentPlayerNumber && !tile.sealed && !tile.exchanged}
             onDragTile={onDragTile}
             onDropTile={onDropTile} />
         );
       } else {
         const emptyTile: Tile = {
           playerNo: null, number: tileNumber + 1, rowNumber: null, columnNumber: null, letter: null,
-          value: null, vowel: false, roundNumber: null, sealed: false, selected: false, exchanged: false,
+          value: null, vowel: false, roundNumber: null, sealed: false, exchanged: false,
         };
         tiles.push(
           <RackTile
@@ -96,7 +101,30 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
         );
       }
     }
+
+    // reset the exchanged tile count
+    setExchangedTileCount(exchangedTilesRef.current.length);
+
+    // update the tiles
     setTiles(tiles);
+  }
+
+  function updateTile(tileNumber: number, cell: Cell): void {
+    const updatedTile = virtualRackRef.current.tiles.find(tile => tile.number === tileNumber);
+    updatedTile.cellNumber = cell.cellNumber;
+    updatedTile.rowNumber = cell.rowNumber;
+    updatedTile.columnNumber = cell.columnNumber;
+    updatedTile.sealed = true;
+    update();
+  }
+
+  function resetTile(tileNumber: number): void {
+    const resettedTile = virtualRackRef.current.tiles.find(tile => tile.number === tileNumber);
+    resettedTile.cellNumber = null;
+    resettedTile.rowNumber = null;
+    resettedTile.columnNumber = null;
+    resettedTile.sealed = false;
+    update();
   }
 
   function play(): void {
@@ -105,8 +133,8 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
       return;
     }
 
-    if (viewingPlayer.playerNumber !== lastAction.currentPlayerNumber) {
-      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
+    if (viewingPlayer.playerNumber !== lastActionRef.current.currentPlayerNumber) {
+      notificationRef.current.warning(t('error.2007', { 0: lastActionRef.current.currentPlayerNumber }));
       return;
     }
 
@@ -137,8 +165,8 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
       return;
     }
 
-    if (viewingPlayer.playerNumber !== lastAction.currentPlayerNumber) {
-      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
+    if (viewingPlayer.playerNumber !== lastActionRef.current.currentPlayerNumber) {
+      notificationRef.current.warning(t('error.2007', { 0: lastActionRef.current.currentPlayerNumber }));
       return;
     }
 
@@ -172,8 +200,8 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
       return;
     }
 
-    if (viewingPlayer.playerNumber !== lastAction.currentPlayerNumber) {
-      notificationRef.current.warning(t('error.2007', { 0: lastAction.currentPlayerNumber }));
+    if (viewingPlayer.playerNumber !== lastActionRef.current.currentPlayerNumber) {
+      notificationRef.current.warning(t('error.2007', { 0: lastActionRef.current.currentPlayerNumber }));
       return;
     } else if (exchangedTilesRef.current.length === 0) {
       notificationRef.current.warning(t('game.rack.tile.remove'));
@@ -199,11 +227,15 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
   }
 
   function onDragTile(draggableTile: DraggableTile): void {
-    if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
+    if (viewingPlayer.playerNumber !== lastActionRef.current.currentPlayerNumber) {
       return;
     }
 
+    const draggedTile = virtualRackRef.current.tiles.find(tile => tile.number === draggableTile.number);
     if (isBoardZone(draggableTile)) {
+      draggableTile.number = draggedTile.number;
+      draggableTile.letter = draggedTile.letter;
+      draggableTile.value = draggedTile.value;
       boardRef.current.onDragTile(draggableTile);
     }
 
@@ -215,15 +247,19 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
   }
 
   function onDropTile(draggableTile: DraggableTile): void {
-    if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
+    if (viewingPlayer.playerNumber !== lastActionRef.current.currentPlayerNumber) {
       return;
     }
 
-    if (!draggableTile.tile.sealed && isExchangeZone(draggableTile)) {
-      draggableTile.tile.exchanged = true;
-      exchangedTilesRef.current.push(draggableTile.tile);
-      setExchangedTileCount(exchangedTilesRef.current.length);
+    const draggedTile = virtualRackRef.current.tiles.find(tile => tile.number === draggableTile.number);
+    if (!draggedTile.sealed && isExchangeZone(draggableTile)) {
+      draggedTile.exchanged = true;
+      exchangedTilesRef.current.push(draggedTile);
+      update();
     } else if (isBoardZone(draggableTile)) {
+      draggableTile.number = draggedTile.number;
+      draggableTile.letter = draggedTile.letter;
+      draggableTile.value = draggedTile.value;
       boardRef.current.onDropTile(draggableTile);
     }
     setExchangedOpacity(NOT_ON_EXCHANGE_OPACITY);
@@ -274,7 +310,7 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
   }
 
   function onPressExchanged(): void {
-    if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
+    if (viewingPlayer.playerNumber !== lastActionRef.current.currentPlayerNumber) {
       return;
     }
 
@@ -288,7 +324,7 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
   }
 
   function onPressCleanExchanged(): void {
-    if (viewingPlayer.playerNumber != lastAction.currentPlayerNumber) {
+    if (viewingPlayer.playerNumber !== lastActionRef.current.currentPlayerNumber) {
       return;
     }
 
@@ -300,9 +336,6 @@ export function Rack({ game, lastAction, viewingPlayer, rackRef, boardRef, board
 
       // empty the exchanged tiles
       exchangedTilesRef.current = [];
-
-      // reset the exchanged tile count
-      setExchangedTileCount(0);
 
       // reset the rack
       update();

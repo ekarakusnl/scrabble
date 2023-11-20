@@ -81,6 +81,7 @@ export function Board({ game, lastAction, boardRef, boardZoneRef, rackRef, notif
         onRemoveTile={onRemoveTile}
         onInitializeDroppableCell={onInitializeDroppableCell} />;
 
+    // only update the changed rows
     const updatedRows = [];
     for (let rowNumber = 0; rowNumber < ROW_SIZE; rowNumber++) {
       if (cell.rowNumber === rowNumber + 1) {
@@ -94,6 +95,7 @@ export function Board({ game, lastAction, boardRef, boardZoneRef, rackRef, notif
   }
 
   function onBoardLayout(): void {
+    // initialize the board layout to find the dragged cells by using the cell coordinates
     if (boardLayoutRef.current && !boardZoneRef.current) {
       const paddingHorizontal = 0;
       const paddingVertical = 0;
@@ -121,13 +123,14 @@ export function Board({ game, lastAction, boardRef, boardZoneRef, rackRef, notif
   }
 
   function onDragTile(draggableTile: DraggableTile): void {
-    
+
   }
 
   function onDropTile(draggableTile: DraggableTile): void {
     const horizontalCenter = draggableTile.x + (draggableTile.width / 2);
     const verticalCenter = draggableTile.y + (draggableTile.height / 2);
 
+    // find the cell where the tile is released
     const droppableCell = droppableCellsRef.current.find((droppableCell: DroppableCell) => {
       return isTileBetweenHorizontal(horizontalCenter, droppableCell.x, droppableCell.x + droppableCell.width)
         && isTileBetweenVertical(verticalCenter, droppableCell.y, droppableCell.y + droppableCell.height);
@@ -137,57 +140,40 @@ export function Board({ game, lastAction, boardRef, boardZoneRef, rackRef, notif
       return;
     }
 
-    const selectedTile = draggableTile.tile;
-    const cell = droppableCell.cell;
+    const cell = virtualBoardRef.current.cells.find(cell => cell.cellNumber === droppableCell.cellNumber);
     // put the tile to the board
     if (!cell.letter) {
-      // update the cell with the values of the selected tile
-      cell.letter = selectedTile.letter;
-      cell.value = selectedTile.value;
-      cell.selectedTile = selectedTile;
+      // update the tile on the rack
+      rackRef.current.updateTile(draggableTile.number, cell);
 
-      selectedTile.cellNumber = cell.cellNumber;
-      selectedTile.rowNumber = cell.rowNumber;
-      selectedTile.columnNumber = cell.columnNumber;
-      selectedTile.sealed = true;
+      // update the cell with the values of the selected tile
+      cell.letter = draggableTile.letter;
+      cell.tileNumber = draggableTile.number;
+      cell.value = draggableTile.value;
 
       // update the board
       updateRows(cell);
-
-      // update the rack
-      rackRef.current.update();
     } else if (cell.letter) {
       notificationRef.current.warning(t('error.2010', { 0: cell.rowNumber, 1: cell.columnNumber }));
-      selectedTile.sealed = false;
-      selectedTile.selected = false;
-
-      // update the rack
-      rackRef.current.update();
     }
   }
 
   function onRemoveTile(cell: Cell): void {
-    if (!cell.selectedTile) {
+    // do not do anything if no tile is linked to the cell
+    if (!cell.tileNumber) {
       return;
     }
 
-    // remove the tile from the board
-    cell.selectedTile.sealed = false;
-    cell.selectedTile.selected = false;
-    cell.selectedTile.cellNumber = null;
-    cell.selectedTile.rowNumber = null;
-    cell.selectedTile.columnNumber = null;
+    // reset the tile on the rack
+    rackRef.current.resetTile(cell.tileNumber);
 
     // reset the cell
     cell.letter = null;
-    cell.selectedTile = null;
+    cell.tileNumber = null;
     cell.value = null;
 
     // update the board
     updateRows(cell);
-
-    // update the rack
-    rackRef.current.update();
   }
 
   if (!rows || !lastAction || !(lastAction.gameStatus === GameStatus.IN_PROGRESS || lastAction.gameStatus === GameStatus.ENDED)) {

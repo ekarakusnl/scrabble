@@ -21,7 +21,7 @@ export function BoardCell({ cell, onRemoveTile, onInitializeDroppableCell }) {
     if (cellRef.current) {
       cellRef.current.measure((fx, fy, width, height, px, py) => {
         droppableCellRef.current = {
-          cell: cell,
+          cellNumber: cell.cellNumber,
           x: px,
           y: py,
           width: width,
@@ -42,7 +42,7 @@ export function BoardCell({ cell, onRemoveTile, onInitializeDroppableCell }) {
         {
           cell.letter ?
             <LinearGradient
-              colors={cell.lastPlayed ? playedCellColor : cell.selectedTile ? sealedCellColor : usedCellColor}
+              colors={cell.lastPlayed ? playedCellColor : cell.tileNumber ? sealedCellColor : usedCellColor}
               style={styles.cellLetter}>
               <Text style={styles.cellLetterLabel}>{cell.letter}
                 <Text style={styles.cellLetterScore}>{cell.value}</Text>

@@ -69,7 +69,9 @@ export function RackTile({ tile, hasTurn, onDragTile, onDropTile }) {
         initialXPosition.current = px;
         initialYPosition.current = py;
         draggableTileRef.current = {
-          tile: tile,
+          number: tile.number,
+          letter: tile.letter,
+          value: tile.value,
           x: px,
           y: py,
           width: width,
@@ -96,7 +98,7 @@ export function RackTile({ tile, hasTurn, onDragTile, onDropTile }) {
           tile.exchanged || tile.sealed ? ''
             :
             <LinearGradient
-              colors={tile.selected || tile.sealed ? sealedCellColor : defaultCellColor}
+              colors={tile.sealed ? sealedCellColor : defaultCellColor}
               style={styles.tileLetter}>
               <Text style={styles.tileLetterLabel}>{tile.letter}
                 <Text style={styles.tileLetterScore}>{tile.value}</Text>

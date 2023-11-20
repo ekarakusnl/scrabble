@@ -888,7 +888,58 @@ class TestGameService extends AbstractServiceTest {
     }
 
     @Test
-    void test_play_multiplier_cell_value_only_used_in_first_word() {
+    void test_play_multiplier_cell_value_used_in_double_words_in_same_round() {
+        prepareGame();
+        prepareBoard();
+        prepareCalculateScore();
+        // create the word WEAK
+        prepareUsedRackByRow(8, 7, "WEAK");
+        // create the word (E)RRAT
+        prepareUsedRackByColumn(9, 8, "RRAT");
+        prepareRepository();
+
+        // the words are valid
+        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
+        final DictionaryWord erratWord = DictionaryWord.builder().word("ERRAT").build();
+        when(dictionaryService.getWord(eq("ERRAT"), any(Language.class))).thenReturn(erratWord);
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+
+        // the words are found in the dictionary
+        verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
+        verify(dictionaryService, times(1)).getWord("ERRAT", Language.en);
+
+        // the word score is added to the player score
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 34);
+
+        final Word weak = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(22)
+                .word("WEAK")
+                .build();
+
+        final Word errat = Word.builder()
+                .actionId(DEFAULT_ACTION_ID)
+                .gameId(DEFAULT_GAME_ID)
+                .userId(DEFAULT_USER_ID)
+                .roundNumber(1)
+                .score(12)
+                .word("ERRAT")
+                .build();
+
+        // the words are logged in the words
+        verify(wordService, times(1)).saveAll(Arrays.asList(weak, errat));
+    }
+
+    @Test
+    void test_play_multiplier_cell_value_not_used_multiple_rounds() {
         prepareGame();
         prepareBoard();
         prepareCalculateScore();

@@ -1,5 +1,3 @@
-import { Tile } from "./tile";
-
 export interface Cell {
   cellNumber: number;
   rowNumber: number;
@@ -17,5 +15,5 @@ export interface Cell {
   sealed: boolean;
   roundNumber: number;
   lastPlayed: boolean;
-  selectedTile: Tile;
+  tileNumber: number;
 }

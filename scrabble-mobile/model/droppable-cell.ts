@@ -1,9 +1,7 @@
-import { Cell } from "./cell";
-
 export interface DroppableCell {
 
-  // the cell
-  cell: Cell;
+  // cell number
+  cellNumber: number;
 
   // initial x coordinate
   x: number;
