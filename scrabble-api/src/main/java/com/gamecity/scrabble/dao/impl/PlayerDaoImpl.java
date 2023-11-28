@@ -15,7 +15,7 @@ class PlayerDaoImpl extends AbstractDaoImpl<Player> implements PlayerDao {
 
     @Override
     public Player getByUserId(Long gameId, Long userId) {
-        return getByNamedQuery(Constants.NamedQuery.getPlayersByUserId,
+        return getByNamedQuery(Constants.NamedQuery.getPlayerByUserId,
                 Arrays.asList(Pair.of("gameId", gameId), Pair.of("userId", userId)));
     }
 

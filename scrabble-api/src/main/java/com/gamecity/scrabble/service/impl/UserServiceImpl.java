@@ -1,12 +1,11 @@
 package com.gamecity.scrabble.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,8 +31,7 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
 
     private UserRoleService userRoleService;
 
-    @Autowired
-    void setUserRoleService(UserRoleService userRoleService) {
+    public UserServiceImpl(final UserRoleService userRoleService) {
         this.userRoleService = userRoleService;
     }
 
@@ -44,13 +42,11 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
             throw new UserException(UserError.NOT_FOUND);
         }
 
-        final List<BaseAuthority> authorities = new ArrayList<>();
+        final List<BaseAuthority> authorities = userRoleService.getRolesByUser(user.getId())
+                .stream()
+                .map(roleType -> new BaseAuthority(ROLE_PREFIX + roleType.name()))
+                .collect(Collectors.toList());
         user.setAuthorities(authorities);
-
-        final List<Role> roles = userRoleService.getRolesByUser(user.getId());
-        if (!roles.isEmpty()) {
-            roles.forEach(roleType -> authorities.add(new BaseAuthority(ROLE_PREFIX + roleType.name())));
-        }
 
         return user;
     }

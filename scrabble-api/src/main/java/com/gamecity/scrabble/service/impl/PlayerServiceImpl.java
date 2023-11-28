@@ -2,37 +2,26 @@ package com.gamecity.scrabble.service.impl;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.dao.PlayerDao;
 import com.gamecity.scrabble.entity.Player;
-import com.gamecity.scrabble.entity.User;
 import com.gamecity.scrabble.service.PlayerService;
-import com.gamecity.scrabble.service.UserService;
 
 @Service(value = "playerService")
 class PlayerServiceImpl extends AbstractServiceImpl<Player, PlayerDao> implements PlayerService {
 
-    private UserService userService;
-
-    @Autowired
-    void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
     @Override
-    public void add(Long gameId, Long userId, Integer playerNumber) {
-        final Player player = new Player();
-        player.setGameId(gameId);
-        player.setUserId(userId);
-        player.setPlayerNumber(playerNumber);
-        player.setScore(0);
-        player.setJoinedDate(new Date());
-
-        baseDao.save(player);
+    public Player add(Long gameId, Long userId, Integer playerNumber) {
+        final Player player = Player.builder()
+                .gameId(gameId)
+                .userId(userId)
+                .playerNumber(playerNumber)
+                .score(0)
+                .joinedDate(new Date())
+                .build();
+        return baseDao.save(player);
     }
 
     @Override
@@ -43,9 +32,7 @@ class PlayerServiceImpl extends AbstractServiceImpl<Player, PlayerDao> implement
 
     @Override
     public List<Player> getPlayers(Long gameId) {
-        final List<Player> players = baseDao.getCurrentPlayers(gameId);
-        players.stream().map(this::populateUsername).collect(Collectors.toList());
-        return players;
+        return baseDao.getCurrentPlayers(gameId);
     }
 
     @Override
@@ -62,15 +49,7 @@ class PlayerServiceImpl extends AbstractServiceImpl<Player, PlayerDao> implement
     public void updateScore(Long gameId, Integer playerNumber, Integer newWordsScore) {
         final Player player = getByPlayerNumber(gameId, playerNumber);
         player.setScore(player.getScore() + newWordsScore);
-        save(player);
-    }
-
-    // ------------------------------------ private methods ------------------------------------ //
-
-    private Player populateUsername(Player player) {
-        final User user = userService.get(player.getUserId());
-        player.setUsername(user.getUsername());
-        return player;
+        baseDao.save(player);
     }
 
 }

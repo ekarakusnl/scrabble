@@ -15,38 +15,33 @@ import javax.persistence.Version;
 
 import com.gamecity.scrabble.Constants;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
- * Represents the properites of a game created by a {@link User user}. A game is played between defined
- * number of {@link Player players} on a {@link Board board} by using {@link Tile tiles} to play
- * {@link Word words}
+ * Represents the properites of a game created by a {@link User user}. A game is played between
+ * defined number of {@link Player players} on a {@link Board board} by using {@link Tile tiles} to
+ * play {@link Word words}
  * 
  * @author ekarakus
  */
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = false)
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@SuperBuilder
 @Entity(name = "Game")
 @Table(name = "games")
 @NamedQueries({
-        @NamedQuery(name = Constants.NamedQuery.searchByUser, query =
-                "Select g from Game g, Player p " +
-                " where p.gameId = g.id " + 
-                "   and p.userId = :userId " +
-                "   and p.leftDate is null " +
-                "   and g.status in ('WAITING', 'IN_PROGRESS', 'ENDED') " +
-                " order by g.createdDate asc"),
-        @NamedQuery(name = Constants.NamedQuery.searchGames, query =
-                "Select g from Game g " +
-                " where g.status = 'WAITING' " + 
-                "   and not exists (select userId from Player p " +
-                "                    where p.gameId = g.id " +
-                "                      and p.leftDate is null " +
-                "                      and p.userId = :userId) " +
-                " order by g.createdDate asc") })
+        @NamedQuery(name = Constants.NamedQuery.searchByUser, query = "Select g from Game g, Player p "
+                + " where p.gameId = g.id " + "   and p.userId = :userId " + "   and p.leftDate is null "
+                + "   and g.status in ('WAITING', 'IN_PROGRESS', 'ENDED') " + " order by g.createdDate asc"),
+        @NamedQuery(name = Constants.NamedQuery.searchGames, query = "Select g from Game g "
+                + " where g.status = 'WAITING' " + "   and not exists (select userId from Player p "
+                + "                    where p.gameId = g.id " + "                      and p.leftDate is null "
+                + "                      and p.userId = :userId) " + " order by g.createdDate asc")
+})
 public class Game extends AbstractEntity {
 
     // @JoinColumn(name = "owner_id", referencedColumnName = "id", foreignKey = @ForeignKey(name =

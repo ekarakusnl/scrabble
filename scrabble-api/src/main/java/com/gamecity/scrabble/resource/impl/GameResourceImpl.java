@@ -67,7 +67,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
 
         publishLastAction(game);
 
-        schedulerService.scheduleTerminateGameJob(game.getId());
+        schedulerService.scheduleTerminateGameJob(game.getId(), game.getCreatedDate());
 
         final GameDto responseDto = Mapper.toDto(game);
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
@@ -100,7 +100,8 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
         final VirtualRack rack = Mapper.toEntity(rackDto);
 
         final ActionType actionType = rackDto.getTiles().stream().anyMatch(VirtualTileDto::isSealed) ? ActionType.PLAY
-                : rackDto.getTiles().stream().anyMatch(VirtualTileDto::isExchanged) ? ActionType.EXCHANGE : ActionType.SKIP;
+                : rackDto.getTiles().stream().anyMatch(VirtualTileDto::isExchanged) ? ActionType.EXCHANGE
+                        : ActionType.SKIP;
         final Game game = baseService.play(id, userId, rack, actionType);
 
         publishLastAction(game);
@@ -111,14 +112,8 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
             // the last round has been played, schedule the end game job
             schedulerService.scheduleEndGameJob(id);
         } else {
-            final boolean isMaximumSkipCountReached = actionService.isMaximumSkipCountReached(id, game.getExpectedPlayerCount());
-            if (isMaximumSkipCountReached) {
-                // maximum skip count in a row has been reached, schedule the end game job
-                schedulerService.scheduleEndGameJob(id);
-            } else {
-                // schedule the skip turn job for the next turn
-                schedulerService.scheduleSkipTurnJob(game);
-            }
+            // schedule the skip turn job for the next turn
+            schedulerService.scheduleSkipTurnJob(game);
         }
 
         return Response.ok(Mapper.toDto(game)).build();

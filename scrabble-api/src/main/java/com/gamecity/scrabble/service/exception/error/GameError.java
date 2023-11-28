@@ -87,7 +87,12 @@ public enum GameError {
     /**
      * There are less tiles in the bag than the exchanged tiles
      */
-    INSUFFICIENT_TILES(2016, "There are less tiles in the bag than the exchanged tiles!");
+    INSUFFICIENT_TILES(2016, "There are less tiles in the bag than the exchanged tiles!"),
+
+    /**
+     * Game cannot be updated after an action happens in the game
+     */
+    CANNOT_UPDATE_GAME(2017, "Game cannot be updated after an action happens in the game!");
 
     private int code;
     private String message;

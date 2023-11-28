@@ -58,6 +58,11 @@ public enum ActionType {
     END,
 
     /**
+     * Game is deleted
+     */
+    DELETE,
+
+    /**
      * Game is terminated
      */
     TERMINATE

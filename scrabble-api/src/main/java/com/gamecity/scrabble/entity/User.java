@@ -17,27 +17,31 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.gamecity.scrabble.Constants;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
- * User represents a person authorized to use the application. A user is defined with the {@link Role
+ * User represents a person authorized to use the application. A user is defined with the
+ * {@link Role
  * roles} assigned to him to be able to use certain features
  * 
  * @author ekarakus
  */
-@Getter
-@Setter
+@Data
 @EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
+@SuperBuilder
 @Entity(name = "User")
-@Table(name = "users",
-        uniqueConstraints = { @UniqueConstraint(name = "UK_USER_NAME", columnNames = "username"),
-                @UniqueConstraint(name = "UK_USER_EMAIL", columnNames = "email") })
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "UK_USER_NAME", columnNames = "username"),
+        @UniqueConstraint(name = "UK_USER_EMAIL", columnNames = "email")
+})
 @NamedQueries({
-        @NamedQuery(name = Constants.NamedQuery.getUserByUsername,
-                query = "Select u from User u where u.username = :username"),
-        @NamedQuery(name = Constants.NamedQuery.getUserByEmail, query = "Select u from User u where u.email= :email") })
+        @NamedQuery(name = Constants.NamedQuery.getUserByUsername, query = "Select u from User u where u.username = :username"),
+        @NamedQuery(name = Constants.NamedQuery.getUserByEmail, query = "Select u from User u where u.email= :email")
+})
 public class User extends AbstractEntity implements UserDetails {
 
     private static final long serialVersionUID = -4039028552745359265L;
@@ -53,19 +57,19 @@ public class User extends AbstractEntity implements UserDetails {
 
     @Type(type = "org.hibernate.type.NumericBooleanType")
     @Column(name = "enabled", nullable = false)
-    private boolean enabled = true;
+    private boolean enabled;
 
     @Type(type = "org.hibernate.type.NumericBooleanType")
     @Column(name = "account_non_expired", nullable = false)
-    private boolean accountNonExpired = true;
+    private boolean accountNonExpired;
 
     @Type(type = "org.hibernate.type.NumericBooleanType")
     @Column(name = "account_non_locked", nullable = false)
-    private boolean accountNonLocked = true;
+    private boolean accountNonLocked;
 
     @Type(type = "org.hibernate.type.NumericBooleanType")
     @Column(name = "credentials_non_expired", nullable = false)
-    private boolean credentialsNonExpired = true;
+    private boolean credentialsNonExpired;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "preferred_language")

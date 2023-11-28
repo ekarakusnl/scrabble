@@ -35,6 +35,16 @@ public interface Constants {
          * Bingo bonus for using all tiles (7) in the rack
          */
         Integer BINGO_SCORE = 50;
+
+        /**
+         * Number of skipped rounds to end the game automatically
+         */
+        Integer MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW = 2;
+
+        /**
+         * Number of minutes until the game is terminated if it doesn't start
+         */
+        Integer TERMINATE_GAME_DURATION_MINUTES = 10;
     }
 
     /**
@@ -62,7 +72,6 @@ public interface Constants {
         String getCells = "getCells";
 
         // Chat
-        String getChatCount = "getChatCount";
         String getChats = "getChats";
 
         // Game
@@ -70,7 +79,7 @@ public interface Constants {
         String searchGames = "searchGames";
 
         // Player
-        String getPlayersByUserId = "getPlayersByUserId";
+        String getPlayerByUserId = "getPlayerByUserId";
         String getPlayerByPlayerNumber = "getPlayerByPlayerNumber";
         String getCurrentPlayers = "getCurrentPlayers";
 

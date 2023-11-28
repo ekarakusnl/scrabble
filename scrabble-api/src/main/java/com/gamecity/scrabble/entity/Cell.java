@@ -8,18 +8,20 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * A cell represents the properties of a cell in a board
  * 
  * @author ekarakus
  */
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = false)
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@SuperBuilder
 @Entity(name = "Cell")
 @Table(name = "cells")
 public class Cell extends AbstractEntity implements Serializable {

@@ -40,8 +40,9 @@ public interface BaseService<T extends AbstractEntity> {
      * Deletes an entity
      * 
      * @param id <code>id</code> of the the
+     * @return the deleted entity
      */
-    void delete(Long id);
+    T delete(Long id);
 
     /**
      * Gets the {@link List list} of entities

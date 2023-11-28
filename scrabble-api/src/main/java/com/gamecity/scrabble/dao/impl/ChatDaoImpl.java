@@ -14,13 +14,6 @@ import com.gamecity.scrabble.entity.Chat;
 class ChatDaoImpl extends AbstractDaoImpl<Chat> implements ChatDao {
 
     @Override
-    public Integer getChatCount(Long gameId) {
-        final Long count = findGenericTypeByNamedQuery(Constants.NamedQuery.getChatCount,
-                Arrays.asList(Pair.of("gameId", gameId)));
-        return count.intValue();
-    }
-
-    @Override
     public List<Chat> getChats(Long gameId) {
         return listByNamedQuery(Constants.NamedQuery.getChats, Arrays.asList(Pair.of("gameId", gameId)));
     }

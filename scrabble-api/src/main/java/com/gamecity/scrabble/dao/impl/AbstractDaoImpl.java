@@ -67,9 +67,10 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
     }
 
     @Override
-    public void delete(Long id) {
+    public T delete(Long id) {
         final T entity = get(id);
         entityManager.remove(entity);
+        return entity;
     }
 
     @Override
@@ -114,17 +115,6 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
             });
         }
         return query;
-    }
-
-    @SuppressWarnings("unused")
-    protected <G> G findGenericTypeByNamedQuery(String querySql, List<Pair<String, Object>> paramPairs) {
-        try {
-            final Query query = createQueryWithParams(querySql, paramPairs);
-            query.setMaxResults(1);
-            return (G) query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
     }
 
 }

@@ -9,32 +9,27 @@ import javax.persistence.Transient;
 
 import com.gamecity.scrabble.Constants;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * A chat represents the messages sent by the {@link Player players} in a {@link Game game}
  * 
  * @author ekarakus
  */
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = false)
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@SuperBuilder
 @Entity(name = "Chat")
 @Table(name = "chats")
 @NamedQueries({
-        @NamedQuery(name = Constants.NamedQuery.getChatCount, query = "Select count(1) from Chat c where c.gameId = :gameId"),
         @NamedQuery(name = Constants.NamedQuery.getChats, query = "Select new Chat(c, u.username) from Chat c, User u"
-                + " where c.gameId = :gameId and c.userId = u.id order by c.id asc") })
+                + " where c.gameId = :gameId and c.userId = u.id order by c.id asc")
+})
 public class Chat extends AbstractEntity {
-
-    /**
-     * Default constructor
-     */
-    public Chat() {
-        super();
-    }
 
     /**
      * Named query constructor
@@ -43,7 +38,6 @@ public class Chat extends AbstractEntity {
      * @param username
      */
     public Chat(Chat chat, String username) {
-        super();
         this.id = chat.id;
         this.createdDate = chat.createdDate;
         this.lastUpdatedDate = chat.lastUpdatedDate;

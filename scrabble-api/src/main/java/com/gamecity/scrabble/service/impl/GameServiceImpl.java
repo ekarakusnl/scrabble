@@ -2,14 +2,12 @@ package com.gamecity.scrabble.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -69,53 +67,20 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private ActionService actionService;
     private ScoreService scoreService;
 
-    @Autowired
-    void setUserService(UserService userService) {
+    public GameServiceImpl(UserService userService, PlayerService playerService,
+                           VirtualBoardService virtualBoardService, VirtualRackService virtualRackService,
+                           VirtualBagService virtualBagService, ContentService contentService,
+                           DictionaryService dictionaryService, WordService wordService, ActionService actionService,
+                           ScoreService scoreService) {
         this.userService = userService;
-    }
-
-    @Autowired
-    void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;
-    }
-
-    @Autowired
-    void setVirtualBoardService(VirtualBoardService virtualBoardService) {
         this.virtualBoardService = virtualBoardService;
-    }
-
-    @Autowired
-    void setVirtualRackService(VirtualRackService virtualRackService) {
         this.virtualRackService = virtualRackService;
-    }
-
-    @Autowired
-    void setVirtualBagService(VirtualBagService virtualBagService) {
         this.virtualBagService = virtualBagService;
-    }
-
-    @Autowired
-    void setContentService(ContentService contentService) {
         this.contentService = contentService;
-    }
-
-    @Autowired
-    void setDictionaryService(DictionaryService dictionaryService) {
         this.dictionaryService = dictionaryService;
-    }
-
-    @Autowired
-    void setWordService(WordService wordService) {
         this.wordService = wordService;
-    }
-
-    @Autowired
-    void setActionService(ActionService actionService) {
         this.actionService = actionService;
-    }
-
-    @Autowired
-    void setScoreService(ScoreService scoreService) {
         this.scoreService = scoreService;
     }
 
@@ -158,7 +123,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         final Game existingGame = get(game.getId());
 
         if (existingGame.getVersion() > 1) {
-            throw new GameException(GameError.IN_PROGRESS);
+            throw new GameException(GameError.CANNOT_UPDATE_GAME);
         }
 
         existingGame.setName(game.getName());
@@ -284,10 +249,10 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         final Game game = getAndLock(id);
 
-        if (GameStatus.WAITING == game.getStatus()) {
-            throw new GameException(GameError.WAITING);
-        } else if (GameStatus.ENDED == game.getStatus()) {
+        if (game == null || GameStatus.TERMINATED == game.getStatus() || GameStatus.ENDED == game.getStatus()) {
             throw new GameException(GameError.NOT_FOUND);
+        } else if (GameStatus.WAITING == game.getStatus()) {
+            throw new GameException(GameError.WAITING);
         }
 
         final Player player = playerService.getByUserId(game.getId(), userId);
@@ -315,7 +280,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /*
      * When the player plays word(s)
      */
-    private void play(final Long userId, final Game game, final VirtualRack virtualRack, final VirtualBoard virtualBoard) {
+    private void play(final Long userId, final Game game, final VirtualRack virtualRack,
+                      final VirtualBoard virtualBoard) {
         log.info("Playing on game {} as player {}", game.getId(), game.getCurrentPlayerNumber());
 
         final Integer currentRoundNumber = game.getRoundNumber();
@@ -381,6 +347,13 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         // create a skip action
         actionService.add(updatedGame, userId, NO_SCORE, actionType);
+
+        final boolean isMaximumSkipCountReached = actionService.isMaximumSkipCountReached(game.getId(),
+                game.getExpectedPlayerCount());
+        if (isMaximumSkipCountReached) {
+            // maximum skip count in a row has been reached, the game is going to end
+            game.setStatus(GameStatus.READY_TO_END);
+        }
     }
 
     /*
@@ -389,7 +362,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     private void exchange(final Long userId, final Game game, final Player player, final VirtualRack virtualRack) {
         log.info("Exchanging on game {} as player {}", game.getId(), game.getCurrentPlayerNumber());
 
-        virtualRackService.exchange(game.getId(), game.getLanguage(), player.getPlayerNumber(), game.getRoundNumber(), virtualRack);
+        virtualRackService.exchange(game.getId(), game.getLanguage(), player.getPlayerNumber(), game.getRoundNumber(),
+                virtualRack);
 
         assignNextPlayer(game);
         increaseVersion(game);
@@ -403,15 +377,21 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public Game delete(Long id) {
         final Game game = get(id);
 
         if (GameStatus.IN_PROGRESS == game.getStatus()) {
             throw new GameException(GameError.IN_PROGRESS);
         }
 
-        game.setStatus(GameStatus.TERMINATED);
-        baseDao.save(game);
+        game.setStatus(GameStatus.DELETED);
+        game.setVersion(game.getVersion() + 1);
+
+        final Game updatedGame = baseDao.save(game);
+
+        actionService.add(updatedGame, game.getOwnerId(), NO_SCORE, ActionType.DELETE);
+
+        return updatedGame;
     }
 
     @Override
@@ -420,6 +400,14 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         Assert.notNull(id, "id cannot be null");
 
         final Game game = get(id);
+
+        if (GameStatus.WAITING == game.getStatus()) {
+            throw new GameException(GameError.WAITING);
+        }
+
+        if (GameStatus.READY_TO_END != game.getStatus()) {
+            throw new GameException(GameError.IN_PROGRESS);
+        }
 
         game.setEndDate(new Date());
         game.setStatus(GameStatus.ENDED);
@@ -472,20 +460,13 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
      * Get the game and lock it on database level
      */
     private Game getAndLock(Long gameId) {
-        final Game game = baseDao.getAndLock(gameId);
-
-        if (game == null || GameStatus.TERMINATED == game.getStatus()) {
-            throw new GameException(GameError.NOT_FOUND);
-        }
-
-        return game;
+        return baseDao.getAndLock(gameId);
     }
 
     /*
      * Mark the new word letter cells as last played
      */
     private void markNewWordCellsAsPlayed(final List<ConstructedWord> constructedWords) {
-        // mark new word cells as last played
         constructedWords.stream().forEach(word -> {
             word.getCells().forEach(virtualCell -> virtualCell.setLastPlayed(true));
         });
@@ -496,13 +477,16 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
      */
     private void assignNextPlayer(final Game game) {
         // TODO create a service/utility to calculate next player number
-        int nextPlayerNumber = (game.getVersion() % game.getExpectedPlayerCount()) + 1;
+        int nextPlayerNumber = game.getCurrentPlayerNumber() < game.getExpectedPlayerCount()
+                ? game.getCurrentPlayerNumber() + 1
+                : 1;
+
         game.setCurrentPlayerNumber(nextPlayerNumber);
         log.info("Current player is set as player {} on game {}", nextPlayerNumber, game.getId());
     }
 
     /*
-     * Increases the round number by one
+     * Increases the version number by one
      */
     private void increaseVersion(final Game game) {
         game.setVersion(game.getVersion() + 1);
@@ -513,7 +497,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
      */
     private void increaseRoundNumber(final Game game) {
         // TODO create a service/utility to calculate round number
-        if (game.getVersion() % game.getExpectedPlayerCount() == 1) {
+        if (game.getCurrentPlayerNumber().equals(1)) {
             game.setRoundNumber(game.getRoundNumber() + 1);
         }
     }
@@ -521,13 +505,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
     /*
      * Does the validations and finds the words
      */
-    private List<ConstructedWord> findNewWords(final Game game, final VirtualRack updatedRack, final VirtualBoard virtualBoard) {
-        boolean hasNewMove = updatedRack.getTiles().stream().anyMatch(VirtualTile::isSealed);
-        if (!hasNewMove) {
-            // TODO throw an exception
-            return Collections.emptyList();
-        }
-
+    private List<ConstructedWord> findNewWords(final Game game, final VirtualRack updatedRack,
+                                               final VirtualBoard virtualBoard) {
         final VirtualCell[][] boardMatrix = new VirtualCell[BOARD_ROW_SIZE][BOARD_COLUMN_SIZE];
         virtualBoard.getCells().stream().forEach(cell -> {
             boardMatrix[cell.getRowNumber() - 1][cell.getColumnNumber() - 1] = cell;
@@ -558,8 +537,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             }
             cell.setLetter(tile.getLetter());
             cell.setValue(tile.getValue());
-            log.debug("Letter {} with value {} on rack tile {} is located to cell[{},{}]", cell.getLetter(), cell.getValue(),
-                    tile.getNumber(), cell.getRowNumber(), cell.getColumnNumber());
+            log.debug("Letter {} with value {} on rack tile {} is located to cell[{},{}]", cell.getLetter(),
+                    cell.getValue(), tile.getNumber(), cell.getRowNumber(), cell.getColumnNumber());
         });
     }
 
@@ -577,8 +556,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 final ConstructedWord detectedWord = findWordsByDirection(game, cell, HORIZONTAL, constructedWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
-                    log.debug("Horizontal word {} has been detected on game {} by player {}", detectedWord.getWordBuilder(), game.getId(),
-                            game.getCurrentPlayerNumber());
+                    log.debug("Horizontal word {} has been detected on game {} by player {}",
+                            detectedWord.getWordBuilder(), game.getId(), game.getCurrentPlayerNumber());
                 }
             });
         });
@@ -591,8 +570,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 final ConstructedWord detectedWord = findWordsByDirection(game, cell, VERTICAL, constructedWord);
                 if (detectedWord != null) {
                     words.add(detectedWord);
-                    log.debug("Vertical word {} has been detected on game {} by player {}", detectedWord.getWordBuilder(), game.getId(),
-                            game.getCurrentPlayerNumber());
+                    log.debug("Vertical word {} has been detected on game {} by player {}",
+                            detectedWord.getWordBuilder(), game.getId(), game.getCurrentPlayerNumber());
                 }
             });
         });
@@ -615,15 +594,16 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 cell.setRoundNumber(game.getRoundNumber());
             }
 
-            log.debug("A {} {} letter is spotted on [{},{}] on game {} by player {}", constructedWord.isLinked() ? "new linked" : "new",
-                    direction, cell.getRowNumber(), cell.getColumnNumber(), game.getId(), game.getCurrentPlayerNumber());
+            log.debug("A {} {} letter is spotted on [{},{}] on game {} by player {}",
+                    constructedWord.isLinked() ? "new linked" : "new", direction, cell.getRowNumber(),
+                    cell.getColumnNumber(), game.getId(), game.getCurrentPlayerNumber());
         }
 
         boolean emptyCell = cell.getLetter() == null;
         boolean horizontalLast = HORIZONTAL == direction && cell.getColumnNumber() == BOARD_COLUMN_SIZE;
         boolean verticalLast = VERTICAL == direction && cell.getRowNumber() == BOARD_ROW_SIZE;
 
-        // if the cell is not in the last row/column or not empty, then keep detecting the word
+        // if the cell is neither in the last row/column nor empty, then keep detecting the word
         if (!emptyCell && !horizontalLast && !verticalLast) {
             return null;
         }
@@ -652,7 +632,8 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
                 .wordBuilder(constructedWord.getWordBuilder())
                 .direction(direction)
                 .linked(constructedWord.isLinked())
-                .dictionaryWord(dictionaryService.getWord(constructedWord.getWordBuilder().toString(), game.getLanguage()))
+                .dictionaryWord(
+                        dictionaryService.getWord(constructedWord.getWordBuilder().toString(), game.getLanguage()))
                 .build();
 
         // a new word is detected, reset the last constructed word

@@ -13,14 +13,6 @@ import com.gamecity.scrabble.entity.Game;
 public interface ChatDao extends BaseDao<Chat> {
 
     /**
-     * Gets the chat message count in the {@link Game game}
-     * 
-     * @param gameId <code>id</code> of the game
-     * @return the chat message count
-     */
-    Integer getChatCount(Long gameId);
-
-    /**
      * Gets the {@link List list} of the {@link Chat chats} in the {@link Game game}
      * 
      * @param gameId <code>id</code> of the game

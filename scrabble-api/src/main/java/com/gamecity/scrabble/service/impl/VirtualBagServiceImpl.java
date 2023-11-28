@@ -2,7 +2,6 @@ package com.gamecity.scrabble.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,7 @@ class VirtualBagServiceImpl implements VirtualBagService {
 
     private TileDao tileDao;
 
-    @Autowired
-    void setTileDao(TileDao tileDao) {
+    public VirtualBagServiceImpl(final TileDao tileDao) {
         this.tileDao = tileDao;
     }
 

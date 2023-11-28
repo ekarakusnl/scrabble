@@ -11,18 +11,20 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * A bag contains {@link Tile tiles} used in a {@link Game game}
  * 
  * @author ekarakus
  */
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = false)
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@SuperBuilder
 @Entity(name = "Bag")
 @Table(name = "bags")
 @NamedQuery(name = "loadByLanguage", query = "Select b from Bag b where b.language = :language")

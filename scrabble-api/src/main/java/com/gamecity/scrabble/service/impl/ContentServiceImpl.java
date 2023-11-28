@@ -2,7 +2,6 @@ package com.gamecity.scrabble.service.impl;
 
 import java.util.stream.IntStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.entity.Game;
@@ -18,13 +17,9 @@ class ContentServiceImpl implements ContentService {
     private VirtualBoardService virtualBoardService;
     private VirtualRackService virtualRackService;
 
-    @Autowired
-    void setVirtualBoardService(VirtualBoardService virtualBoardService) {
+    public ContentServiceImpl(final VirtualBoardService virtualBoardService,
+                              final VirtualRackService virtualRackService) {
         this.virtualBoardService = virtualBoardService;
-    }
-
-    @Autowired
-    void setVirtualRackService(VirtualRackService virtualRackService) {
         this.virtualRackService = virtualRackService;
     }
 
@@ -41,7 +36,7 @@ class ContentServiceImpl implements ContentService {
 
     @Override
     public void update(Game game, VirtualRack updatedRack, VirtualBoard updatedBoard, Integer playerNumber,
-            Integer roundNumber) {
+                       Integer roundNumber) {
         virtualRackService.updateRack(game.getId(), playerNumber, roundNumber, updatedRack);
         virtualRackService.fillRack(game.getId(), game.getLanguage(), playerNumber, roundNumber + 1, updatedRack);
         virtualBoardService.updateBoard(game.getId(), updatedBoard);

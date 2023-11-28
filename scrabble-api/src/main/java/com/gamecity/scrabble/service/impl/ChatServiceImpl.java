@@ -2,7 +2,6 @@ package com.gamecity.scrabble.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,18 +23,10 @@ class ChatServiceImpl extends AbstractServiceImpl<Chat, ChatDao> implements Chat
     private PlayerService playerService;
     private RedisRepository redisRepository;
 
-    @Autowired
-    void setGameService(GameService gameService) {
+    public ChatServiceImpl(final GameService gameService, final PlayerService playerService,
+                           final RedisRepository redisRepository) {
         this.gameService = gameService;
-    }
-
-    @Autowired
-    void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;
-    }
-
-    @Autowired
-    void setRedisRepository(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 

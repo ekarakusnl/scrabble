@@ -118,18 +118,18 @@ public class Mapper {
      * @return entity representation of the {@link UserDto}
      */
     public static User toEntity(UserDto userDto) {
-        final User user = new User();
-        user.setAccountNonExpired(userDto.isAccountNonExpired());
-        user.setAccountNonLocked(userDto.isAccountNonLocked());
-        user.setCredentialsNonExpired(userDto.isCredentialsNonExpired());
-        user.setEmail(userDto.getEmail());
-        user.setEnabled(userDto.isEnabled());
-        user.setId(userDto.getId());
-        user.setPassword(userDto.getPassword());
-        user.setPreferredLanguage(StringUtils.isEmpty(userDto.getPreferredLanguage()) ? null
-                : Language.valueOf(userDto.getPreferredLanguage()));
-        user.setUsername(userDto.getUsername());
-        return user;
+        return User.builder()
+                .accountNonExpired(userDto.isAccountNonExpired())
+                .accountNonLocked(userDto.isAccountNonLocked())
+                .credentialsNonExpired(userDto.isCredentialsNonExpired())
+                .email(userDto.getEmail())
+                .enabled(userDto.isEnabled())
+                .id(userDto.getId())
+                .password(userDto.getPassword())
+                .preferredLanguage(StringUtils.isEmpty(userDto.getPreferredLanguage()) ? null
+                        : Language.valueOf(userDto.getPreferredLanguage()))
+                .username(userDto.getUsername())
+                .build();
     }
 
     /**
@@ -164,20 +164,20 @@ public class Mapper {
      * @return entity representation of the {@link GameDto}
      */
     public static Game toEntity(GameDto gameDto) {
-        final Game game = new Game();
-        game.setVersion(gameDto.getVersion());
-        game.setActivePlayerCount(gameDto.getActivePlayerCount());
-        game.setCurrentPlayerNumber(gameDto.getCurrentPlayerNumber());
-        game.setDuration(gameDto.getDuration());
-        game.setExpectedPlayerCount(gameDto.getExpectedPlayerCount());
-        game.setId(gameDto.getId());
-        game.setLanguage(Language.valueOf(gameDto.getLanguage()));
-        game.setName(gameDto.getName());
-        game.setOwnerId(gameDto.getOwnerId());
-        game.setRemainingTileCount(gameDto.getRemainingTileCount());
-        game.setRoundNumber(gameDto.getRoundNumber());
-        game.setStatus(gameDto.getStatus() == null ? null : GameStatus.valueOf(gameDto.getStatus()));
-        return game;
+        return Game.builder()
+                .version(gameDto.getVersion())
+                .activePlayerCount(gameDto.getActivePlayerCount())
+                .currentPlayerNumber(gameDto.getCurrentPlayerNumber())
+                .duration(gameDto.getDuration())
+                .expectedPlayerCount(gameDto.getExpectedPlayerCount())
+                .id(gameDto.getId())
+                .language(Language.valueOf(gameDto.getLanguage()))
+                .name(gameDto.getName())
+                .ownerId(gameDto.getOwnerId())
+                .remainingTileCount(gameDto.getRemainingTileCount())
+                .roundNumber(gameDto.getRoundNumber())
+                .status(gameDto.getStatus() == null ? null : GameStatus.valueOf(gameDto.getStatus()))
+                .build();
     }
 
     /**
@@ -203,12 +203,12 @@ public class Mapper {
      * @return entity representation of the {@link PlayerDto}
      */
     public static Player toEntity(PlayerDto playerDto) {
-        final Player player = new Player();
-        player.setUserId(playerDto.getUserId());
-        player.setPlayerNumber(playerDto.getPlayerNumber());
-        player.setScore(playerDto.getScore());
-        player.setUsername(playerDto.getUsername());
-        return player;
+        return Player.builder()
+                .userId(playerDto.getUserId())
+                .playerNumber(playerDto.getPlayerNumber())
+                .score(playerDto.getScore())
+                .username(playerDto.getUsername())
+                .build();
     }
 
     /**
@@ -338,12 +338,12 @@ public class Mapper {
      * @return entity representation of the {@link ChatDto}
      */
     public static Chat toEntity(ChatDto chatDto) {
-        final Chat chat = new Chat();
-        chat.setCreatedDate(chatDto.getCreatedDate());
-        chat.setGameId(chatDto.getGameId());
-        chat.setMessage(chatDto.getMessage());
-        chat.setUserId(chatDto.getUserId());
-        return chat;
+        return Chat.builder()
+                .createdDate(chatDto.getCreatedDate())
+                .gameId(chatDto.getGameId())
+                .message(chatDto.getMessage())
+                .userId(chatDto.getUserId())
+                .build();
     }
 
     /**
@@ -375,18 +375,18 @@ public class Mapper {
      * @return entity representation of the {@link ActionDto}
      */
     public static Action toEntity(ActionDto actionDto) {
-        final Action action = new Action();
-        action.setVersion(actionDto.getVersion());
-        action.setCurrentPlayerNumber(actionDto.getCurrentPlayerNumber());
-        action.setGameId(actionDto.getGameId());
-        action.setGameStatus(GameStatus.valueOf(actionDto.getGameStatus()));
-        action.setLastUpdatedDate(actionDto.getLastUpdatedDate());
-        action.setRemainingTileCount(actionDto.getRemainingTileCount());
-        action.setRoundNumber(actionDto.getRoundNumber());
-        action.setScore(actionDto.getScore());
-        action.setType(ActionType.valueOf(actionDto.getType()));
-        action.setUserId(actionDto.getUserId());
-        return action;
+        return Action.builder()
+                .version(actionDto.getVersion())
+                .currentPlayerNumber(actionDto.getCurrentPlayerNumber())
+                .gameId(actionDto.getGameId())
+                .gameStatus(GameStatus.valueOf(actionDto.getGameStatus()))
+                .lastUpdatedDate(actionDto.getLastUpdatedDate())
+                .remainingTileCount(actionDto.getRemainingTileCount())
+                .roundNumber(actionDto.getRoundNumber())
+                .score(actionDto.getScore())
+                .type(ActionType.valueOf(actionDto.getType()))
+                .userId(actionDto.getUserId())
+                .build();
     }
 
     /**
@@ -452,7 +452,6 @@ public class Mapper {
         return ExceptionDto.builder()
                 .code(userException.getCode())
                 .message(userException.getMessage())
-                .params(userException.getParams())
                 .type(ExceptionType.USER)
                 .build();
     }

@@ -18,8 +18,9 @@ public interface PlayerService extends BaseService<Player> {
      * @param gameId       <code>id</code> of the game
      * @param userId       <code>id</code> of the user
      * @param playerNumber <code>number</code> of the player
+     * @return the player
      */
-    void add(Long gameId, Long userId, Integer playerNumber);
+    Player add(Long gameId, Long userId, Integer playerNumber);
 
     /**
      * Removes the {@link Player player} from the {@link Game game}

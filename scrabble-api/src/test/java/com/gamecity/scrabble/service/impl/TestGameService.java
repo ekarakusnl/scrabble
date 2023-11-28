@@ -14,7 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.GameDao;
+import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
@@ -41,15 +43,24 @@ import com.gamecity.scrabble.service.WordService;
 import com.gamecity.scrabble.service.exception.GameException;
 import com.gamecity.scrabble.service.exception.error.GameError;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
 
 class TestGameService extends AbstractServiceTest {
 
-    private static final Map<String, Tile> TILE_MAP = new HashMap<>();
+    private static final List<Integer> TRIPLE_WORD_CELLS = Arrays.asList(1, 8, 15, 106, 120, 211, 218, 225);
+    private static final List<Integer> DOUBLE_WORD_CELLS = Arrays.asList(17, 29, 33, 43, 49, 57, 65, 71, 113, 155, 161,
+            169, 177, 183, 193, 197, 209);
 
-    @InjectMocks
-    private GameService gameService = new GameServiceImpl();
+    private static final List<Integer> TRIPLE_LETTER_CELLS = Arrays.asList(21, 25, 77, 81, 85, 89, 137, 141, 145, 149,
+            201, 205);
+    private static final List<Integer> DOUBLE_LETTER_CELLS = Arrays.asList(4, 12, 37, 39, 46, 53, 60, 93, 97, 99, 103,
+            109, 117, 123, 127, 129, 133, 166, 173, 180, 187, 189, 214, 222);
+
+    private static final Map<String, Tile> TILE_MAP = new HashMap<>();
 
     @Mock
     private GameDao gameDao;
@@ -84,13 +95,17 @@ class TestGameService extends AbstractServiceTest {
     @Mock
     private ScoreServiceImpl scoreService;
 
-    private Game game;
+    @InjectMocks
+    private GameService gameService = new GameServiceImpl(userService, playerService, virtualBoardService,
+            virtualRackService, virtualBagService, contentService, dictionaryService, wordService, actionService,
+            scoreService);
+
     private List<VirtualTile> tiles;
     private VirtualCell[][] boardMatrix;
 
     @BeforeEach
     void beforeEach() {
-        tiles = new ArrayList<>(7);
+        tiles = new ArrayList<>(Constants.Game.RACK_SIZE);
     }
 
     static {
@@ -126,378 +141,621 @@ class TestGameService extends AbstractServiceTest {
     void test_game_not_found() {
         try {
             gameService.get(DEFAULT_GAME_ID);
-            fail("Game exists");
+
+            fail("Found not existing game");
         } catch (GameException e) {
-            assertEquals(GameError.NOT_FOUND.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.NOT_FOUND.getCode()));
         }
     }
 
     @Test
     void test_get_terminated_game() {
         try {
-            when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-                final Game game = new Game();
-                game.setStatus(GameStatus.TERMINATED);
-                return game;
-            });
+            when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.TERMINATED).build());
+
             gameService.get(DEFAULT_GAME_ID);
-            fail("Game is not terminated");
+
+            fail("Found terminated game");
         } catch (GameException e) {
-            assertEquals(GameError.NOT_FOUND.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.NOT_FOUND.getCode()));
         }
     }
 
     @Test
     void test_get_waiting_game() {
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-            final Game game = new Game();
-            game.setStatus(GameStatus.WAITING);
-            return game;
-        });
-        assertNotNull(gameService.get(DEFAULT_GAME_ID));
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.WAITING).build());
+        
+        assertThat(gameService.get(DEFAULT_GAME_ID), notNullValue());
     }
 
     @Test
     void test_get_ready_game() {
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-            final Game game = new Game();
-            game.setStatus(GameStatus.READY_TO_START);
-            return game;
-        });
-        assertNotNull(gameService.get(DEFAULT_GAME_ID));
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.READY_TO_START).build());
+        
+        assertThat(gameService.get(DEFAULT_GAME_ID), notNullValue());
     }
 
     @Test
     void test_get_started_game() {
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-            final Game game = new Game();
-            game.setStatus(GameStatus.IN_PROGRESS);
-            return game;
-        });
-        assertNotNull(gameService.get(DEFAULT_GAME_ID));
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.IN_PROGRESS).build());
+        
+        assertThat(gameService.get(DEFAULT_GAME_ID), notNullValue());
     }
 
     @Test
     void test_create_game() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
+        final User mockUser = mock(User.class);
 
-        when(userService.get(eq(DEFAULT_USER_ID))).thenAnswer(invocation -> {
-            final User user = new User();
-            user.setId(DEFAULT_USER_ID);
-            return user;
-        });
+        final Game sampleGame = Game.builder().ownerId(mockUser.getId()).activePlayerCount(2).build();
 
-        when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
-            final Game game = invocation.getArgument(0);
-            game.setId(DEFAULT_GAME_ID);
-            return game;
+        when(userService.get(eq(mockUser.getId()))).thenReturn(mockUser);
+        when(gameDao.save(sampleGame)).thenAnswer(invocation -> {
+            return invocation.getArgument(0);
         });
 
         final Game game = gameService.save(sampleGame);
 
-        verify(playerService, times(1)).add(sampleGame.getId(), sampleGame.getOwnerId(), sampleGame.getActivePlayerCount());
+        assertThat(game, notNullValue());
+        assertThat(game.getStatus(), equalTo(GameStatus.WAITING));
+        assertThat(game.getOwnerId(), equalTo(mockUser.getId()));
+        assertThat(game.getVersion(), equalTo(1));
+        assertThat(game.getActivePlayerCount(), equalTo(1));
 
-        assertNotNull(game.getId());
-        assertEquals(GameStatus.WAITING, game.getStatus());
-        assertEquals(DEFAULT_USER_ID, game.getOwnerId());
-        assertEquals(1, game.getVersion());
-        assertEquals(1, game.getActivePlayerCount());
+        verify(gameDao, times(1)).save(game);
+        verify(playerService, times(1)).add(sampleGame.getId(), sampleGame.getOwnerId(),
+                sampleGame.getActivePlayerCount());
+        verify(actionService, times(1)).add(game, sampleGame.getOwnerId(), Constants.Game.NO_SCORE, ActionType.CREATE);
     }
 
     @Test
     void test_join_game() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 3);
-        sampleGame.setId(DEFAULT_GAME_ID);
+        final Long joiningUserId = 2L;
+
+        final Game sampleGame = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .activePlayerCount(1)
+                .status(GameStatus.WAITING)
+                .version(1)
+                .build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
-
         when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
 
-        final Game game = gameService.join(DEFAULT_GAME_ID, 2L);
+        final Game game = gameService.join(DEFAULT_GAME_ID, joiningUserId);
 
-        verify(playerService, times(1)).add(sampleGame.getId(), 2L, sampleGame.getActivePlayerCount());
+        assertThat(game.getStatus(), equalTo(GameStatus.WAITING));
+        assertThat(game.getVersion(), equalTo(2));
+        assertThat(game.getActivePlayerCount(), equalTo(2));
 
-        assertEquals(GameStatus.WAITING, game.getStatus());
-        assertEquals(2, game.getVersion());
-        assertEquals(2, game.getActivePlayerCount());
+        verify(gameDao, times(1)).save(game);
+        verify(playerService, times(1)).add(sampleGame.getId(), joiningUserId, sampleGame.getActivePlayerCount());
+        verify(actionService, times(1)).add(game, joiningUserId, Constants.Game.NO_SCORE, ActionType.JOIN);
     }
 
     @Test
     void test_join_started_game() {
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-            final Game game = new Game();
-            game.setStatus(GameStatus.IN_PROGRESS);
-            return game;
-        });
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.IN_PROGRESS).build());
 
         try {
             gameService.join(DEFAULT_GAME_ID, 2L);
-            fail("The game is not in progress");
+            
+            fail("Joined started game");
         } catch (GameException e) {
-            assertEquals(GameError.IN_PROGRESS.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));
         }
     }
 
     @Test
     void test_join_game_with_an_existing_player() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 3);
-        sampleGame.setId(DEFAULT_GAME_ID);
+        final Long joiningUserId = 2L;
+
+        final Game sampleGame = Game.builder().id(DEFAULT_GAME_ID).status(GameStatus.WAITING).build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
-        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(2L))).thenAnswer(invocation -> {
-            return Mockito.mock(Player.class);
-        });
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(joiningUserId))).thenReturn(mock(Player.class));
 
         try {
-            gameService.join(DEFAULT_GAME_ID, 2L);
-            fail("Player is not in the game");
+            gameService.join(DEFAULT_GAME_ID, joiningUserId);
+
+            fail("The player in the game joined the game");
         } catch (GameException e) {
-            assertEquals(GameError.IN_THE_GAME.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.IN_THE_GAME.getCode()));
         }
     }
 
     @Test
     void test_join_game_reaches_expected_player_count() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
+        final Game sampleGame = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .activePlayerCount(1)
+                .expectedPlayerCount(2)
+                .status(GameStatus.WAITING)
+                .version(1)
+                .build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
-
         when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
 
         final Game game = gameService.join(DEFAULT_GAME_ID, 2L);
 
-        assertEquals(GameStatus.READY_TO_START, game.getStatus());
+        assertThat(game.getStatus(), equalTo(GameStatus.READY_TO_START));
     }
 
     @Test
     void test_leave_game() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 3);
-        sampleGame.setId(DEFAULT_GAME_ID);
-        sampleGame.setVersion(2);
-        sampleGame.setActivePlayerCount(2);
+        final Long leavingUserId = 2L;
+
+        final Game sampleGame = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .ownerId(DEFAULT_USER_ID)
+                .activePlayerCount(2)
+                .expectedPlayerCount(3)
+                .status(GameStatus.WAITING)
+                .version(2)
+                .build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
-
         when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(leavingUserId))).thenReturn(mock(Player.class));
 
-        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(2L))).thenAnswer(invocation -> {
-            return Mockito.mock(Player.class);
-        });
+        final Game game = gameService.leave(DEFAULT_GAME_ID, leavingUserId);
 
-        final Game game = gameService.leave(DEFAULT_GAME_ID, 2L);
+        assertThat(game.getStatus(), equalTo(GameStatus.WAITING));
+        assertThat(game.getVersion(), equalTo(3));
+        assertThat(game.getActivePlayerCount(), equalTo(1));
 
+        verify(gameDao, times(1)).save(game);
         verify(playerService, times(1)).remove(any(Player.class));
-
-        assertEquals(GameStatus.WAITING, game.getStatus());
-        assertEquals(3, game.getVersion());
-        assertEquals(1, game.getActivePlayerCount());
+        verify(actionService, times(1)).add(game, leavingUserId, Constants.Game.NO_SCORE, ActionType.LEAVE);
     }
 
     @Test
     void test_leave_started_game() {
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-            final Game game = new Game();
-            game.setStatus(GameStatus.IN_PROGRESS);
-            return game;
-        });
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.IN_PROGRESS).build());
 
         try {
             gameService.leave(DEFAULT_GAME_ID, 2L);
-            fail("The game is not in progress");
+            
+            fail("Player left started game");
         } catch (GameException e) {
-            assertEquals(GameError.IN_PROGRESS.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));
         }
     }
 
     @Test
     void test_leave_game_with_not_existing_player() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 3);
+        final Game sampleGame = Game.builder().id(DEFAULT_GAME_ID).status(GameStatus.WAITING).build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
 
         try {
             gameService.leave(DEFAULT_GAME_ID, 2L);
-            fail("Player is in the game");
+
+            fail("Player that is not in the game left the game");
         } catch (GameException e) {
-            assertEquals(GameError.NOT_IN_THE_GAME.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.NOT_IN_THE_GAME.getCode()));
         }
     }
 
     @Test
     void test_leave_game_with_owner() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 3);
-        sampleGame.setId(DEFAULT_GAME_ID);
+        final Game sampleGame = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .ownerId(DEFAULT_USER_ID)
+                .status(GameStatus.WAITING)
+                .build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
-
-        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
-            final Player player = new Player();
-            player.setUserId(invocation.getArgument(0));
-            return player;
-        });
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenReturn(mock(Player.class));
 
         try {
             gameService.leave(DEFAULT_GAME_ID, 1L);
-            fail("Owner is able to leave the game");
+
+            fail("Owner left the game");
         } catch (GameException e) {
-            assertEquals(GameError.OWNER_CANNOT_LEAVE.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.OWNER_CANNOT_LEAVE.getCode()));
+        }
+    }
+
+    @Test
+    void test_delete_game() {
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().ownerId(DEFAULT_USER_ID).version(1).build());
+        when(gameDao.save(any())).thenAnswer(invocation -> {
+            return invocation.getArgument(0);
+        });
+
+        final Game game = gameService.delete(DEFAULT_GAME_ID);
+
+        assertThat(game, notNullValue());
+        assertThat(game.getStatus(), equalTo(GameStatus.DELETED));
+        assertThat(game.getVersion(), equalTo(2));
+
+        verify(gameDao, times(1)).save(game);
+        verify(actionService, times(1)).add(game, DEFAULT_USER_ID, Constants.Game.NO_SCORE, ActionType.DELETE);
+    }
+
+    @Test
+    void test_delete_started_game() {
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.IN_PROGRESS).build());
+
+        try {
+            gameService.delete(DEFAULT_GAME_ID);
+
+            fail("Started game is deleted");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));
+        }
+    }
+
+    @Test
+    void test_terminate_game() {
+        final Game sampleGame = Game.builder().ownerId(DEFAULT_USER_ID).status(GameStatus.WAITING).version(1).build();
+
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
+        when(gameDao.save(any())).thenAnswer(invocation -> {
+            return invocation.getArgument(0);
+        });
+
+        final Game game = gameService.terminate(DEFAULT_GAME_ID);
+
+        assertThat(game, notNullValue());
+        assertThat(game.getStatus(), equalTo(GameStatus.TERMINATED));
+        assertThat(game.getVersion(), equalTo(2));
+
+        verify(gameDao, times(1)).save(game);
+        verify(actionService, times(1)).add(game, DEFAULT_USER_ID, Constants.Game.NO_SCORE, ActionType.TERMINATE);
+    }
+
+    @Test
+    void test_terminate_started_game() {
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.IN_PROGRESS).build());
+
+        try {
+            gameService.terminate(DEFAULT_GAME_ID);
+
+            fail("Started game is deleted");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));
         }
     }
 
     @Test
     void test_start_game() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
-        sampleGame.setId(DEFAULT_GAME_ID);
-        sampleGame.setStatus(GameStatus.READY_TO_START);
+        final Game sampleGame = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .ownerId(DEFAULT_USER_ID)
+                .name("My game")
+                .duration(60)
+                .language(Language.en)
+                .activePlayerCount(2)
+                .expectedPlayerCount(2)
+                .status(GameStatus.READY_TO_START)
+                .version(2)
+                .build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
-
         when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
-        when(virtualBagService.getTiles(eq(DEFAULT_GAME_ID), eq(Language.valueOf(DEFAULT_BAG_LANGUAGE))))
+        when(virtualBagService.getTiles(eq(DEFAULT_GAME_ID), eq(Language.en)))
                 .thenReturn(TILE_MAP.values().stream().collect(Collectors.toList()));
 
         final Game game = gameService.start(DEFAULT_GAME_ID);
 
-        assertNotNull(game.getStartDate());
-        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
-        assertEquals("My game", game.getName());
-        assertEquals(2, game.getExpectedPlayerCount());
-        assertEquals(2, game.getDuration());
-        assertEquals(1, game.getCurrentPlayerNumber());
-        assertEquals(1, game.getRoundNumber());
-        assertEquals(2, game.getVersion());
-        assertEquals(84, game.getRemainingTileCount());
+        assertThat(game.getStartDate(), notNullValue());
+        assertThat(game.getStatus(), equalTo(GameStatus.IN_PROGRESS));
+        assertThat(game.getName(), equalTo("My game"));
+        assertThat(game.getExpectedPlayerCount(), equalTo(2));
+        assertThat(game.getDuration(), equalTo(60));
+        assertThat(game.getCurrentPlayerNumber(), equalTo(1));
+        assertThat(game.getRoundNumber(), equalTo(1));
+        assertThat(game.getVersion(), equalTo(3));
+        assertThat(game.getRemainingTileCount(), equalTo(84));
+
+        verify(gameDao, times(1)).save(game);
+        verify(actionService, times(1)).add(game, DEFAULT_USER_ID, Constants.Game.NO_SCORE, ActionType.START);
     }
 
     @Test
     void test_start_waiting_game() {
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-            final Game game = new Game();
-            game.setStatus(GameStatus.WAITING);
-            return game;
-        });
+        final Game sampleGame = Game.builder().id(DEFAULT_GAME_ID).status(GameStatus.WAITING).build();
+
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
 
         try {
             gameService.start(DEFAULT_GAME_ID);
-            fail("The game is not in progress");
+
+            fail("Waiting game is started");
         } catch (GameException e) {
-            assertEquals(GameError.WAITING.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.WAITING.getCode()));
         }
     }
 
     @Test
     void test_start_started_game() {
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenAnswer(invocation -> {
-            final Game game = new Game();
-            game.setStatus(GameStatus.IN_PROGRESS);
-            return game;
-        });
+        final Game sampleGame = Game.builder().id(DEFAULT_GAME_ID).status(GameStatus.IN_PROGRESS).build();
+
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
 
         try {
             gameService.start(DEFAULT_GAME_ID);
-            fail("The game is not in progress");
+
+            fail("Started game is started");
         } catch (GameException e) {
-            assertEquals(GameError.IN_PROGRESS.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));
         }
     }
 
     @Test
     void test_update_game() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
-        sampleGame.setId(DEFAULT_GAME_ID);
-        sampleGame.setName("The best game");
-        sampleGame.setExpectedPlayerCount(4);
-        sampleGame.setDuration(4);
+        final Game existingGame = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .name("My game")
+                .duration(60)
+                .expectedPlayerCount(2)
+                .version(1)
+                .build();
 
-        final Game existingGame = createSampleGame(DEFAULT_USER_ID, 2);
+        final Game sampleGame = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .name("The best game")
+                .duration(120)
+                .expectedPlayerCount(4)
+                .version(1)
+                .build();
 
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(existingGame);
-
         when(gameDao.save(any(Game.class))).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
 
         final Game game = gameService.save(sampleGame);
 
-        assertEquals("The best game", game.getName());
-        assertEquals(4, game.getExpectedPlayerCount());
-        assertEquals(4, game.getDuration());
+        assertThat(game.getName(), equalTo("The best game"));
+        assertThat(game.getExpectedPlayerCount(), equalTo(4));
+        assertThat(game.getDuration(), equalTo(120));
     }
 
     @Test
-    void test_update_waiting_game() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
-        sampleGame.setId(DEFAULT_GAME_ID);
-        sampleGame.setName("The best game");
-        sampleGame.setExpectedPlayerCount(4);
-        sampleGame.setDuration(4);
+    void test_update_waiting_game_with_players() {
+        final Game mockGame = mock(Game.class);
 
-        final Game existingGame = createSampleGame(DEFAULT_USER_ID, 2);
-        existingGame.setVersion(2);
+        final Game existingGame = Game.builder().id(mockGame.getId()).version(2).build();
 
-        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(existingGame);
+        when(gameDao.get(mockGame.getId())).thenReturn(existingGame);
 
         try {
-            gameService.save(sampleGame);
-            fail("The game is not waiting");
+            gameService.save(mockGame);
+
+            fail("Game with players is updated");
         } catch (GameException e) {
-            assertEquals(GameError.IN_PROGRESS.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.CANNOT_UPDATE_GAME.getCode()));
+        }
+    }
+
+    @Test
+    void test_end_game() {
+        final Long winningUserId = 2L;
+
+        final Game sampleGame = Game.builder()
+                .ownerId(DEFAULT_USER_ID)
+                .status(GameStatus.READY_TO_END)
+                .version(1)
+                .build();
+
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
+        when(gameDao.save(any())).thenAnswer(invocation -> {
+            return invocation.getArgument(0);
+        });
+
+        // player 2 is the winner
+        final List<Player> players = Arrays.asList(
+                Player.builder().playerNumber(1).userId(DEFAULT_USER_ID).score(5).build(),
+                Player.builder().playerNumber(2).userId(winningUserId).score(15).build());
+
+        when(playerService.getPlayers(eq(DEFAULT_GAME_ID))).thenReturn(players);
+
+        final Game game = gameService.end(DEFAULT_GAME_ID);
+
+        assertThat(game, notNullValue());
+        assertThat(game.getStatus(), equalTo(GameStatus.ENDED));
+        assertThat(game.getEndDate(), notNullValue());
+        assertThat(game.getVersion(), equalTo(2));
+        assertThat(game.getCurrentPlayerNumber(), equalTo(2));
+
+        verify(gameDao, times(1)).save(game);
+        verify(actionService, times(1)).add(game, winningUserId, Constants.Game.NO_SCORE, ActionType.END);
+    }
+
+    @Test
+    void test_end_waiting_game() {
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.WAITING).version(2).build());
+
+        try {
+            gameService.end(DEFAULT_GAME_ID);
+
+            fail("Waiting gane is ended");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.WAITING.getCode()));
+        }
+    }
+
+    @Test
+    void test_end_started_game() {
+        when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.IN_PROGRESS).build());
+
+        try {
+            gameService.end(DEFAULT_GAME_ID);
+
+            fail("Started gane is ended");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));
         }
     }
 
     @Test
     void test_play_not_started_game() {
-        final Game sampleGame = createSampleGame(DEFAULT_USER_ID, 2);
+        final Game sampleGame = Game.builder().status(GameStatus.WAITING).build();
 
         when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(), ActionType.PLAY);
-            fail("The game is started");
+
+            fail("Played in a waiting game");
         } catch (GameException e) {
-            assertEquals(GameError.WAITING.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.WAITING.getCode()));
+        }
+    }
+
+    @Test
+    void test_play_ended_game() {
+        final Game sampleGame = Game.builder().status(GameStatus.ENDED).build();
+
+        when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(), ActionType.PLAY);
+
+            fail("Played in an ended game");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.NOT_FOUND.getCode()));
+        }
+    }
+
+    @Test
+    void test_play_terminated_game() {
+        final Game sampleGame = Game.builder().status(GameStatus.TERMINATED).build();
+
+        when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(sampleGame);
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(), ActionType.PLAY);
+
+            fail("Played in a terminated game");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.NOT_FOUND.getCode()));
+        }
+    }
+
+    @Test
+    void test_play_not_existing_game() {
+        when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(null);
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(), ActionType.PLAY);
+
+            fail("Played in a not existing game");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.NOT_FOUND.getCode()));
+        }
+    }
+
+    @Test
+    void test_play_with_wrong_player() {
+        prepareGame();
+
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(2L)))
+                .thenReturn(Player.builder().playerNumber(2).build());
+        try {
+            gameService.play(DEFAULT_GAME_ID, 2L, new VirtualRack(), ActionType.PLAY);
+
+            fail("Played with the wrong player");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.TURN_OF_ANOTHER_PLAYER.getCode()));
         }
     }
 
     @Test
     void test_play_center_is_empty() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
         // the word WEAK is not using the center
         prepareUsedRackByRow(3, 7, "WEAK");
+
         prepareRepository();
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
-            fail("Starting cell is not empty");
+
+            fail("Played when the starting cell is empty");
         } catch (GameException e) {
-            assertEquals(GameError.CENTER_CANNOT_BE_EMPTY.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.CENTER_CANNOT_BE_EMPTY.getCode()));
         }
     }
 
     @Test
-    void test_play_center_is_not_empty() {
+    void test_play_word_is_not_valid() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
+        // create the word WEAK
+        prepareUsedRackByRow(8, 7, "WEAK");
+
+        prepareRepository();
+
+        // the word is not valid
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(null);
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+
+            fail("Invalid word is played");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.WORDS_ARE_NOT_FOUND.getCode()));
+        }
+    }
+
+    @Test
+    void test_play_locate_tile_on_a_non_empty_cell() {
+        prepareGame();
+        preparePlayer();
+        prepareBoard();
+
+        // the word WEAK is an existing word in the board
+        prepareExistingWordByRow(8, 7, "WEAK");
+
+        // the word WARN is using the center
+        prepareUsedRackByRow(8, 7, "WARN");
+
+        prepareRepository();
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+
+            fail("Located a tile on a non empty cell");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.CELL_IS_NOT_EMPTY.getCode()));
+        }
+    }
+
+    @Test
+    void test_play_first_word_by_using_center() {
+        prepareGame();
+        preparePlayer();
+        prepareBoard();
+
         // the word WEAK is using the center
         prepareUsedRackByRow(8, 7, "WEAK");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the word is valid
-        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
-        when(dictionaryService.getWord(any(String.class), any(Language.class))).thenReturn(weakWord);
+        when(dictionaryService.getWord(any(String.class), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAK").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -521,66 +779,41 @@ class TestGameService extends AbstractServiceTest {
     }
 
     @Test
-    void test_play_word_is_not_valid() {
-        prepareGame();
-        prepareBoard();
-        prepareUsedRackByRow(8, 7, "WEAK");
-        prepareRepository();
-
-        // the word is not valid
-        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(null);
-
-        try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
-            fail("The word is valid");
-        } catch (GameException e) {
-            assertEquals(GameError.WORDS_ARE_NOT_FOUND.getCode(), e.getCode());
-        }
-    }
-
-    @Test
-    void test_play_new_word_not_linked_to_existing_words() {
-        prepareGame();
-        prepareBoard();
-        // the word WEAK is an existing word in the board
-        prepareExistingWordByRow(8, 7, "WEAK");
-        // the word HEAL not linked to an existing word
-        prepareUsedRackByRow(3, 7, "HEAL");
-        prepareRepository();
-
-        // the word is valid
-        final DictionaryWord healWord = DictionaryWord.builder().word("HEAL").build();
-        when(dictionaryService.getWord(eq("HEAL"), any(Language.class))).thenReturn(healWord);
-
-        try {
-            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
-            fail("New word is linked to existing words");
-        } catch (GameException e) {
-            assertEquals(GameError.WORDS_ARE_NOT_LINKED.getCode(), e.getCode());
-        }
-    }
-
-    @Test
     void test_play_new_horizontal_and_vertical_words() {
         prepareGame();
+
+        preparePlayer();
         prepareBoard();
+
         // create the word WEAK
         prepareUsedRackByRow(8, 7, "WEAK");
+
         // create the word WAR
         prepareUsedRackByColumn(9, 7, "AR");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the words are valid
-        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
-        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
-        final DictionaryWord warWord = DictionaryWord.builder().word("WAR").build();
-        when(dictionaryService.getWord(eq("WAR"), any(Language.class))).thenReturn(warWord);
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAK").build());
+        when(dictionaryService.getWord(eq("WAR"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WAR").build());
 
-        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(gameDao.save(any())).thenAnswer(invocation -> {
+            return invocation.getArgument(0);
+        });
 
-        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
+
+        final VirtualRack virtualRack = new VirtualRack(tiles);
+
+        final Game game = gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, virtualRack, ActionType.PLAY);
+
+        assertThat(game.getStatus(), equalTo(GameStatus.IN_PROGRESS));
+        assertThat(game.getVersion(), equalTo(4));
+        assertThat(game.getCurrentPlayerNumber(), equalTo(2));
+        assertThat(game.getRemainingTileCount(), equalTo(92)); // 6 tiles are used
 
         // the words are found in the dictionary
         verify(dictionaryService, times(1)).getWord("WEAK", Language.en);
@@ -609,82 +842,151 @@ class TestGameService extends AbstractServiceTest {
 
         // the words are logged in the words
         verify(wordService, times(1)).saveAll(Arrays.asList(weak, war));
+
+        verify(virtualRackService, times(1)).validateRack(DEFAULT_GAME_ID, DEFAULT_PLAYER_NUMBER, DEFAULT_ROUND_NUMBER,
+                virtualRack);
+        verify(gameDao, times(1)).save(any());
+        verify(contentService, times(1)).update(any(), any(), any(), eq(DEFAULT_PLAYER_NUMBER), eq(DEFAULT_DURATION));
     }
 
     @Test
-    void test_play_new_words_linked_to_existing_words() {
-        prepareGame();
+    void test_play_round_number_increases_when_owner_gets_the_turn() {
+        final Game game = prepareGame();
+        game.setCurrentPlayerNumber(2);
+
         prepareBoard();
-        // the word WEAK is an existing word in the board
-        prepareExistingWordByRow(8, 7, "WEAK");
-        // the word RA(W) is directly linked to the existing WEAK word
-        prepareUsedRackByColumn(6, 7, "RA");
-        // the word (R)OLE is linked to the new RAW word
-        prepareUsedRackByRow(6, 8, "OLE");
-        // the word W(E) is linked to the new ROLE word
-        prepareUsedRackByColumn(5, 10, "W");
+
+        // create the word WEAK
+        prepareUsedRackByRow(8, 7, "WEAK");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the words are valid
-        final DictionaryWord rawWord = DictionaryWord.builder().word("RAW").build();
-        when(dictionaryService.getWord(eq("RAW"), any(Language.class))).thenReturn(rawWord);
-        final DictionaryWord roleWord = DictionaryWord.builder().word("ROLE").build();
-        when(dictionaryService.getWord(eq("ROLE"), any(Language.class))).thenReturn(roleWord);
-        final DictionaryWord weWord = DictionaryWord.builder().word("WE").build();
-        when(dictionaryService.getWord(eq("WE"), any(Language.class))).thenReturn(weWord);
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAK").build());
+
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(2L)))
+                .thenReturn(Player.builder().playerNumber(2).build());
+
+        when(gameDao.save(any())).thenAnswer(invocation -> {
+            return invocation.getArgument(0);
+        });
+
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
+
+        final VirtualRack virtualRack = new VirtualRack(tiles);
+
+        gameService.play(DEFAULT_GAME_ID, 2L, virtualRack, ActionType.PLAY);
+
+        assertThat(game.getRoundNumber(), equalTo(2));
+    }
+
+    @Test
+    void test_play_new_two_word_not_linked_to_existing_words() {
+        prepareGame();
+        preparePlayer();
+        prepareBoard();
+
+        // the word WEAK is an existing word in the board
+        prepareExistingWordByRow(8, 7, "WEAK");
+
+        // the word HEAL not linked to an existing word
+        prepareUsedRackByRow(3, 7, "HEAL");
+
+        // the word HOP not linked to an existing word, but linked to HEAL word
+        prepareUsedRackByColumn(4, 7, "OST");
+
+        prepareRepository();
+
+        // the words are valid
+        when(dictionaryService.getWord(eq("HEAL"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("HEAL").build());
+        when(dictionaryService.getWord(eq("HOST"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("HOST").build());
+
+        try {
+            gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+
+            fail("Unlinked word is played");
+        } catch (GameException e) {
+            assertThat(e.getCode(), equalTo(GameError.WORDS_ARE_NOT_LINKED.getCode()));
+        }
+    }
+
+    @Test
+    void test_play_two_words_linked_to_existing_words() {
+        prepareGame();
+        preparePlayer();
+        prepareBoard();
+
+        // the word WEAK is an existing word in the board
+        prepareExistingWordByRow(8, 7, "WEAK");
+
+        // the word SNO(W) is directly linked to the existing WEAK word
+        prepareUsedRackByColumn(5, 7, "SNO");
+
+        // the word BULL(S) is linked to the new RAW word
+        prepareUsedRackByRow(5, 3, "BULL");
+
+        prepareRepository();
+        prepareScoreService();
+
+        // the words are valid
+        when(dictionaryService.getWord(eq("SNOW"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("SNOW").build());
+        when(dictionaryService.getWord(eq("BULLS"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("BULLS").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
         // the words are found in the dictionary
-        verify(dictionaryService, times(1)).getWord("RAW", Language.en);
-        verify(dictionaryService, times(1)).getWord("ROLE", Language.en);
-        verify(dictionaryService, times(1)).getWord("WE", Language.en);
+        verify(dictionaryService, times(1)).getWord("SNOW", Language.en);
+        verify(dictionaryService, times(1)).getWord("BULLS", Language.en);
 
         // the word score is added to the player score
-        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 20);
+        verify(playerService, times(1)).updateScore(DEFAULT_GAME_ID, 1, 22);
 
-        final Word raw = Word.builder()
+        final Word snow = Word.builder()
                 .actionId(DEFAULT_ACTION_ID)
                 .gameId(DEFAULT_GAME_ID)
                 .userId(DEFAULT_USER_ID)
                 .roundNumber(1)
-                .score(7)
-                .word("RAW")
+                .score(8)
+                .word("SNOW")
                 .build();
 
-        final Word role = Word.builder()
+        final Word bulls = Word.builder()
                 .actionId(DEFAULT_ACTION_ID)
                 .gameId(DEFAULT_GAME_ID)
                 .userId(DEFAULT_USER_ID)
                 .roundNumber(1)
-                .score(6)
-                .word("ROLE")
-                .build();
-
-        final Word we = Word.builder()
-                .actionId(DEFAULT_ACTION_ID)
-                .gameId(DEFAULT_GAME_ID)
-                .userId(DEFAULT_USER_ID)
-                .roundNumber(1)
-                .score(7)
-                .word("WE")
+                .score(14)
+                .word("BULLS")
                 .build();
 
         // the words are logged in the words
-        verify(wordService, times(1)).saveAll(Arrays.asList(role, raw, we));
+        verify(wordService, times(1)).saveAll(Arrays.asList(bulls, snow));
     }
 
     @Test
     void test_play_word_detection_ends_in_right() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
+        // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 8, "WEAK");
+
+        // the extension ENIN is linked to the WEAK word
         prepareUsedRackByRow(8, 12, "ENIN");
+
+        // the extension G is added to the next cell that is in the next row
         prepareUsedRackByRow(9, 1, "G");
+
         prepareRepository();
 
         // the word is not valid
@@ -692,22 +994,28 @@ class TestGameService extends AbstractServiceTest {
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+
             fail("Word detection does not end in right");
         } catch (GameException e) {
-            assertEquals(GameError.WORDS_ARE_NOT_FOUND.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.WORDS_ARE_NOT_FOUND.getCode()));
         }
     }
 
     @Test
     void test_play_word_detection_ends_in_bottom() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
         // the word WEAK is an existing word in the board
         prepareExistingWordByColumn(8, 8, "WEAK");
+
         // the extension ENIN is linked to the WEAK word
         prepareUsedRackByColumn(12, 8, "ENIN");
-        // the extension G is added to the next cell in the next row
+
+        // the extension G is added to the next cell that is in the next column
         prepareUsedRackByColumn(1, 9, "G");
+
         prepareRepository();
 
         // the word is not valid
@@ -715,29 +1023,34 @@ class TestGameService extends AbstractServiceTest {
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+
             fail("Word detection does not end in bottom");
         } catch (GameException e) {
-            assertEquals(GameError.WORDS_ARE_NOT_FOUND.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.WORDS_ARE_NOT_FOUND.getCode()));
         }
     }
 
     @Test
-    void test_play_extend_an_existing_word() {
+    void test_play_new_word_extends_an_existing_word() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
-        // the word (WEAK)ENING will extend the existing WEAK word
+
+        // the word ENING will extend the existing WEAK word
         prepareUsedRackByRow(8, 11, "ENING");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the word is valid
-        final DictionaryWord weakeningWord = DictionaryWord.builder().word("WEAKENING").build();
-        when(dictionaryService.getWord(eq("WEAKENING"), any(Language.class))).thenReturn(weakeningWord);
+        when(dictionaryService.getWord(eq("WEAKENING"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAKENING").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -763,24 +1076,29 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_use_a_letter_from_an_extended_word() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
+
         // the word (WEAK)ENING will extend the existing WEAK word
         prepareUsedRackByRow(8, 11, "ENING");
+
         // the word (G)OAL will be linked to the WEAKENING word
         prepareUsedRackByColumn(9, 15, "OAL");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the words are valid
-        final DictionaryWord weakeningWord = DictionaryWord.builder().word("WEAKENING").build();
-        when(dictionaryService.getWord(eq("WEAKENING"), any(Language.class))).thenReturn(weakeningWord);
-        final DictionaryWord goalWord = DictionaryWord.builder().word("GOAL").build();
-        when(dictionaryService.getWord(eq("GOAL"), any(Language.class))).thenReturn(goalWord);
+        when(dictionaryService.getWord(eq("WEAKENING"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAKENING").build());
+        when(dictionaryService.getWord(eq("GOAL"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("GOAL").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -816,20 +1134,24 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_the_same_word_more_than_once() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
+
         // the word (W)EAK will be linked to the W letter
         prepareUsedRackByColumn(9, 7, "EAK");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the word is valid
-        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
-        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAK").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -855,57 +1177,72 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_single_letter_not_allowed() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
+        // the letter A is not linked to anywhere
         prepareUsedRackByColumn(8, 8, "A");
+
         prepareRepository();
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
             fail("Single letter words are not detected");
         } catch (GameException e) {
-            assertEquals(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode()));
         }
     }
 
     @Test
     void test_play_single_letter_with_valid_word_not_allowed() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
+        // the word WEAK is an existing word in the board
         prepareUsedRackByColumn(8, 8, "WEAK");
+
+        // the letter A is not linked to anywhere
         prepareUsedRackByColumn(1, 1, "A");
+
         prepareRepository();
 
         // the word is valid
-        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
-        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAK").build());
 
         try {
             gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
+
             fail("Single letter words are not detected");
         } catch (GameException e) {
-            assertEquals(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode(), e.getCode());
+            assertThat(e.getCode(), equalTo(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED.getCode()));
         }
     }
 
     @Test
     void test_play_multiplier_cell_value_used_in_double_words_in_same_round() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
-        prepareCalculateScore();
+
         // create the word WEAK
         prepareUsedRackByRow(8, 7, "WEAK");
+
         // create the word (E)RRAT
         prepareUsedRackByColumn(9, 8, "RRAT");
+
         prepareRepository();
+        prepareScoreService();
 
         // the words are valid
-        final DictionaryWord weakWord = DictionaryWord.builder().word("WEAK").build();
-        when(dictionaryService.getWord(eq("WEAK"), any(Language.class))).thenReturn(weakWord);
-        final DictionaryWord erratWord = DictionaryWord.builder().word("ERRAT").build();
-        when(dictionaryService.getWord(eq("ERRAT"), any(Language.class))).thenReturn(erratWord);
+        when(dictionaryService.getWord(eq("WEAK"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAK").build());
+        when(dictionaryService.getWord(eq("ERRAT"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("ERRAT").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -941,24 +1278,29 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_play_multiplier_cell_value_not_used_multiple_rounds() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
-        prepareCalculateScore();
+
         // the word WEAK is an existing word in the board
         prepareExistingWordByRow(8, 7, "WEAK");
+
         // extend the word WEAK(ER)
         prepareUsedRackByRow(8, 11, "ER");
+
         // create the word (E)RRAT
         prepareUsedRackByColumn(9, 8, "RRAT");
+
         prepareRepository();
+        prepareScoreService();
 
         // the words are valid
-        final DictionaryWord weakerWord = DictionaryWord.builder().word("WEAKER").build();
-        when(dictionaryService.getWord(eq("WEAKER"), any(Language.class))).thenReturn(weakerWord);
-        final DictionaryWord erratWord = DictionaryWord.builder().word("ERRAT").build();
-        when(dictionaryService.getWord(eq("ERRAT"), any(Language.class))).thenReturn(erratWord);
+        when(dictionaryService.getWord(eq("WEAKER"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("WEAKER").build());
+        when(dictionaryService.getWord(eq("ERRAT"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("ERRAT").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -992,24 +1334,28 @@ class TestGameService extends AbstractServiceTest {
     }
 
     @Test
-    void test_play_all_tiles_on_different_words_gets_no_bonus_score() {
+    void test_play_all_tiles_on_different_words_gets_no_bingo_bonus_score() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
         // create the word PREP
         prepareUsedRackByRow(8, 7, "PREP");
+
         // create the word (R)EPO
         prepareUsedRackByColumn(9, 8, "EPO");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the words are valid
-        final DictionaryWord prepWord = DictionaryWord.builder().word("PREP").build();
-        when(dictionaryService.getWord(eq("PREP"), any(Language.class))).thenReturn(prepWord);
-        final DictionaryWord repoWord = DictionaryWord.builder().word("REPO").build();
-        when(dictionaryService.getWord(eq("REPO"), any(Language.class))).thenReturn(repoWord);
+        when(dictionaryService.getWord(eq("PREP"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("PREP").build());
+        when(dictionaryService.getWord(eq("REPO"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("REPO").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -1040,23 +1386,29 @@ class TestGameService extends AbstractServiceTest {
 
         // the words are logged in the words
         verify(wordService, times(1)).saveAll(Arrays.asList(prep, repo));
+
+        verify(actionService, times(0)).add(any(), eq(DEFAULT_USER_ID), eq(Constants.Game.BINGO_SCORE),
+                eq(ActionType.BONUS_BINGO));
     }
 
     @Test
     void test_play_all_tiles_in_one_word_gets_bonus_score() {
         prepareGame();
+        preparePlayer();
         prepareBoard();
+
         // create the word PREPARE
         prepareUsedRackByRow(8, 7, "PREPARE");
+
         prepareRepository();
-        prepareCalculateScore();
+        prepareScoreService();
 
         // the word is valid
-        final DictionaryWord prepareWord = DictionaryWord.builder().word("PREPARE").build();
-        when(dictionaryService.getWord(eq("PREPARE"), any(Language.class))).thenReturn(prepareWord);
+        when(dictionaryService.getWord(eq("PREPARE"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("PREPARE").build());
 
         when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
-        when(actionService.add(any(), any(), any(), any())).thenReturn(createSampleAction());
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
 
         gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.PLAY);
 
@@ -1077,84 +1429,160 @@ class TestGameService extends AbstractServiceTest {
 
         // the word is logged in the words
         verify(wordService, times(1)).saveAll(Arrays.asList(prepare));
+
+        verify(actionService, times(1)).add(any(), eq(DEFAULT_USER_ID), eq(Constants.Game.BINGO_SCORE),
+                eq(ActionType.BONUS_BINGO));
     }
 
-    private void prepareGame() {
-        game = createSampleGame(DEFAULT_USER_ID, 2);
-        game.setId(DEFAULT_GAME_ID);
-        game.setStatus(GameStatus.IN_PROGRESS);
-        game.setCurrentPlayerNumber(1);
-        game.setVersion(3);
-        game.setRoundNumber(1);
+    @Test
+    void test_play_set_game_as_ready_to_end_when_no_tiles_in_the_bag_and_player_plays_all_tiles_in_the_rack() {
+        final Game game = prepareGame();
+        game.setRemainingTileCount(0);
+
+        preparePlayer();
+        prepareBoard();
+
+        // create the word PREPARE
+        prepareUsedRackByRow(8, 7, "PREPARE");
+
+        prepareRepository();
+        prepareScoreService();
+
+        // the word is valid
+        when(dictionaryService.getWord(eq("PREPARE"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("PREPARE").build());
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
+
+        final Game playedGame = gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles),
+                ActionType.PLAY);
+
+        assertThat(playedGame.getStatus(), equalTo(GameStatus.READY_TO_END));
+    }
+
+    @Test
+    void test_play_do_not_set_game_as_ready_to_end_when_no_tiles_in_the_bag_and_but_the_player_still_has_tiles_in_the_rack() {
+        final Game game = prepareGame();
+        game.setRemainingTileCount(0);
+
+        preparePlayer();
+        prepareBoard();
+
+        // create the word PREP
+        prepareUsedRackByRow(8, 7, "PREP");
+
+        // add a not used tiles
+        tiles.add(VirtualTile.builder().number(5).build());
+
+        prepareRepository();
+        prepareScoreService();
+
+        // the word is valid
+        when(dictionaryService.getWord(eq("PREP"), any(Language.class)))
+                .thenReturn(DictionaryWord.builder().word("PREP").build());
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
+
+        final Game playedGame = gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles),
+                ActionType.PLAY);
+
+        assertThat(playedGame.getStatus(), equalTo(GameStatus.IN_PROGRESS));
+    }
+
+    @Test
+    void test_exchange_tiles() {
+        prepareGame();
+        preparePlayer();
+        prepareBoard();
+
+        // add a not used tiles
+        tiles.add(VirtualTile.builder().number(1).letter("Q").build());
+
+        prepareRepository();
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
+
+        final VirtualRack virtualRack = new VirtualRack(tiles);
+
+        gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, virtualRack, ActionType.EXCHANGE);
+
+        verify(virtualRackService, times(1)).exchange(DEFAULT_GAME_ID, Language.en, DEFAULT_PLAYER_NUMBER,
+                DEFAULT_ROUND_NUMBER, virtualRack);
+        verify(actionService, times(1)).add(any(), eq(DEFAULT_USER_ID), eq(Constants.Game.NO_SCORE),
+                eq(ActionType.EXCHANGE));
+    }
+
+    @Test
+    void test_skip_turn() {
+        prepareGame();
+        preparePlayer();
+        prepareBoard();
+        prepareRepository();
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
+
+        final Game game = gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles), ActionType.SKIP);
+
+        assertThat(game.getStatus(), equalTo(GameStatus.IN_PROGRESS));
+        assertThat(game.getVersion(), equalTo(4));
+        assertThat(game.getCurrentPlayerNumber(), equalTo(2));
+        assertThat(game.getRemainingTileCount(), equalTo(98));
+
+        verify(actionService, times(1)).add(any(), eq(DEFAULT_USER_ID), eq(Constants.Game.NO_SCORE),
+                eq(ActionType.SKIP));
+    }
+
+    @Test
+    void test_skip_turn_by_timeout() {
+        prepareGame();
+        preparePlayer();
+        prepareBoard();
+        prepareRepository();
+
+        when(gameDao.save(any())).thenReturn(Mockito.mock(Game.class));
+        when(actionService.add(any(), any(), any(), any())).thenReturn(Action.builder().id(DEFAULT_ACTION_ID).build());
+
+        final Game game = gameService.play(DEFAULT_GAME_ID, DEFAULT_USER_ID, new VirtualRack(tiles),
+                ActionType.TIMEOUT);
+
+        assertThat(game.getStatus(), equalTo(GameStatus.IN_PROGRESS));
+        assertThat(game.getVersion(), equalTo(4));
+        assertThat(game.getCurrentPlayerNumber(), equalTo(2));
+        assertThat(game.getRemainingTileCount(), equalTo(98));
+
+        verify(actionService, times(1)).add(any(), eq(DEFAULT_USER_ID), eq(Constants.Game.NO_SCORE),
+                eq(ActionType.TIMEOUT));
+    }
+
+    private Game prepareGame() {
+        final Game game = Game.builder()
+                .id(DEFAULT_GAME_ID)
+                .status(GameStatus.IN_PROGRESS)
+                .expectedPlayerCount(2)
+                .language(Language.en)
+                .currentPlayerNumber(DEFAULT_PLAYER_NUMBER)
+                .version(3)
+                .roundNumber(DEFAULT_ROUND_NUMBER)
+                .remainingTileCount(98)
+                .build();
 
         when(gameDao.getAndLock(eq(DEFAULT_GAME_ID))).thenReturn(game);
 
-        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(1L))).thenAnswer(invocation -> {
-            final Player player = new Player();
-            player.setPlayerNumber(1);
-            return player;
-        });
+        return game;
     }
 
-    private void prepareUsedRackByRow(int startingRow, int startingColumn, String word) {
-        int tileNumber = tiles.size() + 1;
-        int columnNumber = startingColumn;
-        for (char letter : word.toCharArray()) {
-            final VirtualTile tile = VirtualTile.builder()
-                    .columnNumber(columnNumber)
-                    .letter(String.valueOf(letter).toUpperCase())
-                    .number(tileNumber++)
-                    .playerNumber(1)
-                    .rowNumber(startingRow)
-                    .sealed(true)
-                    .value(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue())
-                    .build();
-            tiles.add(tile);
-            columnNumber = columnNumber + 1;
-        }
-    }
-
-    private void prepareUsedRackByColumn(int startingRow, int startingColumn, String word) {
-        int tileNumber = tiles.size() + 1;
-        int rowNumber = startingRow;
-        for (char letter : word.toCharArray()) {
-            final VirtualTile tile = VirtualTile.builder()
-                    .columnNumber(startingColumn)
-                    .letter(String.valueOf(letter).toUpperCase())
-                    .number(tileNumber++)
-                    .playerNumber(1)
-                    .rowNumber(rowNumber)
-                    .sealed(true)
-                    .value(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue())
-                    .build();
-            tiles.add(tile);
-            rowNumber = rowNumber + 1;
-        }
-    }
-
-    private void prepareExistingWordByRow(int startingRow, int startingColumn, String word) {
-        int columnNumber = startingColumn;
-        for (char letter : word.toCharArray()) {
-            boardMatrix[startingRow - 1][columnNumber - 1].setLetter(String.valueOf(letter).toUpperCase());
-            boardMatrix[startingRow - 1][columnNumber - 1].setSealed(true);
-            boardMatrix[startingRow - 1][columnNumber - 1].setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
-            columnNumber = columnNumber + 1;
-        }
-    }
-
-    private void prepareExistingWordByColumn(int startingRow, int startingColumn, String word) {
-        int rowNumber = startingRow;
-        for (char letter : word.toCharArray()) {
-            boardMatrix[rowNumber - 1][startingColumn - 1].setLetter(String.valueOf(letter).toUpperCase());
-            boardMatrix[rowNumber - 1][startingColumn - 1].setSealed(true);
-            boardMatrix[rowNumber - 1][startingColumn - 1].setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
-            rowNumber = rowNumber + 1;
-        }
+    private void preparePlayer() {
+        when(playerService.getByUserId(eq(DEFAULT_GAME_ID), eq(DEFAULT_USER_ID)))
+                .thenReturn(Player.builder().playerNumber(DEFAULT_PLAYER_NUMBER).build());
     }
 
     private void prepareBoard() {
-        // ---------------------- prepare the board ---------------------- //
         boardMatrix = new VirtualCell[15][15];
+
         IntStream.range(1, 16).forEach(rowNumber -> {
             IntStream.range(1, 16).forEach(columnNumber -> {
                 final Integer cellNumber = (rowNumber - 1) * 15 + columnNumber;
@@ -1170,27 +1598,93 @@ class TestGameService extends AbstractServiceTest {
                         .rowNumber(rowNumber)
                         .wordScoreMultiplier(getWordScoreMultiplier(cellNumber))
                         .build();
+
                 boardMatrix[cell.getRowNumber() - 1][cell.getColumnNumber() - 1] = cell;
             });
         });
     }
 
+    private void prepareUsedRackByRow(int startingRow, int startingColumn, String word) {
+        int tileNumber = tiles.size() + 1;
+
+        int columnNumber = startingColumn;
+
+        for (char letter : word.toCharArray()) {
+            tiles.add(VirtualTile.builder()
+                    .columnNumber(columnNumber)
+                    .letter(String.valueOf(letter).toUpperCase())
+                    .number(tileNumber++)
+                    .playerNumber(1)
+                    .rowNumber(startingRow)
+                    .sealed(true)
+                    .value(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue())
+                    .build());
+
+            columnNumber = columnNumber + 1;
+        }
+    }
+
+    private void prepareUsedRackByColumn(int startingRow, int startingColumn, String word) {
+        int tileNumber = tiles.size() + 1;
+
+        int rowNumber = startingRow;
+
+        for (char letter : word.toCharArray()) {
+            tiles.add(VirtualTile.builder()
+                    .columnNumber(startingColumn)
+                    .letter(String.valueOf(letter).toUpperCase())
+                    .number(tileNumber++)
+                    .playerNumber(1)
+                    .rowNumber(rowNumber)
+                    .sealed(true)
+                    .value(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue())
+                    .build());
+
+            rowNumber = rowNumber + 1;
+        }
+    }
+
+    private void prepareExistingWordByRow(int startingRow, int startingColumn, String word) {
+        int columnNumber = startingColumn;
+
+        for (char letter : word.toCharArray()) {
+            boardMatrix[startingRow - 1][columnNumber - 1].setLetter(String.valueOf(letter).toUpperCase());
+            boardMatrix[startingRow - 1][columnNumber - 1].setSealed(true);
+            boardMatrix[startingRow - 1][columnNumber - 1]
+                    .setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
+
+            columnNumber = columnNumber + 1;
+        }
+    }
+
+    private void prepareExistingWordByColumn(int startingRow, int startingColumn, String word) {
+        int rowNumber = startingRow;
+
+        for (char letter : word.toCharArray()) {
+            boardMatrix[rowNumber - 1][startingColumn - 1].setLetter(String.valueOf(letter).toUpperCase());
+            boardMatrix[rowNumber - 1][startingColumn - 1].setSealed(true);
+            boardMatrix[rowNumber - 1][startingColumn - 1]
+                    .setValue(TILE_MAP.get(String.valueOf(letter).toUpperCase()).getValue());
+
+            rowNumber = rowNumber + 1;
+        }
+    }
+
     private void prepareRepository() {
         final List<VirtualCell> cells = Arrays.stream(boardMatrix).flatMap(Arrays::stream).collect(Collectors.toList());
+
         when(virtualBoardService.getBoard(eq(DEFAULT_GAME_ID), eq(1))).thenReturn(new VirtualBoard(cells));
     }
 
-    private void prepareCalculateScore() {
+    private void prepareScoreService() {
         when(scoreService.calculateConstructedWordScore(any())).thenCallRealMethod();
         when(scoreService.calculateBonuses(any(), any())).thenCallRealMethod();
     }
 
     private Integer getLetterValueMultiplier(Integer cellNumber) {
-        if (Arrays.asList(21, 25, 77, 81, 85, 89, 137, 141, 145, 149, 201, 205).contains(cellNumber)) {
+        if (TRIPLE_LETTER_CELLS.contains(cellNumber)) {
             return 3;
-        } else if (Arrays
-                .asList(4, 12, 37, 39, 46, 53, 60, 93, 97, 99, 103, 109, 117, 123, 127, 129, 133, 166, 173, 180, 187, 189, 214, 222)
-                .contains(cellNumber)) {
+        } else if (DOUBLE_LETTER_CELLS.contains(cellNumber)) {
             return 2;
         } else {
             return 1;
@@ -1198,9 +1692,9 @@ class TestGameService extends AbstractServiceTest {
     }
 
     private Integer getWordScoreMultiplier(Integer cellNumber) {
-        if (Arrays.asList(1, 8, 15, 106, 120, 211, 218, 225).contains(cellNumber)) {
+        if (TRIPLE_WORD_CELLS.contains(cellNumber)) {
             return 3;
-        } else if (Arrays.asList(17, 29, 33, 43, 49, 57, 65, 71, 113, 155, 161, 169, 177, 183, 193, 197, 209).contains(cellNumber)) {
+        } else if (DOUBLE_WORD_CELLS.contains(cellNumber)) {
             return 2;
         } else {
             return 1;

@@ -13,7 +13,6 @@ import javax.persistence.Version;
 
 import com.gamecity.scrabble.Constants;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -24,19 +23,18 @@ import lombok.experimental.SuperBuilder;
  * 
  * @author ekarakus
  */
-
-@SuperBuilder
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@AllArgsConstructor
+@SuperBuilder
 @Entity(name = "Action")
 @Table(name = "actions")
 @NamedQueries({
         @NamedQuery(name = Constants.NamedQuery.getActions, query = "Select a from Action a where a.gameId = :gameId order by id asc"),
         @NamedQuery(name = Constants.NamedQuery.getLastAction, query = "Select a from Action a where a.gameId = :gameId and a.type != 'BONUS' order by id desc"),
         @NamedQuery(name = Constants.NamedQuery.getActionByVersion, query = "Select a from Action a where a.gameId = :gameId and a.version = :version and a.type != 'BONUS' order by id desc"),
-        @NamedQuery(name = Constants.NamedQuery.getLastActionsByCount, query = "Select a from Action a where a.gameId = :gameId and a.type != 'BONUS' order by id desc") })
+        @NamedQuery(name = Constants.NamedQuery.getLastActionsByCount, query = "Select a from Action a where a.gameId = :gameId and a.type != 'BONUS' order by id desc")
+})
 public class Action extends AbstractEntity implements Serializable {
 
     private static final long serialVersionUID = -8857819980114071959L;

@@ -6,6 +6,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
+import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.dao.ActionDao;
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
@@ -15,23 +16,22 @@ import com.gamecity.scrabble.service.ActionService;
 @Service(value = "actionService")
 class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implements ActionService {
 
-    private static final Integer MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW = 2;
-
     @Override
     @Transactional
     public Action add(Game game, Long userId, Integer score, ActionType actionType) {
-        final Action action = new Action();
-        action.setGameId(game.getId());
-        action.setUserId(userId);
-        action.setVersion(game.getVersion());
-        action.setGameStatus(game.getStatus());
-        action.setType(actionType);
-        action.setCurrentPlayerNumber(game.getCurrentPlayerNumber());
-        action.setRoundNumber(game.getRoundNumber());
-        action.setRemainingTileCount(game.getRemainingTileCount());
-        action.setScore(score);
-        action.setCreatedDate(game.getLastUpdatedDate());
-        action.setLastUpdatedDate(game.getLastUpdatedDate());
+        final Action action = Action.builder()
+                .gameId(game.getId())
+                .userId(userId)
+                .version(game.getVersion())
+                .gameStatus(game.getStatus())
+                .type(actionType)
+                .currentPlayerNumber(game.getCurrentPlayerNumber())
+                .roundNumber(game.getRoundNumber())
+                .remainingTileCount(game.getRemainingTileCount())
+                .score(score)
+                .createdDate(game.getLastUpdatedDate())
+                .lastUpdatedDate(game.getLastUpdatedDate())
+                .build();
         return baseDao.save(action);
     }
 
@@ -53,7 +53,7 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
 
     @Override
     public boolean isMaximumSkipCountReached(Long gameId, Integer playerCount) {
-        final Integer maximumSkippedTurns = MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
+        final Integer maximumSkippedTurns = Constants.Game.MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
         // if 2 rounds have been skipped in a row, then the game should end
         final List<Action> lastActions = baseDao.getLastActionsByCount(gameId, maximumSkippedTurns);
         return lastActions.size() == maximumSkippedTurns && lastActions.stream()

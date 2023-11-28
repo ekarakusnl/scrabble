@@ -46,6 +46,7 @@
     <environment>dev</environment>
 
     <!-- maven plugins -->
+    <jacoco.maven-plugin.version>0.8.11</jacoco.maven-plugin.version>
     <maven.compiler-plugin.version>3.10.1</maven.compiler-plugin.version>
     <maven.failsafe-plugin.version>2.22.0</maven.failsafe-plugin.version>
     <maven.surefire-plugin.version>2.22.0</maven.surefire-plugin.version>
@@ -361,6 +362,11 @@
         <artifactId>embedded-redis</artifactId>
         <version>${embedded-redis.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -409,6 +415,11 @@
               </goals>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.dao.CellDao;
@@ -27,13 +26,8 @@ class VirtualBoardServiceImpl implements VirtualBoardService {
     private CellDao cellDao;
     private RedisRepository redisRepository;
 
-    @Autowired
-    public void setCellDao(CellDao cellDao) {
+    public VirtualBoardServiceImpl(final CellDao cellDao, final RedisRepository redisRepository) {
         this.cellDao = cellDao;
-    }
-
-    @Autowired
-    void setRedisRepository(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 

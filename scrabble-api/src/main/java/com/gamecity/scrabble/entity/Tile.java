@@ -11,22 +11,20 @@ import org.hibernate.annotations.Type;
 
 import com.gamecity.scrabble.Constants;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Tile represents the properties of letters in a {@link Bag bag}
  * 
  * @author ekarakus
  */
-@Builder
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@AllArgsConstructor
+@SuperBuilder
 @Entity(name = "Tile")
 @Table(name = "tiles")
 @NamedQuery(name = Constants.NamedQuery.getTiles, query = "Select t from Tile t, Bag b where t.bagId = b.id and b.language = :language")

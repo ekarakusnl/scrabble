@@ -13,12 +13,9 @@ import com.gamecity.scrabble.service.UserRoleService;
 class UserRoleServiceImpl extends AbstractServiceImpl<UserRole, UserRoleDao> implements UserRoleService {
 
     @Override
-    public void add(Long userId, Role role) {
-        final UserRole userRole = new UserRole();
-        userRole.setEnabled(true);
-        userRole.setRole(role);
-        userRole.setUserId(userId);
-        baseDao.save(userRole);
+    public UserRole add(Long userId, Role role) {
+        final UserRole userRole = UserRole.builder().enabled(true).role(role).userId(userId).build();
+        return baseDao.save(userRole);
     }
 
     @Override

@@ -21,6 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GameValidationHelper {
 
+    private GameValidationHelper() {
+        // do not create a new instance
+    }
+
     /**
      * Whether the playing player has the turn
      * 
@@ -62,7 +66,8 @@ public class GameValidationHelper {
             final String commaSeperatedInvalidWords = String.join(",",
                     invalidWords.stream().map(ConstructedWord::getWordBuilder).collect(Collectors.toList()));
             log.debug("Word(s) {} are not found in {} dictionary", commaSeperatedInvalidWords, language);
-            throw new GameException(GameError.WORDS_ARE_NOT_FOUND, Arrays.asList(commaSeperatedInvalidWords, language.name()));
+            throw new GameException(GameError.WORDS_ARE_NOT_FOUND,
+                    Arrays.asList(commaSeperatedInvalidWords, language.name()));
         }
     }
 
@@ -70,10 +75,14 @@ public class GameValidationHelper {
      * Whether the constructed words are linked to existing words on the board
      * 
      * @param constructedWords {@link List} of constructed words
-     * @param boardMatrix      {@link VirtualBoard Board} matrix represent the board in two-dimensions
+     * @param boardMatrix      {@link VirtualBoard Board} matrix represent the board in
+     *                             two-dimensions
      */
-    public static void hasValidBoardLinks(final List<ConstructedWord> constructedWords, final VirtualCell[][] boardMatrix) {
-        final List<ConstructedWord> unlinkedWords = constructedWords.stream().filter(word -> !word.isLinked()).collect(Collectors.toList());
+    public static void hasValidBoardLinks(final List<ConstructedWord> constructedWords,
+                                          final VirtualCell[][] boardMatrix) {
+        final List<ConstructedWord> unlinkedWords = constructedWords.stream()
+                .filter(word -> !word.isLinked())
+                .collect(Collectors.toList());
 
         if (unlinkedWords.isEmpty()) {
             return;
@@ -87,7 +96,7 @@ public class GameValidationHelper {
 
             if (updatedUnlinkedWords.isEmpty()) {
                 // all words are linked
-                return;
+                unlinkedWordCount = 0;
             } else if (updatedUnlinkedWords.size() < unlinkedWordCount) {
                 // some words are linked, update the unlinked word count then try to link the remaining words
                 unlinkedWordCount = updatedUnlinkedWords.size();
@@ -142,7 +151,8 @@ public class GameValidationHelper {
         if (!CollectionUtils.isEmpty(singleLetterWords)) {
             final String commaSeperatedSingleLetterWords = String.join(",", singleLetterWords);
             log.debug("Single letter word(s) {} are detected", commaSeperatedSingleLetterWords);
-            throw new GameException(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED, Arrays.asList(commaSeperatedSingleLetterWords));
+            throw new GameException(GameError.SINGLE_LETTER_WORDS_NOT_ALLOWED,
+                    Arrays.asList(commaSeperatedSingleLetterWords));
         }
     }
 

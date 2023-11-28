@@ -18,8 +18,9 @@ public interface UserRoleService extends BaseService<UserRole> {
      * 
      * @param userId <code>id</code> of the user
      * @param role   <code>role</code> to add
+     * @return User role
      */
-    void add(Long userId, Role role);
+    UserRole add(Long userId, Role role);
 
     /**
      * Gets the {@link List list} of {@link Role roles} assigned to the {@link User user}

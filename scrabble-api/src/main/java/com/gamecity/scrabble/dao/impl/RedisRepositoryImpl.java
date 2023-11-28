@@ -1,6 +1,5 @@
 package com.gamecity.scrabble.dao.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -20,8 +19,7 @@ class RedisRepositoryImpl implements RedisRepository {
 
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Autowired
-    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
+    public RedisRepositoryImpl(final RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -44,8 +42,8 @@ class RedisRepositoryImpl implements RedisRepository {
 
     @Override
     public VirtualBoard getBoard(Long gameId, Integer version) {
-        final BoundListOperations<String, Object> boards =
-                redisTemplate.boundListOps(Constants.CacheKey.BOARD + ":" + gameId);
+        final BoundListOperations<String, Object> boards = redisTemplate
+                .boundListOps(Constants.CacheKey.BOARD + ":" + gameId);
         return (VirtualBoard) boards.range(version - 1, -1).stream().findFirst().orElse(null);
     }
 
@@ -62,8 +60,8 @@ class RedisRepositoryImpl implements RedisRepository {
 
     @Override
     public VirtualRack getRack(Long gameId, Integer playerNumber, Integer roundNumber) {
-        final BoundListOperations<String, Object> racks =
-                redisTemplate.boundListOps(Constants.CacheKey.RACK + ":" + gameId + ":" + playerNumber);
+        final BoundListOperations<String, Object> racks = redisTemplate
+                .boundListOps(Constants.CacheKey.RACK + ":" + gameId + ":" + playerNumber);
         return (VirtualRack) racks.range(roundNumber - 1, -1).stream().findFirst().orElse(null);
     }
 

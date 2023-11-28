@@ -38,6 +38,11 @@ public enum GameStatus {
     ENDED,
 
     /**
+     * The game is deleted
+     */
+    DELETED,
+
+    /**
      * The game is terminated
      */
     TERMINATED

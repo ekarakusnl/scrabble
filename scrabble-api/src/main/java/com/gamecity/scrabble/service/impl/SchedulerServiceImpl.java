@@ -10,10 +10,10 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.TriggerBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 
+import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.job.EndGameJob;
 import com.gamecity.scrabble.job.SkipTurnJob;
@@ -27,7 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class SchedulerServiceImpl implements SchedulerService {
 
-	private static final int TERMINATE_GAME_DURATION_MINUTES = 10;
+    public static final String PARAM_GAME_ID = "gameId";
+    public static final String PARAM_PLAYER_NUMBER = "playerNumber";
+    public static final String PARAM_VERSION = "version";
 
     private static final String SKIP_TURN_JOB_IDENTITY = "skipTurnJob_%s_%s";
     private static final String SKIP_TURN_JOB_GROUP = "skipTurn";
@@ -47,8 +49,7 @@ class SchedulerServiceImpl implements SchedulerService {
 
     private SchedulerFactoryBean schedulerFactory;
 
-    @Autowired
-    void setSchedulerFactory(SchedulerFactoryBean schedulerFactory) {
+    public SchedulerServiceImpl(final SchedulerFactoryBean schedulerFactory) {
         this.schedulerFactory = schedulerFactory;
     }
 
@@ -58,9 +59,9 @@ class SchedulerServiceImpl implements SchedulerService {
             final JobDetail jobDetail = JobBuilder.newJob(SkipTurnJob.class)
                     .withIdentity(String.format(SKIP_TURN_JOB_IDENTITY, game.getId(), game.getVersion()),
                             SKIP_TURN_JOB_GROUP)
-                    .usingJobData("gameId", game.getId())
-                    .usingJobData("playerNumber", game.getCurrentPlayerNumber())
-                    .usingJobData("version", game.getVersion())
+                    .usingJobData(PARAM_GAME_ID, game.getId())
+                    .usingJobData(PARAM_PLAYER_NUMBER, game.getCurrentPlayerNumber())
+                    .usingJobData(PARAM_VERSION, game.getVersion())
                     .build();
 
             final Calendar calendar = Calendar.getInstance();
@@ -87,8 +88,9 @@ class SchedulerServiceImpl implements SchedulerService {
     @Override
     public void terminateSkipTurnJob(Long gameId, Integer version) {
         try {
-            final JobKey jobKey =
-                    new JobKey(String.format(SKIP_TURN_JOB_IDENTITY, gameId, version), SKIP_TURN_JOB_GROUP);
+            final JobKey jobKey = new JobKey(String.format(SKIP_TURN_JOB_IDENTITY, gameId, version),
+                    SKIP_TURN_JOB_GROUP);
+
             schedulerFactory.getScheduler().interrupt(jobKey);
             schedulerFactory.getScheduler().deleteJob(jobKey);
 
@@ -103,7 +105,7 @@ class SchedulerServiceImpl implements SchedulerService {
         try {
             final JobDetail jobDetail = JobBuilder.newJob(StartGameJob.class)
                     .withIdentity(String.format(START_GAME_JOB_IDENTITY, gameId), START_GAME_JOB_GROUP)
-                    .usingJobData("gameId", gameId)
+                    .usingJobData(PARAM_GAME_ID, gameId)
                     .build();
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
@@ -127,7 +129,7 @@ class SchedulerServiceImpl implements SchedulerService {
         try {
             final JobDetail jobDetail = JobBuilder.newJob(EndGameJob.class)
                     .withIdentity(String.format(END_GAME_JOB_IDENTITY, gameId), END_GAME_JOB_GROUP)
-                    .usingJobData("gameId", gameId)
+                    .usingJobData(PARAM_GAME_ID, gameId)
                     .build();
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
@@ -147,17 +149,17 @@ class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public void scheduleTerminateGameJob(Long gameId) {
+    public void scheduleTerminateGameJob(Long gameId, Date createdDate) {
         try {
             final JobDetail jobDetail = JobBuilder.newJob(TerminateGameJob.class)
                     .withIdentity(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP)
-                    .usingJobData("gameId", gameId)
+                    .usingJobData(PARAM_GAME_ID, gameId)
                     .build();
 
             // terminate the game if it doesn't start in 10 minutes
             final Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date());
-            calendar.add(Calendar.MINUTE, TERMINATE_GAME_DURATION_MINUTES);
+            calendar.setTime(createdDate);
+            calendar.add(Calendar.MINUTE, Constants.Game.TERMINATE_GAME_DURATION_MINUTES);
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
                     .withIdentity(String.format(TERMINATE_GAME_TRIGGER_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP)
@@ -178,8 +180,9 @@ class SchedulerServiceImpl implements SchedulerService {
     @Override
     public void terminateTerminateGameJob(Long gameId) {
         try {
-            final JobKey jobKey =
-                    new JobKey(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP);
+            final JobKey jobKey = new JobKey(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId),
+                    TERMINATE_GAME_JOB_GROUP);
+
             schedulerFactory.getScheduler().interrupt(jobKey);
             schedulerFactory.getScheduler().deleteJob(jobKey);
 

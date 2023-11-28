@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.gamecity.scrabble.Constants;
@@ -35,13 +34,8 @@ class VirtualRackServiceImpl implements VirtualRackService {
     private VirtualBagService virtualBagService;
     private RedisRepository redisRepository;
 
-    @Autowired
-    void setVirtualBagService(VirtualBagService virtualBagService) {
+    public VirtualRackServiceImpl(final VirtualBagService virtualBagService, final RedisRepository redisRepository) {
         this.virtualBagService = virtualBagService;
-    }
-
-    @Autowired
-    void setRedisRepository(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 
@@ -74,9 +68,11 @@ class VirtualRackServiceImpl implements VirtualRackService {
      * @param vowel        whether a vowel letter should be selected
      * @return the created tile
      */
-    private VirtualTile createTile(Long gameId, Language language, Integer playerNumber, int tileNumber, int roundNumber,
-                                   List<Tile> tiles) {
-        final List<Tile> availableTiles = tiles.stream().filter(tile -> tile.getCount() > 0).collect(Collectors.toList());
+    private VirtualTile createTile(Long gameId, Language language, Integer playerNumber, int tileNumber,
+                                   int roundNumber, List<Tile> tiles) {
+        final List<Tile> availableTiles = tiles.stream()
+                .filter(tile -> tile.getCount() > 0)
+                .collect(Collectors.toList());
 
         VirtualTile virtualTile = null;
         int index = 0;
@@ -110,7 +106,8 @@ class VirtualRackServiceImpl implements VirtualRackService {
     }
 
     @Override
-    public void fillRack(Long gameId, Language language, Integer playerNumber, Integer roundNumber, VirtualRack virtualRack) {
+    public void fillRack(Long gameId, Language language, Integer playerNumber, Integer roundNumber,
+                         VirtualRack virtualRack) {
         final List<Tile> tiles = virtualBagService.getTiles(gameId, language);
         final List<VirtualTile> updatedVirtualTiles = virtualRack.getTiles().stream().map(tile -> {
             if (Boolean.TRUE.equals(tile.isSealed()) || Boolean.TRUE.equals(tile.isExchanged())) {
@@ -156,7 +153,8 @@ class VirtualRackServiceImpl implements VirtualRackService {
     }
 
     @Override
-    public void exchange(Long gameId, Language language, Integer playerNumber, Integer roundNumber, VirtualRack exchangedRack) {
+    public void exchange(Long gameId, Language language, Integer playerNumber, Integer roundNumber,
+                         VirtualRack exchangedRack) {
         final List<Tile> tiles = virtualBagService.getTiles(gameId, language);
 
         // rack should be full to be able to exchange
@@ -165,7 +163,9 @@ class VirtualRackServiceImpl implements VirtualRackService {
         }
 
         // number of exchanged tiles cannot be more than the number of tiles in the bag
-        if (exchangedRack.getTiles().stream().filter(VirtualTile::isExchanged).count() > tiles.stream().mapToInt(Tile::getCount).sum()) {
+        if (exchangedRack.getTiles().stream().filter(VirtualTile::isExchanged).count() > tiles.stream()
+                .mapToInt(Tile::getCount)
+                .sum()) {
             throw new GameException(GameError.INSUFFICIENT_TILES);
         }
 
