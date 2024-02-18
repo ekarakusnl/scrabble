@@ -1,5 +1,7 @@
 package com.gamecity.scrabble.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -65,7 +67,7 @@ class SchedulerServiceImpl implements SchedulerService {
                     .build();
 
             final Calendar calendar = Calendar.getInstance();
-            calendar.setTime(game.getLastUpdatedDate());
+            calendar.setTime(Date.from(game.getLastUpdatedDate().atZone(ZoneId.systemDefault()).toInstant()));
             calendar.add(Calendar.SECOND, game.getDuration());
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
@@ -149,7 +151,7 @@ class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public void scheduleTerminateGameJob(Long gameId, Date createdDate) {
+    public void scheduleTerminateGameJob(Long gameId, LocalDateTime createdDate) {
         try {
             final JobDetail jobDetail = JobBuilder.newJob(TerminateGameJob.class)
                     .withIdentity(String.format(TERMINATE_GAME_JOB_IDENTITY, gameId), TERMINATE_GAME_JOB_GROUP)
@@ -158,7 +160,7 @@ class SchedulerServiceImpl implements SchedulerService {
 
             // terminate the game if it doesn't start in 10 minutes
             final Calendar calendar = Calendar.getInstance();
-            calendar.setTime(createdDate);
+            calendar.setTime(Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant()));
             calendar.add(Calendar.MINUTE, Constants.Game.TERMINATE_GAME_DURATION_MINUTES);
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()

@@ -1,18 +1,15 @@
 package com.gamecity.scrabble.resource.impl;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import com.gamecity.scrabble.entity.AbstractEntity;
@@ -25,18 +22,23 @@ import com.gamecity.scrabble.service.BaseService;
 abstract class AbstractResourceImpl<T extends AbstractEntity, D extends AbstractDto, S extends BaseService<T>>
         implements BaseResource<D> {
 
-    abstract S getBaseService();
+    protected S baseService;
+
+    @Autowired
+    void setBaseService(S baseService) {
+        this.baseService = baseService;
+    }
 
     @Override
     public Response get(Long id) {
-        final T entity = getBaseService().get(id);
+        final T entity = baseService.get(id);
         final D dto = (D) Mapper.toDto(entity);
         return Response.ok(dto).tag(createETag(dto)).build();
     }
 
     @Override
     public Response create(D dto) {
-        final T entity = getBaseService().save((T) Mapper.toEntity(dto));
+        final T entity = baseService.save((T) Mapper.toEntity(dto));
         final D responseDto = (D) Mapper.toDto(entity);
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
     }
@@ -53,33 +55,20 @@ abstract class AbstractResourceImpl<T extends AbstractEntity, D extends Abstract
             throw new IllegalStateException("If-Match header is missing");
         }
 
-        final D existingEntityDto = (D) Mapper.toDto(getBaseService().get(id));
+        final D existingEntityDto = (D) Mapper.toDto(baseService.get(id));
         final ResponseBuilder failedETagValidationResponse = request
                 .evaluatePreconditions(createETag(existingEntityDto));
         if (failedETagValidationResponse != null) {
             return failedETagValidationResponse.build();
         }
 
-        final T entity = getBaseService().save((T) Mapper.toEntity(dto));
+        final T entity = baseService.save((T) Mapper.toEntity(dto));
         final D responseDto = (D) Mapper.toDto(entity);
         return Response.ok(responseDto).tag(createETag(responseDto)).build();
     }
 
-    @Override
-    public Response delete(Long id) {
-        getBaseService().delete(id);
-        return Response.ok().build();
-    }
-
-    @Override
-    public Response list() {
-        final List<T> list = getBaseService().list();
-        return Response.ok(list.stream().map(Mapper::toDto).collect(Collectors.toList())).build();
-    }
-
     protected EntityTag createETag(D dto) {
-        final String lastUpdatedDate = DateTimeFormatter.ISO_DATE_TIME
-                .format(LocalDateTime.ofInstant(dto.getLastUpdatedDate().toInstant(), ZoneId.systemDefault()));
+        final String lastUpdatedDate = DateTimeFormatter.ISO_DATE_TIME.format(dto.getLastUpdatedDate());
         final String eTag = DigestUtils.sha256Hex(lastUpdatedDate);
         return new EntityTag(eTag);
     }

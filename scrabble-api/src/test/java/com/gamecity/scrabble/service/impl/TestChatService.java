@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -36,6 +37,11 @@ class TestChatService extends AbstractServiceTest {
 
     @InjectMocks
     private ChatService chatService = new ChatServiceImpl(gameService, playerService, redisRepository);
+
+    @BeforeEach
+    void beforeEach() {
+        ((ChatServiceImpl) chatService).setBaseDao(chatDao);
+    }
 
     @Test
     void test_save_chat() {

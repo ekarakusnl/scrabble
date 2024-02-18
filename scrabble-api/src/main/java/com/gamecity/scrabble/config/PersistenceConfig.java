@@ -2,8 +2,9 @@ package com.gamecity.scrabble.config;
 
 import java.util.Properties;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+
+import jakarta.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,8 +26,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Spring configuration of Hibernate including transaction management, entity management, jpa properties,
- * datasource properties and data/schema populator
+ * Spring configuration of Hibernate including transaction management, entity management, jpa
+ * properties, datasource properties and data/schema populator
  * 
  * @author ekarakus
  */

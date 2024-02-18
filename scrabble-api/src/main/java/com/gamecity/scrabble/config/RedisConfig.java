@@ -4,7 +4,7 @@ import java.time.Duration;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +21,8 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 /**
  * Spring configuration of Redis including push messages and cache connection
  * 
@@ -29,7 +31,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @EnableCaching
 @PropertySource("classpath:redis.properties")
-public class RedisConfig extends CachingConfigurerSupport {
+public class RedisConfig implements CachingConfigurer {
 
     private static final Integer TTL_SECONDS = 3600;
 
@@ -74,21 +76,31 @@ public class RedisConfig extends CachingConfigurerSupport {
         final RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setValueSerializer(new CustomJackson2JsonRedisSerializer());
         return redisTemplate;
     }
 
     @Bean
     RedisCacheManager cacheManager(JedisConnectionFactory connectionFactory) {
-        RedisCacheManager redisCacheManager = RedisCacheManager.builder(connectionFactory)
+        CustomJackson2JsonRedisSerializer customJackson2JsonRedisSerializer = new CustomJackson2JsonRedisSerializer();
+
+        return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig()
                         .disableCachingNullValues()
                         .computePrefixWith(name -> name + ":")
                         .serializeValuesWith(RedisSerializationContext.SerializationPair
-                                .fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                                .fromSerializer(customJackson2JsonRedisSerializer))
                         .entryTtl(Duration.ofSeconds(TTL_SECONDS)))
                 .build();
-        return redisCacheManager;
+    }
+
+    class CustomJackson2JsonRedisSerializer extends GenericJackson2JsonRedisSerializer {
+
+        public CustomJackson2JsonRedisSerializer() {
+            super();
+            super.getObjectMapper().registerModule(new JavaTimeModule());
+        }
+
     }
 
 }

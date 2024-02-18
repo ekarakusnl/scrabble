@@ -1,6 +1,10 @@
 package com.gamecity.scrabble.model.rest;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,8 +22,12 @@ public abstract class AbstractDto {
 
     protected Long id;
 
-    protected Date createdDate;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    protected LocalDateTime createdDate;
 
-    protected Date lastUpdatedDate;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    protected LocalDateTime lastUpdatedDate;
 
 }

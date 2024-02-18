@@ -40,6 +40,7 @@ class TestUserService extends AbstractServiceTest {
 
     @BeforeEach
     void beforeEach() {
+        ((UserServiceImpl) userService).setBaseDao(userDao);
         this.user = User.builder().email("tester@gamecity.com").username("tester").password("Scrabble.102").build();
     }
 
@@ -304,7 +305,7 @@ class TestUserService extends AbstractServiceTest {
                 .credentialsNonExpired(true)
                 .enabled(true)
                 .build());
-        
+
         try {
             userService.get(DEFAULT_USER_ID);
 
@@ -322,7 +323,7 @@ class TestUserService extends AbstractServiceTest {
                 .credentialsNonExpired(true)
                 .enabled(true)
                 .build());
-        
+
         try {
             userService.get(DEFAULT_USER_ID);
 
@@ -340,10 +341,10 @@ class TestUserService extends AbstractServiceTest {
                 .credentialsNonExpired(false)
                 .enabled(true)
                 .build());
-        
+
         try {
             userService.get(DEFAULT_USER_ID);
-            
+
             fail("Credentials expired user is found");
         } catch (UserException e) {
             assertThat(e.getCode(), equalTo(UserError.CREDENTIALS_EXPIRED.getCode()));

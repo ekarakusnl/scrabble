@@ -4,9 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -18,18 +17,6 @@ import com.gamecity.scrabble.service.ActionService;
 
 @Component(value = "actionResource")
 class ActionResourceImpl extends AbstractResourceImpl<Action, ActionDto, ActionService> implements ActionResource {
-
-    private ActionService baseService;
-
-    @Override
-    ActionService getBaseService() {
-        return baseService;
-    }
-
-    @Autowired
-    void setBaseService(ActionService baseService) {
-        this.baseService = baseService;
-    }
 
     @Override
     public Response get(Long gameId, Integer version) {

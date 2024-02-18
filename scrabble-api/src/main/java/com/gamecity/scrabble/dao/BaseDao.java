@@ -43,14 +43,6 @@ public interface BaseDao<T> {
     List<T> saveAll(List<T> entities);
 
     /**
-     * Deletes an entity
-     * 
-     * @param id <code>id</code> of the the
-     * @return the deleted entity
-     */
-    T delete(Long id);
-
-    /**
      * Gets the {@link List list} of entities
      * 
      * @return the list of all entities

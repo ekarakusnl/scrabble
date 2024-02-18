@@ -35,15 +35,4 @@ abstract class AbstractServiceImpl<T extends AbstractEntity, D extends BaseDao<T
         return baseDao.saveAll(entities);
     }
 
-    @Override
-    @Transactional
-    public T delete(Long id) {
-        return baseDao.delete(id);
-    }
-
-    @Override
-    public List<T> list() {
-        return baseDao.list();
-    }
-
 }

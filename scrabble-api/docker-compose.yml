@@ -1,7 +1,7 @@
 version: '3'
 services:
   scrabble-api:
-    image: tomcat:9.0.70-jdk11
+    image: tomcat:10.1.18-jdk17
     hostname: scrabble-api
     container_name: scrabble-api
     environment:

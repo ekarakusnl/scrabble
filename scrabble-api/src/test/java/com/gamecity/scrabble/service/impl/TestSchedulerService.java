@@ -1,5 +1,7 @@
 package com.gamecity.scrabble.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -42,7 +44,7 @@ class TestSchedulerService extends AbstractServiceTest {
                 .currentPlayerNumber(DEFAULT_PLAYER_NUMBER)
                 .version(DEFAULT_VERSION)
                 .duration(DEFAULT_DURATION)
-                .lastUpdatedDate(calendar.getTime())
+                .lastUpdatedDate(calendar.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
                 .build();
 
         when(schedulerFactory.getScheduler()).thenReturn(mock(Scheduler.class));
@@ -61,7 +63,7 @@ class TestSchedulerService extends AbstractServiceTest {
         assertThat(dataMap.get(SchedulerServiceImpl.PARAM_VERSION), equalTo(game.getVersion()));
 
         final Calendar startAt = Calendar.getInstance();
-        startAt.setTime(game.getLastUpdatedDate());
+        startAt.setTime(Date.from(game.getLastUpdatedDate().atZone(ZoneId.systemDefault()).toInstant()));
         startAt.add(Calendar.SECOND, game.getDuration());
 
         assertThat(trigger.getValue().getStartTime(), equalTo(startAt.getTime()));
@@ -72,7 +74,7 @@ class TestSchedulerService extends AbstractServiceTest {
     @Test
     void test_schedule_terminate_skip_turn_job() throws SchedulerException {
         when(schedulerFactory.getScheduler()).thenReturn(mock(Scheduler.class));
-        
+
         schedulerService.terminateSkipTurnJob(DEFAULT_GAME_ID, DEFAULT_VERSION);
 
         verify(schedulerFactory.getScheduler(), times(1)).interrupt(any(JobKey.class));
@@ -82,15 +84,15 @@ class TestSchedulerService extends AbstractServiceTest {
     @Test
     void test_schedule_start_game_job() throws SchedulerException, InterruptedException {
         when(schedulerFactory.getScheduler()).thenReturn(mock(Scheduler.class));
-        
+
         final Date dateBeforeExecution = new Date();
-        
+
         Thread.sleep(10);
 
         schedulerService.scheduleStartGameJob(DEFAULT_GAME_ID);
-        
+
         Thread.sleep(10);
-        
+
         final Date dateAfterExecution = new Date();
 
         final ArgumentCaptor<JobDetail> jobDetail = ArgumentCaptor.forClass(JobDetail.class);
@@ -98,7 +100,8 @@ class TestSchedulerService extends AbstractServiceTest {
 
         verify(schedulerFactory.getScheduler()).scheduleJob(jobDetail.capture(), trigger.capture());
 
-        assertThat(jobDetail.getValue().getJobDataMap().get(SchedulerServiceImpl.PARAM_GAME_ID), equalTo(DEFAULT_GAME_ID));
+        assertThat(jobDetail.getValue().getJobDataMap().get(SchedulerServiceImpl.PARAM_GAME_ID),
+                equalTo(DEFAULT_GAME_ID));
         assertThat(trigger.getValue().getStartTime(), greaterThan(dateBeforeExecution));
         assertThat(trigger.getValue().getStartTime(), lessThan(dateAfterExecution));
 
@@ -108,15 +111,15 @@ class TestSchedulerService extends AbstractServiceTest {
     @Test
     void test_schedule_end_game_job() throws SchedulerException, InterruptedException {
         when(schedulerFactory.getScheduler()).thenReturn(mock(Scheduler.class));
-        
+
         final Date dateBeforeExecution = new Date();
-        
+
         Thread.sleep(10);
 
         schedulerService.scheduleEndGameJob(DEFAULT_GAME_ID);
-        
+
         Thread.sleep(10);
-        
+
         final Date dateAfterExecution = new Date();
 
         final ArgumentCaptor<JobDetail> jobDetail = ArgumentCaptor.forClass(JobDetail.class);
@@ -124,7 +127,8 @@ class TestSchedulerService extends AbstractServiceTest {
 
         verify(schedulerFactory.getScheduler()).scheduleJob(jobDetail.capture(), trigger.capture());
 
-        assertThat(jobDetail.getValue().getJobDataMap().get(SchedulerServiceImpl.PARAM_GAME_ID), equalTo(DEFAULT_GAME_ID));
+        assertThat(jobDetail.getValue().getJobDataMap().get(SchedulerServiceImpl.PARAM_GAME_ID),
+                equalTo(DEFAULT_GAME_ID));
         assertThat(trigger.getValue().getStartTime(), greaterThan(dateBeforeExecution));
         assertThat(trigger.getValue().getStartTime(), lessThan(dateAfterExecution));
 
@@ -133,7 +137,7 @@ class TestSchedulerService extends AbstractServiceTest {
 
     @Test
     void test_schedule_terminate_game_job() throws SchedulerException {
-        final Date createdDate = new Date();
+        final LocalDateTime createdDate = LocalDateTime.now();
 
         when(schedulerFactory.getScheduler()).thenReturn(mock(Scheduler.class));
 
@@ -149,7 +153,7 @@ class TestSchedulerService extends AbstractServiceTest {
         assertThat(dataMap.get(SchedulerServiceImpl.PARAM_GAME_ID), equalTo(DEFAULT_GAME_ID));
 
         final Calendar startAt = Calendar.getInstance();
-        startAt.setTime(createdDate);
+        startAt.setTime(Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant()));
         startAt.add(Calendar.MINUTE, Constants.Game.TERMINATE_GAME_DURATION_MINUTES);
 
         assertThat(trigger.getValue().getStartTime(), equalTo(startAt.getTime()));
@@ -160,7 +164,7 @@ class TestSchedulerService extends AbstractServiceTest {
     @Test
     void test_schedule_terminate_terminate_game_job() throws SchedulerException {
         when(schedulerFactory.getScheduler()).thenReturn(mock(Scheduler.class));
-        
+
         schedulerService.terminateTerminateGameJob(DEFAULT_GAME_ID);
 
         verify(schedulerFactory.getScheduler(), times(1)).interrupt(any(JobKey.class));

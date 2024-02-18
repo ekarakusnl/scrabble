@@ -3,7 +3,7 @@ package com.gamecity.scrabble.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -89,7 +89,7 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
 
         // set the default preferred language
         user.setPreferredLanguage(Language.en);
-        final User savedUser = baseDao.save(user);
+        final User savedUser = super.save(user);
 
         userRoleService.add(savedUser.getId(), Role.USER);
 
@@ -98,7 +98,7 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
 
     // TOD this method can be replaced with patch operation since it only updates the password
     private User update(User user) {
-        final User existingUser = baseDao.get(user.getId());
+        final User existingUser = super.get(user.getId());
 
         if (StringUtils.isNotEmpty(user.getPassword())) {
             if (!new PasswordValidator().isValid(user.getPassword())) {
@@ -107,12 +107,12 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
             existingUser.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         }
         existingUser.setPreferredLanguage(user.getPreferredLanguage());
-        return baseDao.save(existingUser);
+        return super.save(existingUser);
     }
 
     @Override
     public User get(Long id) {
-        final User user = baseDao.get(id);
+        final User user = super.get(id);
         if (user == null) {
             throw new UserException(UserError.NOT_FOUND);
         } else if (!user.isEnabled()) {

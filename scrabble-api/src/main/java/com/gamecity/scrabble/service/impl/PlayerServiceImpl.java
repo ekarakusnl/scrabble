@@ -1,6 +1,6 @@
 package com.gamecity.scrabble.service.impl;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -19,15 +19,15 @@ class PlayerServiceImpl extends AbstractServiceImpl<Player, PlayerDao> implement
                 .userId(userId)
                 .playerNumber(playerNumber)
                 .score(0)
-                .joinedDate(new Date())
+                .joinedDate(LocalDateTime.now())
                 .build();
-        return baseDao.save(player);
+        return super.save(player);
     }
 
     @Override
     public void remove(Player player) {
-        player.setLeftDate(new Date());
-        baseDao.save(player);
+        player.setLeftDate(LocalDateTime.now());
+        super.save(player);
     }
 
     @Override
@@ -49,7 +49,7 @@ class PlayerServiceImpl extends AbstractServiceImpl<Player, PlayerDao> implement
     public void updateScore(Long gameId, Integer playerNumber, Integer newWordsScore) {
         final Player player = getByPlayerNumber(gameId, playerNumber);
         player.setScore(player.getScore() + newWordsScore);
-        baseDao.save(player);
+        super.save(player);
     }
 
 }

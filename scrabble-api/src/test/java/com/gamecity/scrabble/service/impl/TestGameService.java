@@ -105,6 +105,7 @@ class TestGameService extends AbstractServiceTest {
 
     @BeforeEach
     void beforeEach() {
+        ((GameServiceImpl) gameService).setBaseDao(gameDao);
         tiles = new ArrayList<>(Constants.Game.RACK_SIZE);
     }
 
@@ -164,21 +165,21 @@ class TestGameService extends AbstractServiceTest {
     @Test
     void test_get_waiting_game() {
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.WAITING).build());
-        
+
         assertThat(gameService.get(DEFAULT_GAME_ID), notNullValue());
     }
 
     @Test
     void test_get_ready_game() {
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.READY_TO_START).build());
-        
+
         assertThat(gameService.get(DEFAULT_GAME_ID), notNullValue());
     }
 
     @Test
     void test_get_started_game() {
         when(gameDao.get(eq(DEFAULT_GAME_ID))).thenReturn(Game.builder().status(GameStatus.IN_PROGRESS).build());
-        
+
         assertThat(gameService.get(DEFAULT_GAME_ID), notNullValue());
     }
 
@@ -240,7 +241,7 @@ class TestGameService extends AbstractServiceTest {
 
         try {
             gameService.join(DEFAULT_GAME_ID, 2L);
-            
+
             fail("Joined started game");
         } catch (GameException e) {
             assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));
@@ -321,7 +322,7 @@ class TestGameService extends AbstractServiceTest {
 
         try {
             gameService.leave(DEFAULT_GAME_ID, 2L);
-            
+
             fail("Player left started game");
         } catch (GameException e) {
             assertThat(e.getCode(), equalTo(GameError.IN_PROGRESS.getCode()));

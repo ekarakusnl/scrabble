@@ -1,8 +1,7 @@
 package com.gamecity.scrabble.resource.impl;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -16,17 +15,12 @@ import com.gamecity.scrabble.service.VirtualBoardService;
 @Component(value = "virtualBoardResource")
 class VirtualBoardResourceImpl implements VirtualBoardResource {
 
-    private ActionService actionService;
     private VirtualBoardService virtualBoardService;
+    private ActionService actionService;
 
-    @Autowired
-    void setActionService(ActionService actionService) {
-        this.actionService = actionService;
-    }
-
-    @Autowired
-    void setVirtualBoardService(VirtualBoardService virtualBoardService) {
+    public VirtualBoardResourceImpl(final VirtualBoardService virtualBoardService, final ActionService actionService) {
         this.virtualBoardService = virtualBoardService;
+        this.actionService = actionService;
     }
 
     @Override

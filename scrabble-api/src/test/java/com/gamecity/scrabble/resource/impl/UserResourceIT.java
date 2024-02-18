@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.junit.jupiter.api.Test;
 
+import com.gamecity.scrabble.model.rest.ExceptionDto;
 import com.gamecity.scrabble.model.rest.UserDto;
 import com.gamecity.scrabble.util.JsonUtils;
 import com.google.common.io.Resources;
@@ -109,6 +110,19 @@ class UserResourceIT extends AbstractIntegrationTest {
         assertThat(updatedResponse.readEntity(String.class), equalTo("If-Match header is missing"));
 
         updatedResponse.close();
+        response.close();
+    }
+
+    @Test
+    void test_user_does_not_exist() {
+        final Response response = target("/users/by/null").request().get();
+
+        assertThat(response.getStatus(), equalTo(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
+
+        final ExceptionDto responseDto = response.readEntity(ExceptionDto.class);
+
+        assertThat(responseDto.getMessage(), equalTo("User is not found!"));
+
         response.close();
     }
 

@@ -2,18 +2,15 @@ package com.gamecity.scrabble.resource;
 
 import java.util.List;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import com.gamecity.scrabble.model.rest.ChatDto;
 import com.gamecity.scrabble.model.rest.GameDto;
-import com.gamecity.scrabble.model.rest.PlayerDto;
 
 /**
  * {@link ChatDto Chat} resources
@@ -21,18 +18,7 @@ import com.gamecity.scrabble.model.rest.PlayerDto;
  * @author ekarakus
  */
 @Path("/games/{gameId}/chats")
-public interface ChatResource {
-
-    /**
-     * Creates a {@link ChatDto chat} by a {@link PlayerDto player }in a {@link GameDto game}
-     * 
-     * @param chatDto dto representation of the chat
-     * @return dto representation of the chat
-     */
-    @PUT
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    Response create(ChatDto chatDto);
+public interface ChatResource extends BaseResource<ChatDto> {
 
     /**
      * Gets the {@link List list} of {@link ChatDto chats} in a {@link GameDto game}

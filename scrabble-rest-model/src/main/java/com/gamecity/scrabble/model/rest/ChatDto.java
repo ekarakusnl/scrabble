@@ -1,7 +1,5 @@
 package com.gamecity.scrabble.model.rest;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -31,8 +29,5 @@ public class ChatDto extends AbstractDto {
 
     @JsonProperty("message")
     private String message;
-
-    @JsonProperty("createdDate")
-    private Date createdDate;
 
 }

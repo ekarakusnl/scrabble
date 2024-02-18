@@ -42,7 +42,7 @@ class ChatServiceImpl extends AbstractServiceImpl<Chat, ChatDao> implements Chat
 
         chat.setMessage(chat.getMessage().replace("\"", ""));
 
-        final Chat savedChat = baseDao.save(chat);
+        final Chat savedChat = super.save(chat);
 
         redisRepository.publishChat(chat.getGameId(), chat);
 

@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.2
-FROM maven:3.8.3-jdk-11-slim as build
+FROM maven:3.8.5-openjdk-17-slim as build
 
 # set work directory
 WORKDIR /scrabble
@@ -10,7 +10,7 @@ ADD . /scrabble
 # maven build
 RUN mvn clean install -e -DskipTests -DskipITs -Denvironment=prod
 
-FROM tomcat:9.0.70-jdk11
+FROM tomcat:10.1.18-jdk17
 
 # get environment variables
 ARG DICTIONARY_PATH

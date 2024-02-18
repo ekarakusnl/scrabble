@@ -1,6 +1,6 @@
 package com.gamecity.scrabble.service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.quartz.Job;
 import org.quartz.Scheduler;
@@ -53,7 +53,7 @@ public interface SchedulerService {
      * @param gameId      <code>id</code> of the game
      * @param createdDate <code>createdDate</code> of the game
      */
-    void scheduleTerminateGameJob(Long gameId, Date createdDate);
+    void scheduleTerminateGameJob(Long gameId, LocalDateTime createdDate);
 
     /**
      * Terminates the scheduled terminate game {@link Job job}

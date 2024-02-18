@@ -4,9 +4,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,11 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JsonUtils {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     static {
-        objectMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.setSerializationInclusion(Include.NON_NULL);
+        mapper.registerModule(new JavaTimeModule());
     }
 
     /**
@@ -40,7 +46,8 @@ public class JsonUtils {
         }
 
         try {
-            return objectMapper.readValue(payload, new TypeReference<List<T>>() {});
+            return mapper.readValue(payload, new TypeReference<List<T>>() {
+            });
         } catch (Exception e) {
             log.error("An error occured while converting to {} by payload {}", clazz.getSimpleName(), payload);
             throw new RuntimeException(e);
@@ -61,7 +68,7 @@ public class JsonUtils {
         }
 
         try {
-            return objectMapper.readValue(payload, clazz);
+            return mapper.readValue(payload, clazz);
         } catch (Exception e) {
             log.error("An error occured while converting to {} by payload {}", clazz.getSimpleName(), payload);
             throw new RuntimeException(e);
@@ -77,7 +84,7 @@ public class JsonUtils {
      */
     public static <T> String toJson(T dto) {
         try {
-            return objectMapper.writeValueAsString(dto);
+            return mapper.writeValueAsString(dto);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +99,7 @@ public class JsonUtils {
      */
     public static <T> String toJson(List<T> dtoList) {
         try {
-            return objectMapper.writeValueAsString(dtoList);
+            return mapper.writeValueAsString(dtoList);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,9 +1,9 @@
 package com.gamecity.scrabble.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -86,7 +86,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
     @Override
     public Game get(Long gameId) {
-        final Game game = baseDao.get(gameId);
+        final Game game = super.get(gameId);
 
         if (game == null || GameStatus.TERMINATED == game.getStatus()) {
             throw new GameException(GameError.NOT_FOUND);
@@ -109,7 +109,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setActivePlayerCount(1);
         game.setVersion(1);
 
-        final Game savedGame = baseDao.save(game);
+        final Game savedGame = super.save(game);
 
         playerService.add(game.getId(), user.getId(), game.getActivePlayerCount());
         actionService.add(savedGame, game.getOwnerId(), NO_SCORE, ActionType.CREATE);
@@ -130,7 +130,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         existingGame.setExpectedPlayerCount(game.getExpectedPlayerCount());
         existingGame.setDuration(game.getDuration());
 
-        return baseDao.save(existingGame);
+        return super.save(existingGame);
     }
 
     @Override
@@ -162,7 +162,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             game.setStatus(GameStatus.READY_TO_START);
         }
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         actionService.add(updatedGame, userId, NO_SCORE, ActionType.JOIN);
 
@@ -196,7 +196,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setActivePlayerCount(game.getActivePlayerCount() - 1);
         game.setVersion(game.getVersion() + 1);
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         actionService.add(updatedGame, userId, NO_SCORE, ActionType.LEAVE);
 
@@ -218,7 +218,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             throw new GameException(GameError.WAITING);
         }
 
-        game.setStartDate(new Date());
+        game.setStartDate(LocalDateTime.now());
         game.setStatus(GameStatus.IN_PROGRESS);
         game.setCurrentPlayerNumber(1);
         game.setRoundNumber(1);
@@ -232,7 +232,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         log.info("Game {} is started", game.getId());
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         actionService.add(updatedGame, game.getOwnerId(), NO_SCORE, ActionType.START);
         contentService.create(updatedGame);
@@ -319,7 +319,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             game.setStatus(GameStatus.READY_TO_END);
         }
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         // create a play action
         final Action action = actionService.add(updatedGame, userId, constructedWordsScore, ActionType.PLAY);
@@ -343,7 +343,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         increaseVersion(game);
         increaseRoundNumber(game);
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         // create a skip action
         actionService.add(updatedGame, userId, NO_SCORE, actionType);
@@ -369,7 +369,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         increaseVersion(game);
         increaseRoundNumber(game);
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         // create an exchange action
         actionService.add(updatedGame, userId, NO_SCORE, ActionType.EXCHANGE);
@@ -387,7 +387,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
         game.setStatus(GameStatus.DELETED);
         game.setVersion(game.getVersion() + 1);
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         actionService.add(updatedGame, game.getOwnerId(), NO_SCORE, ActionType.DELETE);
 
@@ -409,7 +409,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             throw new GameException(GameError.IN_PROGRESS);
         }
 
-        game.setEndDate(new Date());
+        game.setEndDate(LocalDateTime.now());
         game.setStatus(GameStatus.ENDED);
         game.setVersion(game.getVersion() + 1);
 
@@ -420,7 +420,7 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
 
         log.info("Game {} is ended", game.getId());
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         actionService.add(updatedGame, winningPlayer.getUserId(), NO_SCORE, ActionType.END);
 
@@ -438,13 +438,13 @@ class GameServiceImpl extends AbstractServiceImpl<Game, GameDao> implements Game
             throw new GameException(GameError.IN_PROGRESS);
         }
 
-        game.setEndDate(new Date());
+        game.setEndDate(LocalDateTime.now());
         game.setStatus(GameStatus.TERMINATED);
         game.setVersion(game.getVersion() + 1);
 
         log.info("Game {} is terminated", game.getId());
 
-        final Game updatedGame = baseDao.save(game);
+        final Game updatedGame = super.save(game);
 
         actionService.add(updatedGame, game.getOwnerId(), NO_SCORE, ActionType.TERMINATE);
 

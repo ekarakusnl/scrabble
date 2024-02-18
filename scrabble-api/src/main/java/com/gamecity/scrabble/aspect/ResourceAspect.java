@@ -10,6 +10,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
+import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,6 +27,7 @@ public class ResourceAspect {
      * Defines a pointcut for the given package
      */
     @Pointcut("execution(* com.gamecity.scrabble.resource..*(..))")
+    @Generated
     public void resource() {
         // nothing to do here
     }

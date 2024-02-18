@@ -3,10 +3,10 @@ package com.gamecity.scrabble.filter;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String TOKEN_PARAMETER = "HTTP_TOKEN";
+    private static final String TOKEN_PARAMETER = "HTTP_TOKEN ";
 
     @Autowired
     private JwtProvider jwtProvider;

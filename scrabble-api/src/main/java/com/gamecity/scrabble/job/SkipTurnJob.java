@@ -21,8 +21,8 @@ import com.gamecity.scrabble.service.SchedulerService;
 import com.gamecity.scrabble.service.VirtualRackService;
 
 /**
- * A Quartz {@link Job job} to skip the turn of a {@link Player player} at the end of the play duration
- * in a {@link Game game}
+ * A Quartz {@link Job job} to skip the turn of a {@link Player player} at the end of the play
+ * duration in a {@link Game game}
  * 
  * @author ekarakus
  */
@@ -97,15 +97,8 @@ public class SkipTurnJob implements Job {
             // the last round has been played, schedule the end game job
             schedulerService.scheduleEndGameJob(updatedGame.getId());
         } else {
-            final boolean isMaximumSkipCountReached =
-                    actionService.isMaximumSkipCountReached(gameId, updatedGame.getExpectedPlayerCount());
-            if (isMaximumSkipCountReached) {
-                // maximum skip count in a row has been reached, schedule the end game job
-                schedulerService.scheduleEndGameJob(gameId);
-            } else {
-                // schedule the skip turn job for the next turn
-                schedulerService.scheduleSkipTurnJob(updatedGame);
-            }
+            // schedule the skip turn job for the next turn
+            schedulerService.scheduleSkipTurnJob(updatedGame);
         }
     }
 

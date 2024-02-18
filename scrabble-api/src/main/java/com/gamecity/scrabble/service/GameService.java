@@ -62,8 +62,8 @@ public interface GameService extends BaseService<Game> {
     /**
      * Gets the {@link List list} of {@link Game games} by the given criterias
      *
-     * @param userId <code>id</code> of the user
-     * @param includeUser whether or not to include the given user 
+     * @param userId      <code>id</code> of the user
+     * @param includeUser whether or not to include the given user
      * @return the games
      */
     List<Game> search(Long userId, boolean includeUser);
@@ -75,5 +75,13 @@ public interface GameService extends BaseService<Game> {
      * @return the updated entity
      */
     Game terminate(Long id);
+
+    /**
+     * Deletes the {@link Game game}
+     * 
+     * @param id <code>id</code> of the game
+     * @return the deleted game
+     */
+    Game delete(Long id);
 
 }

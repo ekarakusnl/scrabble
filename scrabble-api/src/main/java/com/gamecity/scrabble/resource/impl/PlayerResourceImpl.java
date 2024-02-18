@@ -4,9 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -20,21 +19,9 @@ import com.gamecity.scrabble.service.ActionService;
 @Component(value = "playerResource")
 class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerService> implements PlayerResource {
 
-    private PlayerService baseService;
     private ActionService actionService;
 
-    @Override
-    PlayerService getBaseService() {
-        return baseService;
-    }
-
-    @Autowired
-    void setBaseService(PlayerService baseService) {
-        this.baseService = baseService;
-    }
-
-    @Autowired
-    void setActionService(ActionService actionService) {
+    public PlayerResourceImpl(final ActionService actionService) {
         this.actionService = actionService;
     }
 

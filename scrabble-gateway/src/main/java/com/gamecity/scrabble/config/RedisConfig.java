@@ -5,7 +5,7 @@ import java.time.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -33,7 +33,7 @@ import com.gamecity.scrabble.controller.ChatController;
  */
 @Configuration
 @PropertySource("classpath:redis.properties")
-public class RedisConfig extends CachingConfigurerSupport {
+public class RedisConfig implements CachingConfigurer {
 
     private static final Integer MAX_SUBSCRIPTION_REGISTRATION_MILLISECONDS = 300000;
     private static final Integer TTL_SECONDS = 3600;

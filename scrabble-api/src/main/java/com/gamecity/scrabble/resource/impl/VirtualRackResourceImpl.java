@@ -1,8 +1,7 @@
 package com.gamecity.scrabble.resource.impl;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -20,13 +19,8 @@ class VirtualRackResourceImpl implements VirtualRackResource {
     private VirtualRackService virtualRackService;
     private PlayerService playerService;
 
-    @Autowired
-    void setVirtualRackService(VirtualRackService virtualRackService) {
+    public VirtualRackResourceImpl(final VirtualRackService virtualRackService, final PlayerService playerService) {
         this.virtualRackService = virtualRackService;
-    }
-
-    @Autowired
-    void setPlayerService(PlayerService playerService) {
         this.playerService = playerService;
     }
 

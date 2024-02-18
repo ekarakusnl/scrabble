@@ -3,6 +3,7 @@ package com.gamecity.scrabble.service.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,6 +26,11 @@ class TestActionService extends AbstractServiceTest {
 
     @InjectMocks
     private ActionService actionService = new ActionServiceImpl();
+
+    @BeforeEach
+    void beforeEach() {
+        ((ActionServiceImpl) actionService).setBaseDao(actionDao);
+    }
 
     @Test
     void test_add_action() {
@@ -55,14 +61,14 @@ class TestActionService extends AbstractServiceTest {
     @Test
     void test_has_new_action() {
         when(actionDao.getLastAction(DEFAULT_GAME_ID)).thenReturn(Action.builder().version(1).build());
-        
+
         assertThat(actionService.hasNewAction(DEFAULT_GAME_ID, 1), equalTo(true));
     }
 
     @Test
     void test_has_no_new_action() {
         when(actionDao.getLastAction(DEFAULT_GAME_ID)).thenReturn(Action.builder().version(1).build());
-        
+
         assertThat(actionService.hasNewAction(DEFAULT_GAME_ID, 2), equalTo(false));
     }
 

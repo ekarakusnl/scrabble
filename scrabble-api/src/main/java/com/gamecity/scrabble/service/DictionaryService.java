@@ -3,7 +3,6 @@ package com.gamecity.scrabble.service;
 import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Word;
-import com.gamecity.scrabble.model.Dictionary;
 import com.gamecity.scrabble.model.DictionaryWord;
 
 /**
@@ -15,7 +14,7 @@ import com.gamecity.scrabble.model.DictionaryWord;
 public interface DictionaryService {
 
     /**
-     * Gets the selected word from the {@link Dictionary dictionary}
+     * Gets the selected word from the dictionary
      * 
      * @param word     <code>word</code> to search in the dictionary
      * @param language <code>language</code> of the dictionary

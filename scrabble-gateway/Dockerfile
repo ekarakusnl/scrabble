@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.2
-FROM maven:3.8.3-jdk-11-slim as build
+FROM maven:3.8.5-openjdk-17-slim as build
 
 # set work directory
 WORKDIR /scrabble
@@ -10,7 +10,7 @@ ADD . /scrabble
 # maven build
 RUN mvn clean install -e -DskipTests -DskipITs -Denvironment=prod
 
-FROM tomcat:9.0.70-jdk11
+FROM tomcat:10.1.18-jdk17
 
 # get environment variables
 ARG API_ENDPOINT
@@ -22,7 +22,7 @@ ARG REDIS_USERNAME
 ARG REDIS_PASSWORD
 ARG REDIS_USE_SSL
 ARG CDN_UPLOAD_IMAGE_ENDPOINT
-ARG CDN_SECRET
+ARG CDN_PRIVATE_KEY
 
 # move deployable to webapps
 COPY --from=build /scrabble/scrabble-gateway/target/scrabble-gateway.war /usr/local/tomcat/webapps/scrabble-gateway.war
@@ -43,7 +43,7 @@ ENV JAVA_OPTS="-Dapi.endpoint=$API_ENDPOINT \
                -Dredis.password=$REDIS_PASSWORD \
                -Dredis.use.ssl=$REDIS_USE_SSL \
                -Dcdn.upload.image.endpoint=$CDN_UPLOAD_IMAGE_ENDPOINT \
-               -Dcdn.secret=$CDN_SECRET"
+               -Dcdn.private.key=$CDN_PRIVATE_KEY"
 
 # run tomcat
 EXPOSE 8080

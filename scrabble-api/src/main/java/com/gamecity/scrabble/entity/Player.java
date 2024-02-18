@@ -1,15 +1,13 @@
 package com.gamecity.scrabble.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import com.gamecity.scrabble.Constants;
 
@@ -66,7 +64,6 @@ public class Player extends AbstractEntity {
     @Transient
     private String username;
 
-    // TODO consider a better property name
     @Column(name = "player_number")
     private Integer playerNumber;
 
@@ -74,12 +71,10 @@ public class Player extends AbstractEntity {
     @Builder.Default
     private Integer score = 0;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "joined_date", nullable = false)
-    private Date joinedDate;
+    private LocalDateTime joinedDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "left_date")
-    private Date leftDate;
+    private LocalDateTime leftDate;
 
 }

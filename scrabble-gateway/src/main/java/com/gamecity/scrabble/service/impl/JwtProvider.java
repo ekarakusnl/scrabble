@@ -7,7 +7,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
+import javax.crypto.spec.SecretKeySpec;
+
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,9 +28,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -41,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtProvider {
 
     private Cache<String, UserDto> userCache;
+    private SecretKeySpec secretKeySpec;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -59,6 +61,7 @@ public class JwtProvider {
     void init() {
         // store the authenticated users in cache until the validity of tokens expire
         this.userCache = CacheBuilder.newBuilder().expireAfterWrite(tokenValidityHours, TimeUnit.HOURS).build();
+        this.secretKeySpec = new SecretKeySpec(jwtSecret.getBytes(), "HMACSHA256");
     }
 
     /**
@@ -68,7 +71,7 @@ public class JwtProvider {
      * @return the username
      */
     public String getUsername(final String token) {
-        final Claims body = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+        final Claims body = Jwts.parser().verifyWith(secretKeySpec).build().parseSignedClaims(token).getPayload();
         return body.getSubject();
     }
 
@@ -80,7 +83,7 @@ public class JwtProvider {
      */
     public String generateToken(Authentication authentication) {
         final User user = (User) authentication.getPrincipal();
-        Claims claims = Jwts.claims().setSubject(user.getUsername());
+        final Claims claims = Jwts.claims().subject(user.getUsername()).build();
 
         final Date now = new Date();
         final Calendar calendar = Calendar.getInstance();
@@ -88,10 +91,10 @@ public class JwtProvider {
         calendar.add(Calendar.HOUR, tokenValidityHours);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(calendar.getTime())
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .claims(claims)
+                .issuedAt(now)
+                .expiration(calendar.getTime())
+                .signWith(secretKeySpec)
                 .compact();
     }
 
@@ -102,7 +105,7 @@ public class JwtProvider {
      */
     public void validateToken(final String token) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            Jwts.parser().verifyWith(secretKeySpec).build().parseSignedClaims(token);
         } catch (SignatureException e) {
             log.error("Invalid JWT signature", e);
             throw new RuntimeException("Invalid JWT signature");
@@ -122,8 +125,8 @@ public class JwtProvider {
     }
 
     /**
-     * Gets the {@link UserDto user} for the specified token. If the user is not in the cache with the
-     * specified token, then the user is fetched and added to the cache
+     * Gets the {@link UserDto user} for the specified token. If the user is not in the cache with
+     * the specified token, then the user is fetched and added to the cache
      * 
      * @param token
      * @return the userPasswordAuthenticationToken
@@ -132,8 +135,8 @@ public class JwtProvider {
     public UsernamePasswordAuthenticationToken getAuthenticationToken(String token) throws ExecutionException {
         final String username = getUsername(token);
 
-        final UserDto userDto =
-                userCache.get(token, () -> restService.get("/users/by/{username}", UserDto.class, username));
+        final UserDto userDto = userCache.get(token,
+                () -> restService.get("/users/by/{username}", UserDto.class, username));
 
         final Collection<BaseAuthority> authorities = userDto.getAuthorities()
                 .stream()

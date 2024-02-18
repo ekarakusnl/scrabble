@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,6 +22,11 @@ class TestUserRoleService extends AbstractServiceTest {
     @InjectMocks
     private UserRoleService userRoleService = new UserRoleServiceImpl();
 
+    @BeforeEach
+    void beforeEach() {
+        ((UserRoleServiceImpl) userRoleService).setBaseDao(userRoleDao);
+    }
+
     @Test
     void test_add_user_role() {
         when(userRoleDao.save(any())).thenAnswer(invocation -> {
@@ -28,7 +34,7 @@ class TestUserRoleService extends AbstractServiceTest {
         });
 
         final UserRole userRole = userRoleService.add(DEFAULT_USER_ID, Role.USER);
-        
+
         assertThat(userRole, notNullValue());
         assertThat(userRole.isEnabled(), equalTo(true));
         assertThat(userRole.getRole(), equalTo(Role.USER));

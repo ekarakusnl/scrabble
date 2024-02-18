@@ -2,8 +2,8 @@ package com.gamecity.scrabble.config;
 
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletRegistration.Dynamic;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletRegistration.Dynamic;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

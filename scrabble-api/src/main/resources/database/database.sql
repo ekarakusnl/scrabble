@@ -374,13 +374,6 @@ SELECT pg_catalog.setval('public.bags_id_seq', 1, false);
 
 
 --
--- Name: boards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: scrabble_api
---
-
-SELECT pg_catalog.setval('public.boards_id_seq', 1, false);
-
-
---
 -- Name: cells_id_seq; Type: SEQUENCE SET; Schema: public; Owner: scrabble_api
 --
 
@@ -450,14 +443,6 @@ ALTER TABLE ONLY public.actions
 
 ALTER TABLE ONLY public.bags
     ADD CONSTRAINT bags_pkey PRIMARY KEY (id);
-
-
---
--- Name: boards boards_pkey; Type: CONSTRAINT; Schema: public; Owner: scrabble_api
---
-
-ALTER TABLE ONLY public.boards
-    ADD CONSTRAINT boards_pkey PRIMARY KEY (id);
 
 
 --

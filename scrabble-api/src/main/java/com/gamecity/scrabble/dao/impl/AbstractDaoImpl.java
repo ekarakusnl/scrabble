@@ -1,18 +1,17 @@
 package com.gamecity.scrabble.dao.impl;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.util.CollectionUtils;
 
 import com.gamecity.scrabble.dao.BaseDao;
 import com.gamecity.scrabble.entity.AbstractEntity;
@@ -48,7 +47,7 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
 
     @Override
     public T save(T entity) {
-        final Date now = new Date();
+        final LocalDateTime now = LocalDateTime.now();
         entity.setCreatedDate(entity.getId() == null ? now : entity.getCreatedDate());
         entity.setLastUpdatedDate(now);
         entityManager.persist(entity);
@@ -57,20 +56,13 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
 
     @Override
     public List<T> saveAll(List<T> entities) {
-        final Date now = new Date();
+        final LocalDateTime now = LocalDateTime.now();
         entities.forEach(entity -> {
             entity.setCreatedDate(entity.getId() == null ? now : entity.getCreatedDate());
             entity.setLastUpdatedDate(now);
         });
         entities.forEach(entityManager::persist);
         return entities;
-    }
-
-    @Override
-    public T delete(Long id) {
-        final T entity = get(id);
-        entityManager.remove(entity);
-        return entity;
     }
 
     @Override
@@ -85,7 +77,7 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
 
     protected List<T> listByNamedQuery(String querySql, List<Pair<String, Object>> paramPairs, Integer maxResults) {
         final Query query = createQueryWithParams(querySql, paramPairs);
-        if (maxResults != null && maxResults > 0) {
+        if (maxResults != null) {
             query.setMaxResults(maxResults);
         }
         return query.getResultList();
@@ -109,11 +101,9 @@ abstract class AbstractDaoImpl<T extends AbstractEntity> implements BaseDao<T> {
 
     private Query createQueryWithParams(String querySql, List<Pair<String, Object>> paramPairs) {
         final Query query = entityManager.createNamedQuery(querySql);
-        if (!CollectionUtils.isEmpty(paramPairs)) {
-            paramPairs.stream().forEach(pair -> {
-                query.setParameter(pair.getKey(), pair.getValue());
-            });
-        }
+        paramPairs.stream().forEach(pair -> {
+            query.setParameter(pair.getKey(), pair.getValue());
+        });
         return query;
     }
 

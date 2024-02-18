@@ -1,14 +1,12 @@
 package com.gamecity.scrabble.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -34,13 +32,11 @@ public abstract class AbstractEntity {
     protected Long id;
 
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    protected Date createdDate;
+    protected LocalDateTime createdDate;
 
     @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_updated_date", nullable = false)
-    protected Date lastUpdatedDate;
+    protected LocalDateTime lastUpdatedDate;
 
 }

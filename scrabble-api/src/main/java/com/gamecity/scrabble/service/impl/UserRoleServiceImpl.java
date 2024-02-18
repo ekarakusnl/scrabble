@@ -15,7 +15,7 @@ class UserRoleServiceImpl extends AbstractServiceImpl<UserRole, UserRoleDao> imp
     @Override
     public UserRole add(Long userId, Role role) {
         final UserRole userRole = UserRole.builder().enabled(true).role(role).userId(userId).build();
-        return baseDao.save(userRole);
+        return super.save(userRole);
     }
 
     @Override

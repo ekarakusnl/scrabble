@@ -3,9 +3,8 @@ package com.gamecity.scrabble.resource.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.gamecity.scrabble.dao.RedisRepository;
@@ -26,39 +25,15 @@ import com.gamecity.scrabble.service.SchedulerService;
 @Component(value = "gameResource")
 class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> implements GameResource {
 
-    private GameService baseService;
     private ActionService actionService;
     private SchedulerService schedulerService;
     private RedisRepository redisRepository;
 
-    @Override
-    GameService getBaseService() {
-        return baseService;
-    }
-
-    @Autowired
-    void setBaseService(GameService baseService) {
-        this.baseService = baseService;
-    }
-
-    @Autowired
-    void setActionService(ActionService actionService) {
+    public GameResourceImpl(final ActionService actionService, final SchedulerService schedulerService,
+                            final RedisRepository redisRepository) {
         this.actionService = actionService;
-    }
-
-    @Autowired
-    void setSchedulerService(SchedulerService schedulerService) {
         this.schedulerService = schedulerService;
-    }
-
-    @Autowired
-    void setRedisRepository(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
-    }
-
-    @Override
-    public Response get(Long gameId) {
-        return super.get(gameId);
     }
 
     @Override
@@ -121,11 +96,7 @@ class GameResourceImpl extends AbstractResourceImpl<Game, GameDto, GameService> 
 
     @Override
     public Response search(Long userId, Boolean includeUser) {
-        if (userId == null) {
-            return super.list();
-        }
-
-        final List<Game> games = getBaseService().search(userId, includeUser);
+        final List<Game> games = baseService.search(userId, includeUser);
         return Response.ok(games.stream().map(Mapper::toDto).collect(Collectors.toList())).build();
     }
 

@@ -1,7 +1,7 @@
 version: '3'
 services:
   scrabble-gateway:
-    image: tomcat:9.0.70-jdk11
+    image: tomcat:10.1.18-jdk17
     hostname: scrabble-gateway
     container_name: scrabble-gateway
     environment:
@@ -14,7 +14,7 @@ services:
                   -Dredis.password=
                   -Dredis.use.ssl=false
                   -Dcdn.upload.image.endpoint=https://www.google.com
-                  -Dcdn.secret=cdn_secret
+                  -Dcdn.private.key=cdn_private_key
     volumes:
       - ./target/scrabble-gateway.war:/usr/local/tomcat/webapps/scrabble-gateway.war
     ports:

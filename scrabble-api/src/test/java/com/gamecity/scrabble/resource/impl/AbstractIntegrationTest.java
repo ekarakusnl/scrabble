@@ -1,8 +1,6 @@
 package com.gamecity.scrabble.resource.impl;
 
-import java.io.IOException;
-
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.core.Application;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -15,13 +13,12 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.gamecity.scrabble.config.AspectConfig;
-import com.gamecity.scrabble.config.RedisConfig;
-
-import redis.embedded.RedisServer;
-
 import com.gamecity.scrabble.config.PersistenceConfig;
 import com.gamecity.scrabble.config.PropertyConfig;
 import com.gamecity.scrabble.config.QuartzConfig;
+import com.gamecity.scrabble.config.RedisConfig;
+
+import redis.embedded.RedisServer;
 
 @SuppressWarnings("unchecked")
 abstract class AbstractIntegrationTest extends JerseyTest {
@@ -32,10 +29,15 @@ abstract class AbstractIntegrationTest extends JerseyTest {
     protected static RedisTemplate<String, Object> redisTemplate;
 
     @BeforeAll
-    public static void beforeAll() throws IOException {
-        redisServer = new RedisServer(6380);
-        redisServer.start();
-        initializeApplicationContext();
+    @SuppressWarnings("unused")
+    public static void beforeAll() {
+        try {
+            redisServer = new RedisServer(6380);
+            redisServer.start();
+            initializeApplicationContext();
+        } catch (Exception e) {
+            redisServer.stop();
+        }
     }
 
     @AfterAll

@@ -1,5 +1,6 @@
 package com.gamecity.scrabble.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,6 +20,11 @@ class TestPlayerService extends AbstractServiceTest {
 
     @InjectMocks
     private PlayerService playerService = new PlayerServiceImpl();
+
+    @BeforeEach
+    void beforeEach() {
+        ((PlayerServiceImpl) playerService).setBaseDao(playerDao);
+    }
 
     @Test
     void test_add_player() {

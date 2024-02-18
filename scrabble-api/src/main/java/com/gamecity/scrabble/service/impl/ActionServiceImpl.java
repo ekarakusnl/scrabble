@@ -2,7 +2,7 @@ package com.gamecity.scrabble.service.impl;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
@@ -32,7 +32,7 @@ class ActionServiceImpl extends AbstractServiceImpl<Action, ActionDao> implement
                 .createdDate(game.getLastUpdatedDate())
                 .lastUpdatedDate(game.getLastUpdatedDate())
                 .build();
-        return baseDao.save(action);
+        return super.save(action);
     }
 
     @Override

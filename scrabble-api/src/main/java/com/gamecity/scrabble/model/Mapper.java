@@ -1,14 +1,11 @@
 package com.gamecity.scrabble.model;
 
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 import com.gamecity.scrabble.entity.AbstractEntity;
 import com.gamecity.scrabble.entity.Action;
-import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.BaseAuthority;
 import com.gamecity.scrabble.entity.Chat;
 import com.gamecity.scrabble.entity.Game;
@@ -40,6 +37,9 @@ import com.gamecity.scrabble.service.exception.UserException;
  */
 public class Mapper {
 
+    private Mapper() {
+    }
+
     /**
      * Converts an entity to a dto
      * 
@@ -47,21 +47,15 @@ public class Mapper {
      * @return the dto
      */
     public static AbstractDto toDto(AbstractEntity entity) {
-        if (entity instanceof Action) {
-            return toDto((Action) entity);
-        } else if (entity instanceof Chat) {
+        if (entity instanceof Chat) {
             return toDto((Chat) entity);
         } else if (entity instanceof Game) {
             return toDto((Game) entity);
-        } else if (entity instanceof Player) {
-            return toDto((Player) entity);
         } else if (entity instanceof User) {
             return toDto((User) entity);
-        } else if (entity instanceof Word) {
-            return toDto((Word) entity);
-        } else {
-            throw new IllegalStateException(entity.getClass() + " is not mapped");
         }
+
+        throw new IllegalStateException(entity.getClass() + " is not mapped");
     }
 
     /**
@@ -71,21 +65,15 @@ public class Mapper {
      * @return the entity
      */
     public static AbstractEntity toEntity(AbstractDto dto) {
-        if (dto instanceof ActionDto) {
-            return toEntity((ActionDto) dto);
-        } else if (dto instanceof ChatDto) {
+        if (dto instanceof ChatDto) {
             return toEntity((ChatDto) dto);
         } else if (dto instanceof GameDto) {
             return toEntity((GameDto) dto);
-        } else if (dto instanceof PlayerDto) {
-            return toEntity((PlayerDto) dto);
         } else if (dto instanceof UserDto) {
             return toEntity((UserDto) dto);
-        } else if (dto instanceof WordDto) {
-            return toEntity((WordDto) dto);
-        } else {
-            throw new IllegalStateException(dto.getClass() + " is not mapped");
         }
+
+        throw new IllegalStateException(dto.getClass() + " is not mapped");
     }
 
     /**
@@ -197,30 +185,12 @@ public class Mapper {
     }
 
     /**
-     * Converts a {@link PlayerDto} to a {@link Player}
-     * 
-     * @param playerDto
-     * @return entity representation of the {@link PlayerDto}
-     */
-    public static Player toEntity(PlayerDto playerDto) {
-        return Player.builder()
-                .userId(playerDto.getUserId())
-                .playerNumber(playerDto.getPlayerNumber())
-                .score(playerDto.getScore())
-                .username(playerDto.getUsername())
-                .build();
-    }
-
-    /**
      * Converts a {@link VirtualTile} to a {@link VirtualTileDto}
      * 
      * @param tile
      * @return dto representation of the {@link VirtualTile}
      */
     public static VirtualTileDto toDto(VirtualTile tile) {
-        if (tile == null) {
-            return null;
-        }
         return VirtualTileDto.builder()
                 .columnNumber(tile.getColumnNumber())
                 .letter(tile.getLetter())
@@ -242,9 +212,6 @@ public class Mapper {
      * @return entity representation of the {@link VirtualTileDto}
      */
     public static VirtualTile toEntity(VirtualTileDto tileDto) {
-        if (tileDto == null) {
-            return null;
-        }
         return VirtualTile.builder()
                 .columnNumber(tileDto.getColumnNumber())
                 .letter(tileDto.getLetter())
@@ -283,33 +250,6 @@ public class Mapper {
                 .sealed(cell.isSealed())
                 .value(cell.getValue())
                 .wordScoreMultiplier(cell.getWordScoreMultiplier())
-                .build();
-    }
-
-    /**
-     * Converts a {@link VirtualCellDto} to a {@link VirtualCell}
-     * 
-     * @param cellDto
-     * @return entity representation of the {@link VirtualCellDto}
-     */
-    public static VirtualCell toEntity(VirtualCellDto cellDto) {
-        return VirtualCell.builder()
-                .cellNumber(cellDto.getCellNumber())
-                .center(cellDto.isCenter())
-                .color(cellDto.getColor())
-                .columnNumber(cellDto.getColumnNumber())
-                .hasBottom(cellDto.isHasBottom())
-                .hasLeft(cellDto.isHasLeft())
-                .hasRight(cellDto.isHasRight())
-                .hasTop(cellDto.isHasTop())
-                .lastPlayed(cellDto.isLastPlayed())
-                .letter(cellDto.getLetter())
-                .letterValueMultiplier(cellDto.getLetterValueMultiplier())
-                .roundNumber(cellDto.getRoundNumber())
-                .rowNumber(cellDto.getRowNumber())
-                .sealed(cellDto.isSealed())
-                .value(cellDto.getValue())
-                .wordScoreMultiplier(cellDto.getWordScoreMultiplier())
                 .build();
     }
 
@@ -369,27 +309,6 @@ public class Mapper {
     }
 
     /**
-     * Converts a {@link ActionDto} to a {@link Action}
-     * 
-     * @param actionDto
-     * @return entity representation of the {@link ActionDto}
-     */
-    public static Action toEntity(ActionDto actionDto) {
-        return Action.builder()
-                .version(actionDto.getVersion())
-                .currentPlayerNumber(actionDto.getCurrentPlayerNumber())
-                .gameId(actionDto.getGameId())
-                .gameStatus(GameStatus.valueOf(actionDto.getGameStatus()))
-                .lastUpdatedDate(actionDto.getLastUpdatedDate())
-                .remainingTileCount(actionDto.getRemainingTileCount())
-                .roundNumber(actionDto.getRoundNumber())
-                .score(actionDto.getScore())
-                .type(ActionType.valueOf(actionDto.getType()))
-                .userId(actionDto.getUserId())
-                .build();
-    }
-
-    /**
      * Converts a {@link Word} to a {@link WordDto}
      * 
      * @param word
@@ -406,24 +325,6 @@ public class Mapper {
                 .score(word.getScore())
                 .word(word.getWord())
                 .definition(word.getDefinition())
-                .build();
-    }
-
-    /**
-     * Converts a {@link WordDto} to a {@link Word}
-     * 
-     * @param wordDto
-     * @return entity representation of the {@link WordDto}
-     */
-    public static Word toEntity(WordDto wordDto) {
-        return Word.builder()
-                .actionId(wordDto.getActionId())
-                .gameId(wordDto.getGameId())
-                .userId(wordDto.getUserId())
-                .roundNumber(wordDto.getRoundNumber())
-                .score(wordDto.getScore())
-                .word(wordDto.getWord())
-                .definition(wordDto.getDefinition())
                 .build();
     }
 
@@ -464,11 +365,7 @@ public class Mapper {
      */
     public static VirtualRackDto toDto(VirtualRack virtualRack) {
         final VirtualRackDto virtualRackDto = new VirtualRackDto();
-        if (!CollectionUtils.isEmpty(virtualRack.getTiles())) {
-            virtualRackDto.setTiles(virtualRack.getTiles().stream().map(Mapper::toDto).collect(Collectors.toList()));
-        } else {
-            virtualRackDto.setTiles(Collections.emptyList());
-        }
+        virtualRackDto.setTiles(virtualRack.getTiles().stream().map(Mapper::toDto).collect(Collectors.toList()));
         return virtualRackDto;
     }
 
@@ -480,9 +377,7 @@ public class Mapper {
      */
     public static VirtualRack toEntity(VirtualRackDto virtualRackDto) {
         final VirtualRack virtualRack = new VirtualRack();
-        if (virtualRackDto.getTiles() != null) {
-            virtualRack.setTiles(virtualRackDto.getTiles().stream().map(Mapper::toEntity).collect(Collectors.toList()));
-        }
+        virtualRack.setTiles(virtualRackDto.getTiles().stream().map(Mapper::toEntity).collect(Collectors.toList()));
         return virtualRack;
     }
 
@@ -496,18 +391,6 @@ public class Mapper {
         final VirtualBoardDto virtualBoardDto = new VirtualBoardDto();
         virtualBoardDto.setCells(virtualBoard.getCells().stream().map(Mapper::toDto).collect(Collectors.toList()));
         return virtualBoardDto;
-    }
-
-    /**
-     * Converts a {@link VirtualBoardDto} to a {@link VirtualBoard}
-     * 
-     * @param virtualBoardDto
-     * @return entity representation of the {@link VirtualBoardDto}
-     */
-    public static VirtualBoard toEntity(VirtualBoardDto virtualBoardDto) {
-        final VirtualBoard virtualBoard = new VirtualBoard();
-        virtualBoard.setCells(virtualBoardDto.getCells().stream().map(Mapper::toEntity).collect(Collectors.toList()));
-        return virtualBoard;
     }
 
 }
