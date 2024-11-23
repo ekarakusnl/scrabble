@@ -60,7 +60,7 @@ public class StartGameJob implements Job {
         // terminate the scheduled game termination since the game is started
         schedulerService.terminateTerminateGameJob(game.getId());
 
-        schedulerService.scheduleSkipTurnJob(game);
+        gameService.scheduleNextRoundJobs(game);
     }
 
 }

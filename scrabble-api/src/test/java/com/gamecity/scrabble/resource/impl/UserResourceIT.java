@@ -77,7 +77,7 @@ class UserResourceIT extends AbstractIntegrationTest {
         final String newPassword = "Test!123";
         responseDto.setPassword(newPassword);
 
-        final Response updatedResponse = target("/users/1").request()
+        final Response updatedResponse = target("/users/" + DEFAULT_USER_ID).request()
                 .header(HttpHeaders.IF_MATCH, etag)
                 .put(Entity.entity(responseDto, MediaType.APPLICATION_JSON));
 
@@ -104,7 +104,7 @@ class UserResourceIT extends AbstractIntegrationTest {
         final UserDto responseDto = response.readEntity(UserDto.class);
         responseDto.setPassword("$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVz");
 
-        final Response updatedResponse = target("/users/1").request()
+        final Response updatedResponse = target("/users/" + DEFAULT_USER_ID).request()
                 .put(Entity.entity(responseDto, MediaType.APPLICATION_JSON));
 
         assertThat(updatedResponse.readEntity(String.class), equalTo("If-Match header is missing"));

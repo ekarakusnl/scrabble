@@ -8,7 +8,7 @@ package com.gamecity.scrabble;
 public interface Constants {
 
     /**
-     * Game properties
+     * Game constants
      */
     interface Game {
         /**
@@ -17,14 +17,9 @@ public interface Constants {
         Integer RACK_SIZE = 7;
 
         /**
-         * Number of rows in a board
+         * Number of rows/columns in a board
          */
-        Integer BOARD_ROW_SIZE = 15;
-
-        /**
-         * Number of columns in a board
-         */
-        Integer BOARD_COLUMN_SIZE = 15;
+        Integer BOARD_SIZE = 15;
 
         /**
          * No score
@@ -45,6 +40,11 @@ public interface Constants {
          * Number of minutes until the game is terminated if it doesn't start
          */
         Integer TERMINATE_GAME_DURATION_MINUTES = 10;
+
+        /**
+         * Minimum word length
+         */
+        Integer MIN_WORD_LENGTH = 2;
     }
 
     /**

@@ -21,6 +21,7 @@ class WordResourceImpl extends AbstractResourceImpl<Word, WordDto, WordService> 
     @Override
     public Response list(Long gameId) {
         final List<Word> words = baseService.getWords(gameId);
+        // TODO add a test
         if (CollectionUtils.isEmpty(words)) {
             return Response.ok(Collections.emptyList()).build();
         }

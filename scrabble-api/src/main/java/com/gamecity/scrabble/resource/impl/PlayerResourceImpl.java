@@ -27,16 +27,19 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
 
     @Override
     public Response list(Long gameId, Integer version) {
+        // TODO add a test
         if (version < 1) {
             return Response.ok(Collections.emptyList()).build();
         }
 
         boolean hasNewAction = actionService.hasNewAction(gameId, version);
+        // TODO add a test
         if (!hasNewAction) {
             return Response.ok(Collections.emptyList()).build();
         }
 
         final List<Player> players = baseService.getPlayers(gameId);
+        // TODO add a test
         if (CollectionUtils.isEmpty(players)) {
             return Response.ok(Collections.emptyList()).build();
         }
@@ -45,6 +48,7 @@ class PlayerResourceImpl extends AbstractResourceImpl<Player, PlayerDto, PlayerS
         return Response.ok(playerDtos).build();
     }
 
+    // TODO add a test
     @Override
     public Response get(Long gameId, Long userId) {
         final Player player = baseService.getByUserId(gameId, userId);

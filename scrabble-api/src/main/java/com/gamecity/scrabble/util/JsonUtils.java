@@ -21,6 +21,7 @@ public class JsonUtils {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private JsonUtils() {
+        // do not create a new instance
     }
 
     static {
@@ -47,6 +48,7 @@ public class JsonUtils {
         try {
             return mapper.readValue(payload, clazz);
         } catch (Exception e) {
+            // TODO add a test
             log.error("An error occured while converting to {} by payload {}", clazz.getSimpleName(), payload);
             throw new RuntimeException(e);
         }
@@ -63,6 +65,7 @@ public class JsonUtils {
         try {
             return mapper.writeValueAsString(dto);
         } catch (Exception e) {
+            // TODO add a test
             throw new RuntimeException(e);
         }
     }

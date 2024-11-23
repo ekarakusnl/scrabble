@@ -47,6 +47,7 @@ abstract class AbstractResourceImpl<T extends AbstractEntity, D extends Abstract
     public Response update(Long id, D dto, String ifMatch, Request request) {
         Assert.notNull(dto.getId(), "id cannot be null");
 
+        // TODO add a test
         if (!dto.getId().equals(id)) {
             throw new IllegalStateException("id values are not the same");
         }
@@ -58,6 +59,7 @@ abstract class AbstractResourceImpl<T extends AbstractEntity, D extends Abstract
         final D existingEntityDto = (D) Mapper.toDto(baseService.get(id));
         final ResponseBuilder failedETagValidationResponse = request
                 .evaluatePreconditions(createETag(existingEntityDto));
+        // TODO add a test
         if (failedETagValidationResponse != null) {
             return failedETagValidationResponse.build();
         }

@@ -11,13 +11,11 @@ import com.gamecity.scrabble.dao.RedisRepository;
 import com.gamecity.scrabble.entity.Action;
 import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.Game;
-import com.gamecity.scrabble.entity.GameStatus;
 import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.model.VirtualRack;
 import com.gamecity.scrabble.service.ActionService;
 import com.gamecity.scrabble.service.GameService;
 import com.gamecity.scrabble.service.PlayerService;
-import com.gamecity.scrabble.service.SchedulerService;
 import com.gamecity.scrabble.service.VirtualRackService;
 
 /**
@@ -33,7 +31,6 @@ public class SkipTurnJob implements Job {
     private GameService gameService;
     private PlayerService playerService;
     private VirtualRackService virtualRackService;
-    private SchedulerService schedulerService;
     private RedisRepository redisRepository;
 
     @Autowired
@@ -57,11 +54,6 @@ public class SkipTurnJob implements Job {
     }
 
     @Autowired
-    void setSchedulerService(SchedulerService schedulerService) {
-        this.schedulerService = schedulerService;
-    }
-
-    @Autowired
     void setRedisRepository(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
@@ -76,6 +68,7 @@ public class SkipTurnJob implements Job {
 
         final Game game = gameService.get(gameId);
 
+        // TODO add a test for version validation
         if (game.getVersion() > version) {
             // player has already played, do not do anything
             return;
@@ -86,20 +79,11 @@ public class SkipTurnJob implements Job {
 
         final ActionType actionType = ActionType.TIMEOUT;
         final Game updatedGame = gameService.play(game.getId(), player.getUserId(), virtualRack, actionType);
-        if (updatedGame == null) {
-            return;
-        }
 
         final Action action = actionService.getAction(gameId, updatedGame.getVersion());
         redisRepository.publishAction(action.getGameId(), action);
 
-        if (GameStatus.READY_TO_END == updatedGame.getStatus()) {
-            // the last round has been played, schedule the end game job
-            schedulerService.scheduleEndGameJob(updatedGame.getId());
-        } else {
-            // schedule the skip turn job for the next turn
-            schedulerService.scheduleSkipTurnJob(updatedGame);
-        }
+        gameService.scheduleNextRoundJobs(updatedGame);
     }
 
 }

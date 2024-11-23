@@ -1,14 +1,15 @@
 -- pre-defined users
-insert into users (username, email, password, preferred_language, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('user', 'user@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 1, 1, 1, now(), now());
-insert into users (username, email, password, preferred_language, enabled, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values ('admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 1, 1, 1, now(), now());
+insert into users (id, username, email, password, preferred_language, enabled, type, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values (4, 'user', 'user@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 'NORMAL, 1, 1, 1, now(), now());
+insert into users (id, username, email, password, preferred_language, enabled, type, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values (5, 'admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 'NORMAL', 1, 1, 1, now(), now());
 -- pre-defined user-role assignments
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (1, 'USER', 1, now(), now());
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (2, 'ADMIN', 1, now(), now());
-insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (2, 'USER', 1, now(), now());
+insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (4, 'USER', 1, now(), now());
+insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (5, 'ADMIN', 1, now(), now());
 -- pre-defined bags
 insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('Turkish Tile Bag', 'tr', 98, 1, now(), now());
 insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('English Tile Bag', 'en', 98, 1, now(), now());
 insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('French Tile Bag', 'fr', 97, 1, now(), now());
+insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('Dutch Tile Bag', 'nl', 100, 1, now(), now());
+insert into bags (name, language, tile_count, enabled, created_date, last_updated_date) values ('German Tile Bag', 'de', 100, 1, now(), now());
 -- pre-defined bag tiles
 -- turkish language
 insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (1, 'A', 12, 1, 1, now(), now());
@@ -94,6 +95,63 @@ insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updat
 insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (3, 'X', 1, 10, 0, now(), now());
 insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (3, 'Y', 1, 10, 1, now(), now());
 insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (3, 'Z', 1, 10, 0, now(), now());
+-- dutch language
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'A', 6, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'B', 2, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'C', 2, 5, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'D', 5, 2, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'E', 18, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'F', 2, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'G', 3, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'H', 2, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'I', 4, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'J', 2, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'K', 3, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'L', 3, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'M', 3, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'N', 10, 1, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'O', 6, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'P', 2, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'Q', 1, 10, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'R', 5, 2, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'S', 5, 2, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'T', 5, 2, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'U', 3, 4, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'V', 2, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'W', 2, 5, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'X', 1, 8, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'Y', 1, 8, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (4, 'Z', 2, 4, 0, now(), now());
+-- german language
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'A', 5, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'Ä', 1, 6, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'B', 2, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'C', 2, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'D', 4, 1, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'E', 15, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'F', 2, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'G', 3, 2, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'H', 4, 2, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'I', 6, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'J', 1, 6, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'K', 2, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'L', 3, 2, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'M', 4, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'N', 9, 1, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'O', 3, 2, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'Ö', 1, 8, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'P', 1, 4, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'Q', 1, 10, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'R', 6, 1, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'S', 7, 1, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'T', 6, 1, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'U', 6, 1, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'Ü', 1, 6, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'V', 1, 6, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'W', 1, 3, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'X', 1, 8, 0, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'Y', 1, 10, 1, now(), now());
+insert into tiles (bag_id, letter, count, value, vowel, created_date, last_updated_date) values (5, 'Z', 1, 3, 0, now(), now());
 -- cell define rules
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (1, 1, 1, 'red', 1, 3, 1, 0, 0, 1, 0, now(), now());
 insert into cells (cell_number, row_number, column_number, color, letter_value_multiplier, word_score_multiplier, has_right, has_left, has_top, has_bottom, center, created_date, last_updated_date) values (2, 1, 2, 'white', 1, 1, 1, 1, 0, 1, 0, now(), now());

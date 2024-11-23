@@ -19,9 +19,10 @@ public interface SchedulerService {
      * Schedules a {@link Job job} to run at the end of the play duration of the {@link Player
      * player} in a {@link Game game} to skip the turn
      * 
-     * @param game the game
+     * @param game     the game
+     * @param duration skip duration in seconds
      */
-    void scheduleSkipTurnJob(Game game);
+    void scheduleSkipTurnJob(Game game, Integer duration);
 
     /**
      * Terminates the scheduled skip turn {@link Job job}

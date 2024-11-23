@@ -10,26 +10,41 @@ public enum Language {
     /**
      * English
      */
-    en,
+    en(26),
 
     /**
      * Turkish
      */
-    tr,
+    tr(29),
 
     /**
      * French
      */
-    fr,
+    fr(26),
 
     /**
      * Dutch
      */
-    nl,
+    nl(26),
 
     /**
      * German
      */
-    de
+    de(26);
+
+    private int alphabetSize;
+
+    Language(int alphabetSize) {
+        this.alphabetSize = alphabetSize;
+    }
+
+    /**
+     * Returns the number of letters in the alphabet of the selected language
+     * 
+     * @return the alphabet size
+     */
+    public int getAlphabetSize() {
+        return alphabetSize;
+    }
 
 }

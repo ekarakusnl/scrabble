@@ -74,44 +74,44 @@ class TestActionService extends AbstractServiceTest {
 
     @Test
     void test_maximum_skip_count_reached() {
-        final Integer playerCount = 2; // 2 players
+        final Integer playerCount = 2;
 
-        final Integer skippedCount = Constants.Game.MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
+        final Integer skippedTurnCount = Constants.Game.MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
 
         final List<Action> lastActions = Arrays.asList(Action.builder().type(ActionType.TIMEOUT).build(),
                 Action.builder().type(ActionType.SKIP).build(), Action.builder().type(ActionType.TIMEOUT).build(),
                 Action.builder().type(ActionType.SKIP).build());
 
-        when(actionDao.getLastActionsByCount(DEFAULT_GAME_ID, skippedCount)).thenReturn(lastActions);
+        when(actionDao.getLastActionsByCount(DEFAULT_GAME_ID, skippedTurnCount)).thenReturn(lastActions);
 
         assertThat(actionService.isMaximumSkipCountReached(DEFAULT_GAME_ID, playerCount), equalTo(true));
     }
 
     @Test
     void test_maximum_skip_count_not_reached() {
-        final Integer playerCount = 2; // 2 players
+        final Integer playerCount = 2;
 
-        final Integer skippedCount = Constants.Game.MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
+        final Integer skippedTurnCount = Constants.Game.MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
 
         final List<Action> lastActions = Arrays.asList(Action.builder().type(ActionType.TIMEOUT).build(),
                 Action.builder().type(ActionType.SKIP).build(), Action.builder().type(ActionType.TIMEOUT).build(),
                 Action.builder().type(ActionType.PLAY).build());
 
-        when(actionDao.getLastActionsByCount(DEFAULT_GAME_ID, skippedCount)).thenReturn(lastActions);
+        when(actionDao.getLastActionsByCount(DEFAULT_GAME_ID, skippedTurnCount)).thenReturn(lastActions);
 
         assertThat(actionService.isMaximumSkipCountReached(DEFAULT_GAME_ID, playerCount), equalTo(false));
     }
 
     @Test
     void test_skip_count_is_less_than_action_count() {
-        final Integer playerCount = 2; // 2 players
+        final Integer playerCount = 2;
 
-        final Integer skippedCount = Constants.Game.MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
+        final Integer skippedTurnCount = Constants.Game.MAXIMUM_SKIPPED_ROUNDS_IN_A_ROW * playerCount;
 
         final List<Action> lastActions = Arrays.asList(Action.builder().type(ActionType.SKIP).build(),
                 Action.builder().type(ActionType.TIMEOUT).build(), Action.builder().type(ActionType.PLAY).build());
 
-        when(actionDao.getLastActionsByCount(DEFAULT_GAME_ID, skippedCount)).thenReturn(lastActions);
+        when(actionDao.getLastActionsByCount(DEFAULT_GAME_ID, skippedTurnCount)).thenReturn(lastActions);
 
         assertThat(actionService.isMaximumSkipCountReached(DEFAULT_GAME_ID, playerCount), equalTo(false));
     }

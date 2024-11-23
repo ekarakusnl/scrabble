@@ -56,6 +56,10 @@ public class Game extends AbstractEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private GameType type;
+
     @Column(name = "expected_player_count", nullable = false)
     private Integer expectedPlayerCount;
 
@@ -65,7 +69,6 @@ public class Game extends AbstractEntity {
     @Column(name = "duration", nullable = false)
     private Integer duration;
 
-    // TODO add an index for status
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private GameStatus status;

@@ -85,6 +85,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
             index = new Random().nextInt(availableTiles.size()) + 1;
             final Tile tile = availableTiles.get(index - 1);
 
+            // TODO add a test for unavailable tiles 
             if (tile.getCount() > 0) {
                 virtualTile = VirtualTile.builder()
                         .letter(tile.getLetter())
@@ -97,7 +98,8 @@ class VirtualRackServiceImpl implements VirtualRackService {
                         .build();
 
                 tile.setCount(tile.getCount() - 1);
-                log.debug("Tile {} has been created for player {}", tile.getLetter(), playerNumber);
+                log.debug("Tile '{}' has been created for player {} on game {}", tile.getLetter(), playerNumber,
+                        gameId);
                 break;
             }
         }
@@ -143,6 +145,7 @@ class VirtualRackServiceImpl implements VirtualRackService {
                 .stream()
                 .collect(Collectors.toMap(VirtualTile::getNumber, VirtualTile::getLetter));
 
+        // TODO add a test
         final Predicate<VirtualTile> filter = tile -> tileMap.containsKey(tile.getNumber())
                 && tileMap.get(tile.getNumber()).equals(tile.getLetter());
 

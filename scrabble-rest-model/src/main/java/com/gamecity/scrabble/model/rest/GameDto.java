@@ -39,6 +39,9 @@ public class GameDto extends AbstractDto {
     @JsonProperty("status")
     private String status;
 
+    @JsonProperty("type")
+    private String type;
+
     @JsonProperty("currentPlayerNumber")
     private Integer currentPlayerNumber;
 

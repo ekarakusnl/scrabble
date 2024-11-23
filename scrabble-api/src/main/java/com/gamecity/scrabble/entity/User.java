@@ -75,6 +75,10 @@ public class User extends AbstractEntity implements UserDetails {
     @Column(name = "preferred_language")
     private Language preferredLanguage;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private UserType type;
+
     @Transient
     private Collection<? extends BaseAuthority> authorities;
 

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import com.gamecity.scrabble.Constants;
 import com.gamecity.scrabble.entity.ActionType;
 import com.gamecity.scrabble.entity.GameStatus;
+import com.gamecity.scrabble.entity.GameType;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Tile;
 import com.gamecity.scrabble.model.Mapper;
@@ -100,7 +101,7 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_search_own_game() throws IOException {
         createNewGame(2);
 
-        final Response response = target("/games").queryParam("userId", 1)
+        final Response response = target("/games").queryParam("userId", DEFAULT_USER_ID)
                 .queryParam("includeUser", true)
                 .request()
                 .get();
@@ -116,14 +117,14 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         assertThat(games, notNullValue());
         assertThat(games.size(), not(equalTo(0)));
-        assertThat(games.stream().allMatch(game -> game.getOwnerId().equals(1L)), equalTo(true));
+        assertThat(games.stream().allMatch(game -> game.getOwnerId().equals(DEFAULT_USER_ID)), equalTo(true));
     }
 
     @Test
     void test_search_another_player_game() throws IOException {
         createNewGame(2);
 
-        final Response response = target("/games").queryParam("userId", 2).request().get();
+        final Response response = target("/games").queryParam("userId", ALTERNATIVE_USER_ID).request().get();
 
         if (Status.OK.getStatusCode() != response.getStatus()) {
             assertThat(response.readEntity(String.class), response.getStatus(), equalTo(Status.OK.getStatusCode()));
@@ -136,7 +137,7 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         assertThat(games, notNullValue());
         assertThat(games.size(), not(equalTo(0)));
-        assertThat(games.stream().noneMatch(game -> game.getOwnerId().equals(2L)), equalTo(true));
+        assertThat(games.stream().noneMatch(game -> game.getOwnerId().equals(ALTERNATIVE_USER_ID)), equalTo(true));
     }
 
     @Test
@@ -191,7 +192,7 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_join_game() throws IOException {
         final GameDto game = createNewGame(3);
 
-        final GameDto joinedGame = joinGame(game.getId(), 2L);
+        final GameDto joinedGame = joinGame(game.getId());
 
         assertThat(joinedGame.getVersion(), equalTo(2));
 
@@ -205,9 +206,10 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_leave_game() throws IOException {
         final GameDto game = createNewGame(3);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        final Response leaveGameResponse = target("/games/" + game.getId() + "/users/2").request().delete();
+        final Response leaveGameResponse = target("/games/" + game.getId() + "/users/" + ALTERNATIVE_USER_ID).request()
+                .delete();
 
         if (Status.OK.getStatusCode() != leaveGameResponse.getStatus()) {
             assertThat(leaveGameResponse.readEntity(String.class), leaveGameResponse.getStatus(),
@@ -227,15 +229,15 @@ class GameResourceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void test_start_game() throws IOException, InterruptedException {
+    void test_start_user_game() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        final GameDto joinedGame = joinGame(game.getId(), 2L);
+        final GameDto joinedGame = joinGame(game.getId());
 
         assertThat(joinedGame.getVersion(), equalTo(2));
         assertThat(joinedGame.getStatus(), equalTo(GameStatus.READY_TO_START.name()));
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -264,9 +266,9 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_play_two_rounds() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -319,8 +321,8 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 1 player 2
 
-        rack = updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(),
-                "RALYERE".toCharArray());
+        rack = updateRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getCurrentPlayerNumber(),
+                playedGame.getRoundNumber(), "RALYERE".toCharArray());
 
         // RA(W)LY
         setRackTile(rack, 1, 6, 7, true);
@@ -328,7 +330,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         setRackTile(rack, 3, 9, 7, true);
         setRackTile(rack, 4, 10, 7, true);
 
-        playedGame = playWord(game.getId(), 2L, rack);
+        playedGame = playWord(game.getId(), ALTERNATIVE_USER_ID, rack);
 
         assertThat(playedGame, notNullValue());
         assertThat(playedGame.getVersion(), equalTo(5));
@@ -339,7 +341,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertThat(players.get(0).getScore(), equalTo(11));
         assertThat(players.get(1).getScore(), equalTo(13));
 
-        updatedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() - 1);
+        updatedRack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber() - 1);
 
         assertThat(updatedRack.getTiles().stream().allMatch(tile -> tile.getRoundNumber().equals(1)), equalTo(true));
         assertThat(updatedRack.getTiles().subList(0, 4).stream().allMatch(VirtualTileDto::isSealed), equalTo(true));
@@ -358,7 +360,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertThat(verticalCells.stream().allMatch(VirtualCellDto::isLastPlayed), equalTo(true));
         assertThat(board.getCells().subList(112, 115).stream().noneMatch(VirtualCellDto::isLastPlayed), equalTo(true));
 
-        refreshedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        refreshedRack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber());
 
         assertThat(refreshedRack.getTiles().subList(0, 4).stream().allMatch(tile -> tile.getRoundNumber().equals(2)),
                 equalTo(true));
@@ -422,13 +424,13 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 2 player 2
 
-        rack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber());
 
         // (WEAK)ER
         setRackTile(rack, 5, 8, 11, true);
         setRackTile(rack, 6, 8, 12, true);
 
-        playedGame = playWord(game.getId(), 2L, rack);
+        playedGame = playWord(game.getId(), ALTERNATIVE_USER_ID, rack);
 
         assertThat(playedGame, notNullValue());
         assertThat(playedGame.getVersion(), equalTo(7));
@@ -439,7 +441,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertThat(players.get(0).getScore(), equalTo(17));
         assertThat(players.get(1).getScore(), equalTo(27));
 
-        updatedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() - 1);
+        updatedRack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber() - 1);
 
         board = getVirtualBoard(game.getId(), playedGame.getVersion(), game.getExpectedPlayerCount());
 
@@ -455,7 +457,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertThat(board.getCells().subList(111, 117).stream().allMatch(VirtualCellDto::isLastPlayed), equalTo(true));
         assertThat(board.getCells().subList(81, 85).stream().noneMatch(VirtualCellDto::isLastPlayed), equalTo(true));
 
-        refreshedRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        refreshedRack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber());
 
         assertThat(refreshedRack.getTiles().subList(0, 4).stream().allMatch(tile -> tile.getRoundNumber().equals(2)),
                 equalTo(true));
@@ -488,9 +490,9 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_play_player_is_rewarded_with_bingo_bonus() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -553,9 +555,9 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_skip_round() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -576,19 +578,21 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_exchange_letters() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
-        final VirtualRackDto rack = getVirtualRack(game.getId(), 1L, startedGame.getRoundNumber());
+        final VirtualRackDto rack = getVirtualRack(game.getId(), DEFAULT_USER_ID, startedGame.getRoundNumber());
         rack.getTiles().forEach(tile -> {
             tile.setLetter("C");
             tile.setValue(TILE_MAP.get("C").getValue());
         });
 
-        redisTemplate.boundListOps(Constants.CacheKey.RACK + ":" + game.getId() + ":" + 1L)
+        redisTemplate
+                .boundListOps(
+                        Constants.CacheKey.RACK + ":" + game.getId() + ":" + rack.getTiles().get(0).getPlayerNumber())
                 .set(0, Mapper.toEntity(rack));
 
         rack.getTiles().forEach(tile -> tile.setExchanged(true));
@@ -604,13 +608,15 @@ class GameResourceIT extends AbstractIntegrationTest {
         assertThat(actions.stream().anyMatch(action -> ActionType.EXCHANGE.name().equals(action.getType())),
                 equalTo(true));
 
-        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), 1L, exchangedGame.getRoundNumber());
+        final VirtualRackDto updatedRack = getVirtualRack(game.getId(), DEFAULT_USER_ID,
+                exchangedGame.getRoundNumber());
 
         assertThat(updatedRack, notNullValue());
         assertThat(updatedRack.getTiles().stream().filter(tile -> tile.getLetter().equals("C")).count(), equalTo(7L));
         assertThat(updatedRack.getTiles().stream().allMatch(VirtualTileDto::isExchanged), equalTo(true));
 
-        final VirtualRackDto nextRoundRack = getVirtualRack(game.getId(), 1L, exchangedGame.getRoundNumber() + 1);
+        final VirtualRackDto nextRoundRack = getVirtualRack(game.getId(), DEFAULT_USER_ID,
+                exchangedGame.getRoundNumber() + 1);
 
         assertThat(nextRoundRack, notNullValue());
         assertThat(nextRoundRack.getTiles().stream().filter(tile -> tile.getLetter().equals("C")).count(),
@@ -619,11 +625,11 @@ class GameResourceIT extends AbstractIntegrationTest {
 
     @Test
     void test_game_ends_after_last_round() throws IOException, InterruptedException {
-        final GameDto game = createNewGame(2, Language.fr);
+        final GameDto game = createNewGameWithLanguage(2, DEFAULT_USER_ID, Language.fr);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -632,7 +638,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         updateRack(game.getId(), game.getOwnerId(), startedGame.getCurrentPlayerNumber(), startedGame.getRoundNumber(),
                 "FARADAY".toCharArray());
 
-        VirtualRackDto rack = getVirtualRack(game.getId(), 1L, startedGame.getRoundNumber());
+        VirtualRackDto rack = getVirtualRack(game.getId(), DEFAULT_USER_ID, startedGame.getRoundNumber());
 
         setRackTile(rack, 1, 8, 7, true);
         setRackTile(rack, 2, 8, 8, true);
@@ -642,7 +648,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         setRackTile(rack, 6, 8, 12, true);
         setRackTile(rack, 7, 8, 13, true);
 
-        GameDto playedGame = playWord(game.getId(), 1L, rack);
+        GameDto playedGame = playWord(game.getId(), DEFAULT_USER_ID, rack);
 
         assertThat(playedGame, notNullValue());
         assertThat(playedGame.getVersion(), equalTo(4));
@@ -656,10 +662,10 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         // round 1 player 2
 
-        updateRack(game.getId(), 2L, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(),
+        updateRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getCurrentPlayerNumber(), playedGame.getRoundNumber(),
                 "ARADAYW".toCharArray());
 
-        rack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber());
 
         setRackTile(rack, 1, 9, 7, true);
         setRackTile(rack, 2, 10, 7, true);
@@ -668,31 +674,31 @@ class GameResourceIT extends AbstractIntegrationTest {
         setRackTile(rack, 5, 13, 7, true);
         setRackTile(rack, 6, 14, 7, true);
 
-        playedGame = playWord(game.getId(), 2L, rack);
+        playedGame = playWord(game.getId(), ALTERNATIVE_USER_ID, rack);
 
         assertThat(playedGame, notNullValue());
         assertThat(playedGame.getVersion(), equalTo(5));
         assertThat(playedGame.getCurrentPlayerNumber(), equalTo(1));
         assertThat(playedGame.getStatus(), equalTo(GameStatus.IN_PROGRESS.name()));
 
-        refreshedVirtualRack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber() + 1);
+        refreshedVirtualRack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber() + 1);
 
         assertThat(refreshedVirtualRack, nullValue());
 
         // round 2 player 1
 
-        rack = getVirtualRack(game.getId(), 1L, playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), DEFAULT_USER_ID, playedGame.getRoundNumber());
 
         setRackTile(rack, 1, 12, 8, true);
 
-        playedGame = playWord(game.getId(), 1L, rack);
+        playedGame = playWord(game.getId(), DEFAULT_USER_ID, rack);
 
         assertThat(playedGame, notNullValue());
         assertThat(playedGame.getVersion(), equalTo(6));
         assertThat(playedGame.getCurrentPlayerNumber(), equalTo(2));
         assertThat(playedGame.getStatus(), equalTo(GameStatus.READY_TO_END.name()));
 
-        waitUntilGameEnds();
+        waitOneSecond();
 
         final GameDto endedGame = getGame(game.getId());
 
@@ -706,9 +712,9 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_play_duration_exceeds() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -725,9 +731,9 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_skip_turn_job_is_triggered_while_playing() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -774,9 +780,9 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_word_is_played_while_skip_turn_job_is_running() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
@@ -828,27 +834,27 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_skip_2_rounds_in_a_row_by_the_players_ends_the_game() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         final GameDto startedGame = getGame(game.getId());
 
-        VirtualRackDto rack = getVirtualRack(game.getId(), 1L, startedGame.getRoundNumber());
+        VirtualRackDto rack = getVirtualRack(game.getId(), DEFAULT_USER_ID, startedGame.getRoundNumber());
 
-        GameDto playedGame = playWord(game.getId(), 1L, rack);
+        GameDto playedGame = playWord(game.getId(), DEFAULT_USER_ID, rack);
 
-        rack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber());
 
-        playedGame = playWord(game.getId(), 2L, rack);
+        playedGame = playWord(game.getId(), ALTERNATIVE_USER_ID, rack);
 
-        rack = getVirtualRack(game.getId(), 1L, playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), DEFAULT_USER_ID, playedGame.getRoundNumber());
 
-        playedGame = playWord(game.getId(), 1L, rack);
+        playedGame = playWord(game.getId(), DEFAULT_USER_ID, rack);
 
-        rack = getVirtualRack(game.getId(), 2L, playedGame.getRoundNumber());
+        rack = getVirtualRack(game.getId(), ALTERNATIVE_USER_ID, playedGame.getRoundNumber());
 
-        playedGame = playWord(game.getId(), 2L, rack);
+        playedGame = playWord(game.getId(), ALTERNATIVE_USER_ID, rack);
 
         // wait until the end game job ends
         Thread.sleep(2000);
@@ -864,9 +870,9 @@ class GameResourceIT extends AbstractIntegrationTest {
     void test_skip_2_rounds_in_a_row_by_the_job_ends_the_game() throws IOException, InterruptedException {
         final GameDto game = createNewGame(2);
 
-        joinGame(game.getId(), 2L);
+        joinGame(game.getId());
 
-        waitUntilGameStarts();
+        waitOneSecond();
 
         // Wait more than 4 turns durations
         Thread.sleep(25000);
@@ -900,15 +906,22 @@ class GameResourceIT extends AbstractIntegrationTest {
     }
 
     private GameDto createNewGame(Integer playerCount) throws IOException {
-        return createNewGame(playerCount, Language.en);
+        return createNewGameWithLanguage(playerCount, DEFAULT_USER_ID, Language.en);
     }
 
-    private GameDto createNewGame(Integer playerCount, Language language) throws IOException {
+    private GameDto createNewGameWithLanguage(Integer playerCount, Long userId, Language language) throws IOException {
+        return createNewGameWithType(playerCount, userId, language, GameType.USER);
+    }
+
+    private GameDto createNewGameWithType(Integer playerCount, Long userId, Language language, GameType type)
+            throws IOException {
         final URL resource = GameResourceIT.class.getResource("/json/game.json");
 
         final GameDto game = JsonUtils.toDto(Resources.toString(resource, StandardCharsets.UTF_8), GameDto.class);
         game.setExpectedPlayerCount(playerCount);
         game.setLanguage(language.name());
+        game.setType(type.name());
+        game.setOwnerId(userId);
 
         final Response gameResponse = target("/games").request().put(Entity.entity(game, MediaType.APPLICATION_JSON));
 
@@ -925,8 +938,8 @@ class GameResourceIT extends AbstractIntegrationTest {
         return responseDto;
     }
 
-    private GameDto joinGame(Long gameId, Long userId) {
-        final Response joinGameResponse = target("/games/" + gameId + "/users/" + userId).request()
+    private GameDto joinGame(Long gameId) {
+        final Response joinGameResponse = target("/games/" + gameId + "/users/" + ALTERNATIVE_USER_ID).request()
                 .put(Entity.entity("", MediaType.APPLICATION_JSON));
 
         if (Status.OK.getStatusCode() != joinGameResponse.getStatus()) {
@@ -971,7 +984,9 @@ class GameResourceIT extends AbstractIntegrationTest {
 
         virtualRack.setTiles(tiles);
 
-        redisTemplate.boundListOps(Constants.CacheKey.RACK + ":" + gameId + ":" + userId)
+        redisTemplate
+                .boundListOps(
+                        Constants.CacheKey.RACK + ":" + gameId + ":" + virtualRack.getTiles().get(0).getPlayerNumber())
                 .set(0, Mapper.toEntity(virtualRack));
 
         return virtualRack;
@@ -1089,11 +1104,7 @@ class GameResourceIT extends AbstractIntegrationTest {
         return chats;
     }
 
-    private void waitUntilGameStarts() throws InterruptedException {
-        Thread.sleep(1000);
-    }
-
-    private void waitUntilGameEnds() throws InterruptedException {
+    private void waitOneSecond() throws InterruptedException {
         Thread.sleep(1000);
     }
 

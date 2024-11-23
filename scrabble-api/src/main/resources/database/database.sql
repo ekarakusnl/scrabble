@@ -175,6 +175,7 @@ CREATE TABLE public.games (
     round_number integer,
     start_date timestamp without time zone,
     status character varying(255) NOT NULL,
+    type character varying(255) NOT NULL,
     version integer NOT NULL
 );
 
@@ -305,7 +306,8 @@ CREATE TABLE public.users (
     enabled integer NOT NULL,
     password character varying(255) NOT NULL,
     username character varying(255) NOT NULL,
-    preferred_language character varying(2)
+    preferred_language character varying(2),
+    type character varying(255) NOT NULL
 );
 
 

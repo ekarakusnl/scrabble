@@ -26,12 +26,14 @@ class VirtualRackResourceImpl implements VirtualRackResource {
 
     @Override
     public Response get(Long gameId, Long userId, Integer roundNumber) {
+        // TODO add a test
         if (roundNumber < 1) {
             return Response.ok().build();
         }
 
         final Player player = playerService.getByUserId(gameId, userId);
         final VirtualRack virtualRack = virtualRackService.getRack(gameId, player.getPlayerNumber(), roundNumber);
+        // TODO add a test
         if (virtualRack == null || CollectionUtils.isEmpty(virtualRack.getTiles())) {
             return Response.ok().build();
         }

@@ -1,6 +1,11 @@
 package com.gamecity.scrabble.service;
 
+import java.util.List;
+import java.util.Set;
+
 import com.gamecity.scrabble.entity.Game;
+import com.gamecity.scrabble.model.BoardScanFlag;
+import com.gamecity.scrabble.model.ConstructedWord;
 import com.gamecity.scrabble.model.VirtualBoard;
 
 /**
@@ -34,5 +39,15 @@ public interface VirtualBoardService {
      * @return the board
      */
     VirtualBoard getBoard(Long gameId, Integer version);
+
+    /**
+     * Scans the given {@link VirtualBoard} to find the words
+     * 
+     * @param gameId         <code>id</code> of the game
+     * @param virtualBoard   the board to scan
+     * @param boardScanFlags scan flags
+     * @return the words
+     */
+    List<ConstructedWord> scanWords(Long gameId, VirtualBoard virtualBoard, Set<BoardScanFlag> boardScanFlags);
 
 }

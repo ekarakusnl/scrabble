@@ -75,6 +75,7 @@ CREATE TABLE games (
   round_number integer,
   start_date timestamp,
   status varchar(255) not null,
+  type varchar(255) not null,
   version integer not null,
   primary key (id)
 );
@@ -122,6 +123,7 @@ CREATE TABLE users (
   password varchar(255) not null,
   username varchar(255) not null,
   preferred_language varchar(2) not null,
+  type varchar(255) not null,
   primary key (id)
 );
 CREATE TABLE words (

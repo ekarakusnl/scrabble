@@ -1,7 +1,8 @@
 {
   "name": "My game",
-  "ownerId": 1,
+  "ownerId": 4,
   "language": "en",
   "expectedPlayerCount": 2,
+  "type": "USER",
   "duration": 5
 }

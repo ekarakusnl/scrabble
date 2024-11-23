@@ -40,6 +40,7 @@ public class TerminateGameJob implements Job {
         this.redisRepository = redisRepository;
     }
 
+    // TODO add a test for game termination
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         final JobDataMap dataMap = context.getJobDetail().getJobDataMap();

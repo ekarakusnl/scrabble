@@ -23,7 +23,7 @@ public class ConstructedWord {
 
     // char sequence created by the letters
     @Builder.Default
-    private StringBuilder wordBuilder = new StringBuilder();
+    private StringBuilder builder = new StringBuilder();
 
     // direction of the word
     private Direction direction;
@@ -38,30 +38,23 @@ public class ConstructedWord {
     private Integer score;
 
     /**
-     * 
-     */
-    public enum Direction {
-        /**
-         * Vertical word
-         */
-        VERTICAL,
-
-        /**
-         * Horizontal word
-         */
-        HORIZONTAL
-    }
-
-    /**
-     * Reset the properties of the word
+     * Reset the constructed word
      */
     public void reset() {
         cells = new ArrayList<>();
-        wordBuilder = new StringBuilder();
+        builder = new StringBuilder();
         linked = false;
-        direction = null;
         dictionaryWord = null;
         score = null;
+    }
+
+    /**
+     * Whether the constructed word is an existing word
+     * 
+     * @return true if is existing word
+     */
+    public boolean isExistingWord() {
+        return this.getCells().stream().allMatch(VirtualCell::isSealed);
     }
 
 }

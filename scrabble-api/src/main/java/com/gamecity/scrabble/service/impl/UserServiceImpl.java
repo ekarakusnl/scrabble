@@ -16,6 +16,7 @@ import com.gamecity.scrabble.entity.BaseAuthority;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Role;
 import com.gamecity.scrabble.entity.User;
+import com.gamecity.scrabble.entity.UserType;
 import com.gamecity.scrabble.service.UserRoleService;
 import com.gamecity.scrabble.service.UserService;
 import com.gamecity.scrabble.service.exception.UserException;
@@ -86,6 +87,7 @@ class UserServiceImpl extends AbstractServiceImpl<User, UserDao> implements User
         user.setAccountNonLocked(true);
         user.setCredentialsNonExpired(true);
         user.setEnabled(true);
+        user.setType(UserType.NORMAL);
 
         // set the default preferred language
         user.setPreferredLanguage(Language.en);

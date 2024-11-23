@@ -84,4 +84,19 @@ public interface GameService extends BaseService<Game> {
      */
     Game delete(Long id);
 
+    /**
+     * Schedule the jobs for the next round
+     * 
+     * @param game the game
+     */
+    void scheduleNextRoundJobs(Game game);
+
+    /**
+     * Determines the {@link ActionType} depending on the {@link VirtualRack}
+     * 
+     * @param virtualRack rack of the {@link Player}
+     * @return the action type
+     */
+    ActionType determineActionType(VirtualRack virtualRack);
+
 }

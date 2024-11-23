@@ -21,6 +21,7 @@ class ChatResourceImpl extends AbstractResourceImpl<Chat, ChatDto, ChatService> 
     @Override
     public Response list(Long gameId) {
         final List<Chat> chats = baseService.getChats(gameId);
+        // TODO add a test
         if (CollectionUtils.isEmpty(chats)) {
             return Response.ok(Collections.emptyList()).build();
         }

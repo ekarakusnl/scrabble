@@ -12,6 +12,7 @@ import com.gamecity.scrabble.entity.Game;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Player;
 import com.gamecity.scrabble.entity.GameStatus;
+import com.gamecity.scrabble.entity.GameType;
 import com.gamecity.scrabble.entity.Word;
 import com.gamecity.scrabble.entity.User;
 import com.gamecity.scrabble.model.rest.AbstractDto;
@@ -142,6 +143,7 @@ public class Mapper {
                 .remainingTileCount(game.getRemainingTileCount())
                 .roundNumber(game.getRoundNumber())
                 .status(game.getStatus().name())
+                .type(game.getType().name())
                 .build();
     }
 
@@ -165,6 +167,7 @@ public class Mapper {
                 .remainingTileCount(gameDto.getRemainingTileCount())
                 .roundNumber(gameDto.getRoundNumber())
                 .status(gameDto.getStatus() == null ? null : GameStatus.valueOf(gameDto.getStatus()))
+                .type(gameDto.getType() == null ? null : GameType.valueOf(gameDto.getType()))
                 .build();
     }
 

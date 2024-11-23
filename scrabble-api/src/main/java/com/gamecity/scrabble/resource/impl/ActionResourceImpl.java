@@ -20,26 +20,31 @@ class ActionResourceImpl extends AbstractResourceImpl<Action, ActionDto, ActionS
 
     @Override
     public Response get(Long gameId, Integer version) {
+        // TODO add a test
         if (version < 1) {
             return Response.ok().build();
         }
 
         boolean hasNewAction = baseService.hasNewAction(gameId, version);
+        // TODO add a test
         if (!hasNewAction) {
             return Response.ok().build();
         }
 
         final Action action = baseService.getAction(gameId, version);
+        // TODO add a test
         if (action == null) {
             return Response.ok().build();
         }
 
+        // TODO add a test
         return Response.ok(Mapper.toDto(action)).build();
     }
 
     @Override
     public Response list(Long gameId) {
         final List<Action> actions = baseService.getActions(gameId);
+        // TODO add a test
         if (CollectionUtils.isEmpty(actions)) {
             return Response.ok(Collections.emptyList()).build();
         }

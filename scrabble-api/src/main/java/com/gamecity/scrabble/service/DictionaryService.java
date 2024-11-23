@@ -14,12 +14,21 @@ import com.gamecity.scrabble.model.DictionaryWord;
 public interface DictionaryService {
 
     /**
-     * Gets the selected word from the dictionary
+     * Gets the selected word given in the specified {@link Language} from the dictionary
      * 
      * @param word     <code>word</code> to search in the dictionary
      * @param language <code>language</code> of the dictionary
      * @return true if the words exists
      */
-    DictionaryWord getWord(String word, Language language);
+    DictionaryWord get(String word, Language language);
+
+    /**
+     * Whether the word given in the specified {@link Language} exists in dictionary
+     * 
+     * @param word     <code>word</code> to search in the dictionary
+     * @param language <code>language</code> of the dictionary
+     * @return true if the words exists
+     */
+    boolean find(String word, Language language);
 
 }

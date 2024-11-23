@@ -25,16 +25,19 @@ class VirtualBoardResourceImpl implements VirtualBoardResource {
 
     @Override
     public Response get(Long gameId, Integer version) {
+        // TODO add a test
         if (version < 1) {
             return Response.ok().build();
         }
 
         boolean hasNewAction = actionService.hasNewAction(gameId, version);
+        // TODO add a test
         if (!hasNewAction) {
             return Response.ok().build();
         }
 
         final VirtualBoard virtualBoard = virtualBoardService.getBoard(gameId, version);
+        // TODO add a test
         if (virtualBoard == null || CollectionUtils.isEmpty(virtualBoard.getCells())) {
             return Response.ok().build();
         }

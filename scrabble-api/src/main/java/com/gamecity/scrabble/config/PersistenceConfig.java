@@ -25,6 +25,8 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import lombok.Generated;
+
 /**
  * Spring configuration of Hibernate including transaction management, entity management, jpa
  * properties, datasource properties and data/schema populator
@@ -35,6 +37,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @PropertySource("classpath:database.properties")
 @PropertySource("classpath:hibernate.properties")
+@Generated
 public class PersistenceConfig {
 
     private static final String CREATE_DROP = "create-drop";

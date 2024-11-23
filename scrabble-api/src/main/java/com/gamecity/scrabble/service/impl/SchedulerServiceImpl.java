@@ -56,7 +56,7 @@ class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public void scheduleSkipTurnJob(Game game) {
+    public void scheduleSkipTurnJob(Game game, Integer duration) {
         try {
             final JobDetail jobDetail = JobBuilder.newJob(SkipTurnJob.class)
                     .withIdentity(String.format(SKIP_TURN_JOB_IDENTITY, game.getId(), game.getVersion()),
@@ -68,7 +68,7 @@ class SchedulerServiceImpl implements SchedulerService {
 
             final Calendar calendar = Calendar.getInstance();
             calendar.setTime(Date.from(game.getLastUpdatedDate().atZone(ZoneId.systemDefault()).toInstant()));
-            calendar.add(Calendar.SECOND, game.getDuration());
+            calendar.add(Calendar.SECOND, duration);
 
             final SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
                     .withIdentity(String.format(SKIP_TURN_TRIGGER_IDENTITY, game.getId(), game.getVersion()),

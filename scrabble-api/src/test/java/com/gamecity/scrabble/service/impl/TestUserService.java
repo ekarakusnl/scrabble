@@ -14,6 +14,7 @@ import com.gamecity.scrabble.entity.BaseAuthority;
 import com.gamecity.scrabble.entity.Language;
 import com.gamecity.scrabble.entity.Role;
 import com.gamecity.scrabble.entity.User;
+import com.gamecity.scrabble.entity.UserType;
 import com.gamecity.scrabble.service.UserRoleService;
 import com.gamecity.scrabble.service.UserService;
 import com.gamecity.scrabble.service.exception.GenericException;
@@ -207,6 +208,7 @@ class TestUserService extends AbstractServiceTest {
         assertThat(savedUser.isAccountNonLocked(), equalTo(true));
         assertThat(savedUser.isCredentialsNonExpired(), equalTo(true));
         assertThat(savedUser.isEnabled(), equalTo(true));
+        assertThat(savedUser.getType(), equalTo(UserType.NORMAL));
 
         verify(userDao, times(1)).save(savedUser);
         verify(userRoleService, times(1)).add(savedUser.getId(), Role.USER);
@@ -354,7 +356,7 @@ class TestUserService extends AbstractServiceTest {
     @Test
     void test_update_user() {
         final User existingUser = User.builder()
-                .id(1L)
+                .id(DEFAULT_USER_ID)
                 .email("tester@gamecity.com")
                 .username("tester")
                 .password("Scrabble.102")
@@ -379,7 +381,7 @@ class TestUserService extends AbstractServiceTest {
 
     @Test
     void test_update_user_with_empty_password() {
-        user.setId(1L);
+        user.setId(DEFAULT_USER_ID);
         user.setPassword("");
 
         final User mockUser = mock(User.class);
@@ -393,7 +395,7 @@ class TestUserService extends AbstractServiceTest {
 
     @Test
     void test_update_user_with_weak_password() {
-        user.setId(1L);
+        user.setId(DEFAULT_USER_ID);
         user.setPassword("Test");
 
         final User mockUser = mock(User.class);

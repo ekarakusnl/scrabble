@@ -23,6 +23,9 @@ import redis.embedded.RedisServer;
 @SuppressWarnings("unchecked")
 abstract class AbstractIntegrationTest extends JerseyTest {
 
+    protected static final Long DEFAULT_USER_ID = 4L;
+    protected static final Long ALTERNATIVE_USER_ID = 5L;
+
     private static RedisServer redisServer;
     private static ResourceConfig resourceConfig;
     private static AnnotationConfigApplicationContext applicationContext;

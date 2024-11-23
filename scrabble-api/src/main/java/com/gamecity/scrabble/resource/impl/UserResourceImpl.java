@@ -20,6 +20,7 @@ class UserResourceImpl extends AbstractResourceImpl<User, UserDto, UserService> 
         return Response.ok(userDto).tag(createETag(userDto)).build();
     }
 
+    // TODO add a test
     @Override
     public Response getUser(Long id) {
         final User user = baseService.get(id);

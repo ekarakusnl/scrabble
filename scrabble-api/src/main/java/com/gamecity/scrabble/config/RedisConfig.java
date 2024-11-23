@@ -23,6 +23,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import lombok.Generated;
+
 /**
  * Spring configuration of Redis including push messages and cache connection
  * 
@@ -31,6 +33,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Configuration
 @EnableCaching
 @PropertySource("classpath:redis.properties")
+@Generated
 public class RedisConfig implements CachingConfigurer {
 
     private static final Integer TTL_SECONDS = 3600;

@@ -36,20 +36,17 @@ class TestSchedulerService extends AbstractServiceTest {
 
     @Test
     void test_schedule_skip_turn_job() throws SchedulerException {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-
         final Game game = Game.builder()
                 .id(DEFAULT_GAME_ID)
                 .currentPlayerNumber(DEFAULT_PLAYER_NUMBER)
                 .version(DEFAULT_VERSION)
                 .duration(DEFAULT_DURATION)
-                .lastUpdatedDate(calendar.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                .lastUpdatedDate(LocalDateTime.now())
                 .build();
 
         when(schedulerFactory.getScheduler()).thenReturn(mock(Scheduler.class));
 
-        schedulerService.scheduleSkipTurnJob(game);
+        schedulerService.scheduleSkipTurnJob(game, game.getDuration());
 
         final ArgumentCaptor<JobDetail> jobDetail = ArgumentCaptor.forClass(JobDetail.class);
         final ArgumentCaptor<SimpleTrigger> trigger = ArgumentCaptor.forClass(SimpleTrigger.class);
