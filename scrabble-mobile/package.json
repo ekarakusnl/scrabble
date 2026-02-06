@@ -10,12 +10,13 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.18.2",
-    "axios": "^1.6.0",
+    "axios": "1.10.0",
+    "eas": "^0.1.0",
     "expo": "^49.0.17",
     "expo-av": "~13.4.1",
     "expo-constants": "~14.4.2",
     "expo-font": "~11.4.0",
-    "expo-image-picker": "^14.5.0",
+    "expo-image-picker": "~14.3.2",
     "expo-linear-gradient": "~12.3.0",
     "expo-linking": "~5.0.2",
     "expo-router": "^2.0.0",
@@ -26,7 +27,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-i18next": "^13.3.1",
-    "react-native": "0.72.5",
+    "react-native": "0.72.10",
     "react-native-config": "^1.6.1",
     "react-native-country-flag": "^2.0.2",
     "react-native-gesture-handler": "~2.12.0",
@@ -42,6 +43,9 @@
     "@babel/core": "^7.20.0",
     "@types/react": "~18.2.14",
     "typescript": "^5.1.3"
+  },
+  "resolutions": {
+    "axios": "1.10.0"
   },
   "private": true
 }

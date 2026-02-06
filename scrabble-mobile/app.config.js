@@ -21,6 +21,7 @@ export default ({ config }) => ({
       supportsTablet: true,
     },
     android: {
+      permissions: ['INTERNET'],
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#ffffff',
@@ -36,8 +37,7 @@ export default ({ config }) => ({
     extra: {
       EXPO_PUBLIC_GATEWAY_URL: process.env.EXPO_PUBLIC_GATEWAY_URL || 'http://localhost:6080',
       EXPO_PUBLIC_PROFILE_PICTURE_URL: process.env.EXPO_PUBLIC_PROFILE_PICTURE_URL || 'https://www.google.com/',
-
     },
-    "owner": "ekarakus",
+    owner: 'ekarakus',
   },
 });
