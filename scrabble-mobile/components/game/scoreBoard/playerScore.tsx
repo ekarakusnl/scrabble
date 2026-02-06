@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { StyleSheet, View } from 'react-native';
 import { Avatar, Text } from 'react-native-paper';
 
@@ -12,7 +13,7 @@ export function PlayerScore({ lastAction, player, winnerPlayer }) {
             styles.currentPlayerCard : styles.defaultPlayerCard
       ]}>
       <Avatar.Image
-        source={{ uri: process.env.EXPO_PUBLIC_PROFILE_PICTURE_URL + player.userId + '?' + new Date().getTime() }}
+        source={{ uri: Constants.expoConfig.extra.EXPO_PUBLIC_PROFILE_PICTURE_URL + player.userId + '?' + new Date().getTime() }}
         size={48} />
       <View style={styles.details}>
         <Text variant="titleSmall" style={styles.username}>{player.username}</Text>

@@ -1,6 +1,6 @@
 -- pre-defined users
-insert into users (id, username, email, password, preferred_language, enabled, type, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values (4, 'user', 'user@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 'NORMAL, 1, 1, 1, now(), now());
-insert into users (id, username, email, password, preferred_language, enabled, type, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values (5, 'admin', 'admin@gamecity.com', '$2a$10$kL2cVFyQ9FIRm390RG8JienR/nJVTK8g6Lb0FH0K5Y4AEsE1zZLVm', 'en', 1, 'NORMAL', 1, 1, 1, now(), now());
+insert into users (id, username, email, password, preferred_language, enabled, type, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values (4, 'user', 'user@gamecity.com', '$2a$12$.fdjSj5xVv.RlqeAY5mH3eDJ8GmiOVLl3h.a5TJtcX9IWANT8xbii', 'en', 1, 'NORMAL', 1, 1, 1, now(), now());
+insert into users (id, username, email, password, preferred_language, enabled, type, account_non_expired, account_non_locked, credentials_non_expired, created_date, last_updated_date) values (5, 'admin', 'admin@gamecity.com', '$2a$12$.fdjSj5xVv.RlqeAY5mH3eDJ8GmiOVLl3h.a5TJtcX9IWANT8xbii', 'en', 1, 'NORMAL', 1, 1, 1, now(), now());
 -- pre-defined user-role assignments
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (4, 'USER', 1, now(), now());
 insert into user_roles (user_id, role, enabled, created_date, last_updated_date) values (5, 'ADMIN', 1, now(), now());

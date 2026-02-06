@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +23,7 @@ export function Header({ title, previousScreen }) {
     if (!userIdRef.current) {
       StorageService.getUserId().then(userId => {
         userIdRef.current = Number(userId);
-        profilePictureURIRef.current = process.env.EXPO_PUBLIC_PROFILE_PICTURE_URL + userIdRef.current + '?' + new Date().getTime();
+        profilePictureURIRef.current = Constants.expoConfig.extra.EXPO_PUBLIC_PROFILE_PICTURE_URL + userIdRef.current + '?' + new Date().getTime();
         avatarActionRef.current = createAvatarAction();
         setHeader(createHeader());
       });

@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -86,7 +87,7 @@ export function PlayerList({ userId, game, lastAction, notificationRef }) {
             key={'game_' + game.id + '_player_' + player.playerNumber}
             style={styles.player}>
             <Avatar.Image
-              source={{ uri: process.env.EXPO_PUBLIC_PROFILE_PICTURE_URL + player.userId + '?' + new Date().getTime() }}
+              source={{ uri: Constants.expoConfig.extra.EXPO_PUBLIC_PROFILE_PICTURE_URL + player.userId + '?' + new Date().getTime() }}
               size={40}
               style={styles.avatar} />
             {

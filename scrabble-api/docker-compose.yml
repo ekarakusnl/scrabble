@@ -21,6 +21,7 @@ services:
       scrabble-redis:
         condition: service_started
     volumes:
+      - $PWD/logs:/tmp/scrabble/logs
       - ./target/scrabble-api.war:/usr/local/tomcat/webapps/scrabble-api.war
       - ./src/main/resources/dictionary:/tmp/scrabble/dictionary
     ports:

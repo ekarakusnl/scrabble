@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { AVPlaybackStatus, Audio } from 'expo-av';
 import moment from 'moment';
 import { ReactElement, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -268,7 +269,7 @@ export function GameHistory({ game, lastAction, historyRef, notificationRef, foo
   function createUserAvatar(userId: number): ReactElement {
     return (
       <Avatar.Image
-        source={{ uri: process.env.EXPO_PUBLIC_PROFILE_PICTURE_URL + userId + '?' + new Date().getTime() }}
+        source={{ uri: Constants.expoConfig.extra.EXPO_PUBLIC_PROFILE_PICTURE_URL + userId + '?' + new Date().getTime() }}
         size={30}
         style={styles.avatar} />
     );

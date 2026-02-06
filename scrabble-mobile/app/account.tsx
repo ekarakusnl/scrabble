@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import * as ImagePicker from "expo-image-picker";
 import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -107,7 +108,7 @@ export default function UserScreen() {
   }
 
   function onShowProfilePictureDialog(): void {
-    setProfilePictureURI(process.env.EXPO_PUBLIC_PROFILE_PICTURE_URL + userRef.current.id + '?' + new Date().getTime());
+    setProfilePictureURI(Constants.expoConfig.extra.EXPO_PUBLIC_PROFILE_PICTURE_URL + userRef.current.id + '?' + new Date().getTime());
     setShowProfilePictureDialog(true);
   }
 
@@ -235,7 +236,7 @@ export default function UserScreen() {
             </View>
             <TouchableOpacity onPress={() => onShowProfilePictureDialog()}>
               <Avatar.Image
-                source={{ uri: process.env.EXPO_PUBLIC_PROFILE_PICTURE_URL + userRef.current.id + '?' + new Date().getTime() }}
+                source={{ uri: Constants.expoConfig.extra.EXPO_PUBLIC_PROFILE_PICTURE_URL + userRef.current.id + '?' + new Date().getTime() }}
                 size={72} />
             </TouchableOpacity>
           </View>

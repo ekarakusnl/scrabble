@@ -1,7 +1,7 @@
 <configuration>
   <property resource="application.properties" />
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>${log.path}/scrabble-api.log</file>
+    <file>${log.directory}/scrabble-api.log</file>
     <encoder>
       <pattern>%d{dd/MM/yy HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
     </encoder>
@@ -15,6 +15,6 @@
   <logger name="com.gamecity" level="debug" />
 
   <root level="info">
-    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="FILE" />
   </root>
 </configuration>

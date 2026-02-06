@@ -16,6 +16,7 @@ services:
                   -Dcdn.upload.image.endpoint=https://www.google.com
                   -Dcdn.private.key=cdn_private_key
     volumes:
+      - $PWD/logs:/tmp/scrabble/logs
       - ./target/scrabble-gateway.war:/usr/local/tomcat/webapps/scrabble-gateway.war
     ports:
       - '6080:8080'
